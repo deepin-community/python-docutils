@@ -1,19 +1,15 @@
-#! /usr/bin/env python
+#! /usr/bin/env python3
 
-# $Id: test___init__.py 8481 2020-01-31 08:17:24Z milde $
+# $Id: test___init__.py 9037 2022-03-05 23:31:10Z milde $
 # Author: Lea Wiemann <LeWiemann@gmail.com>
 # Copyright: This module has been placed in the public domain.
 
 """
 Test module for transforms/__init__.py.
 """
-from __future__ import absolute_import
 
 import unittest
 
-if __name__ == '__main__':
-    import __init__
-from test_transforms import DocutilsTestSupport # before importing docutils!
 from docutils import transforms, utils
 
 
@@ -22,7 +18,7 @@ class TestTransform(transforms.Transform):
     default_priority = 100
 
     applied = 0
-    
+
     def apply(self, **kwargs):
         self.applied += 1
         assert kwargs == {'foo': 42}

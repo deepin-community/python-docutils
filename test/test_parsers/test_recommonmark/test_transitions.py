@@ -1,16 +1,15 @@
-#! /usr/bin/env python
+#! /usr/bin/env python3
 
-# $Id: test_transitions.py 8585 2020-12-01 11:38:25Z milde $
+# $Id: test_transitions.py 9037 2022-03-05 23:31:10Z milde $
 # Author: David Goodger <goodger@python.org>
 # Copyright: This module has been placed in the public domain.
 
 """
 Tests for transitions (`thematic breaks`).
 """
-from __future__ import absolute_import
 
 if __name__ == '__main__':
-    import __init__
+    import __init__  # noqa: F401
 from test_parsers import DocutilsTestSupport
 
 
@@ -18,6 +17,7 @@ def suite():
     s = DocutilsTestSupport.RecommonmarkParserTestSuite()
     s.generateTests(totest)
     return s
+
 
 totest = {}
 
@@ -70,21 +70,21 @@ Paragraph 2 in section 2.
 """],
 # ["""\
 # --------
-# 
+#
 # A section or document may not begin with a transition.
-# 
+#
 # The DTD specifies that two transitions may not
 # be adjacent:
-# 
+#
 # --------
-# 
+#
 # --------
-# 
+#
 # --------
-# 
+#
 # The DTD also specifies that a section or document
 # may not end with a transition.
-# 
+#
 # --------
 # """,
 # """\
@@ -204,7 +204,7 @@ A paragraph and two transitions.
 ----------
 
 ----------
-""", # the same:
+""",
 """\
 <document source="test data">
     <paragraph>

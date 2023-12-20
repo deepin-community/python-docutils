@@ -1,14 +1,16 @@
+.. include:: ../header.txt
+
 =============================
  Docutils_ Release Procedure
 =============================
 
 :Authors: David Goodger; Lea Wiemann; open to all Docutils developers
 :Contact: docutils-develop@lists.sourceforge.net
-:Date: $Date: 2021-04-09 22:04:06 +0200 (Fr, 09. Apr 2021) $
-:Revision: $Revision: 8686 $
+:Date: $Date: 2022-06-22 10:56:28 +0200 (Mi, 22. Jun 2022) $
+:Revision: $Revision: 9090 $
 :Copyright: This document has been placed in the public domain.
 
-.. _Docutils: http://docutils.sourceforge.io/
+.. _Docutils: https://docutils.sourceforge.io/
 
 Releasing (post 2020)
 ---------------------
@@ -27,39 +29,27 @@ Releasing (post 2020)
 
   Check what was changed with version control system by ``set_version.sh``
 
+  Change docutils/__init__.py __version_info__ tuple.
+
   Run tests ::
 
     export PYTHONWARNINGS=default
-    python2 test/alltests.py
     python3 test/alltests.py
 
   or use tox.
     
   ``export PYTHONWARNINGS=default`` prints DeprecationWarnings in python3.
 
-* Generate universal wheel and source-distribution::
+* Generate wheel and source-distribution::
 
     python3 setup.py sdist
-    python3 setup.py bdist_wheel --universal
+    python3 setup.py bdist_wheel
 
-* Upload universal wheel and source to test.pypi::
+* Upload wheel and source to test.pypi::
 
     python3 -m twine upload --repository-url https://test.pypi.org/legacy/ dist/*
 
-  Wait some minutes to test in virtualenv ::
-
-    python2 -m virtualenv du2 ; cd du2
-    export PYTHONPATH= ; . bin/activate
-
-    python -m pip install --index-url https://test.pypi.org/simple/ --no-deps docutils
-
-    cp -Lr ../docutils-code/docutils/test .
-    python test/alltests.py
-
-    python -m pip uninstall docutils
-    deactivate ; cd .. ; rm -r du2
-
-  Test in venv ::
+  Test in venv. NOTE use --pre for prereleases::
 
     python3 -m venv du3 ; cd du3
     export PYTHONPATH= ; . bin/activate
@@ -80,11 +70,21 @@ Releasing (post 2020)
              svn+ssh://grubert@svn.code.sf.net/p/docutils/code/tags/docutils-0.## \
              -m "tagging release 0.##"
 
+* Update your source directory. 
+* Rebuild wheel and source-distribution ::
+
+    python3 setup.py sdist
+    python3 setup.py bdist_wheel
+
 * Now upload to pypi::
 
     python3 -m twine upload  dist/docutils-0.##*
 
-  and test::
+* Remove previous package from local cache::
+
+    find .cache/pip/wheels -name docutils\*whl -exec rm -v -i {} \;
+
+* and test::
 
     python3 -m venv du3 ; cd du3
     export PYTHONPATH= ; . bin/activate
@@ -93,12 +93,7 @@ Releasing (post 2020)
     cp -Lr ../docutils-code/docutils/test .
     python test/alltests.py
 
-    python2 -m virtualenv du2 ; cd du2
-    export PYTHONPATH= ; . bin/activate
-
-    pip install --no-deps docutils
-    cp -Lr ../docutils-code/docutils/test .
-    python test/alltests.py
+    deactivate ; cd .. ; rm -r du3
 
 * Notify to docutils-developer and user.
 
@@ -109,8 +104,9 @@ Releasing (post 2020)
     tar xzvf ../dist/docutils-0.##.tar.gz
     cd docutils-0.##/
     tools/buildhtml.py .
-    find . -name \*.pyc -exec rm {} \;
-    rm -rf docutils.egg-info
+    find . -name \*.pyc -exec rm -v {} \;
+    find . -name __pycache__ -exec rmdir -v {} \;
+    rm -r docutils.egg-info
     rsync -e ssh -r -t ./ web.sourceforge.net:/home/project-web/docutils/htdocs/0.##
 
 * Check web/index.txt for necessary corrections.
@@ -120,8 +116,8 @@ Releasing (post 2020)
   - Upload tar.gz and 0.16 release notes to sourceforge.
   - Select docutils-0.16.tar.gz as default for all OS.  
 
-* set_version 0.##+1b.dev
-* test with py2 and py3
+* set_version 0.#.#+1b.dev
+* test with py3
 * docutils/HISTORY.txt: add title "Changes Since 0.##"
 * run sandbox/infrastructure/docutils-update.local
 

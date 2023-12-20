@@ -1,36 +1,24 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
-# $Id: create_unimap.py 8367 2019-08-27 12:09:56Z milde $
+# $Id: create_unimap.py 9030 2022-03-05 23:28:32Z milde $
 # Author: Lea Wiemann <LeWiemann@gmail.com>
 # Copyright: This file has been placed in the public domain.
 
 # Call: create_unimap.py < unicode.xml > unicode_latex.py
 #
 # Get unicode.xml from
-# <http://www.w3.org/2003/entities/xml/unicode.xml>.
+# <https://www.w3.org/2003/entities/xml/unicode.xml>.
 
-from __future__ import print_function
 from xml.dom import minidom
 import sys
 import pprint
 
-if sys.version_info >= (3, 0):
-    unicode = str  #noqa
-else:
-    bytes = str  # noqa
-    chr = unichr  # noqa
-
-
-def w(s):
-    if sys.version_info >= (3, 0) and isinstance(s, unicode):
-        s = s.encode('utf8')
-    sys.stdout.write(s)
 
 text_map = {}
 math_map = {}
 
 
-class Visitor(object):
+class Visitor:
     """Node visitor for contents of unicode.xml."""
 
     def visit_character(self, node):
@@ -51,6 +39,7 @@ class Visitor(object):
                 else:
                     text_map[chr(int(code))] = '{%s}' % latex_code
 
+
 def call_visitor(node, visitor=Visitor()):
     if isinstance(node, minidom.Text):
         name = 'Text'
@@ -62,6 +51,7 @@ def call_visitor(node, visitor=Visitor()):
         call_visitor(child)
     if hasattr(visitor, 'depart_' + name):
         getattr(visitor, 'depart_' + name)(node)
+
 
 document = minidom.parse(sys.stdin)
 call_visitor(document)
@@ -77,10 +67,10 @@ print('# Copyright: This file has been placed in the public domain.')
 print('')
 print('# This is a mapping of Unicode characters to LaTeX equivalents.')
 print('# The information has been extracted from')
-print('# <http://www.w3.org/2003/entities/xml/unicode.xml>, written by')
+print('# <https://www.w3.org/2003/entities/xml/unicode.xml>, written by')
 print('# David Carlisle and Sebastian Rahtz.')
 print('#')
 print('# The extraction has been done by the "create_unimap.py" script')
-print('# located at <http://docutils.sf.net/tools/dev/create_unimap.py>.')
+print('# located at <https://docutils.sourceforge.io/tools/dev/create_unimap.py>.')  # noqa:501
 print('')
 print('unicode_map = %s' % pprint.pformat(unicode_map, indent=0))

@@ -1,23 +1,17 @@
-#! /usr/bin/env python
+#! /usr/bin/env python3
 
-# $Id: test_unicode.py 8481 2020-01-31 08:17:24Z milde $
+# $Id: test_unicode.py 9037 2022-03-05 23:31:10Z milde $
 # Author: David Goodger <goodger@python.org>
 # Copyright: This module has been placed in the public domain.
 
 """
 Tests for misc.py "unicode" directive.
 """
-from __future__ import absolute_import
 
-import sys
 
 if __name__ == '__main__':
-    import __init__
+    import __init__  # noqa: F401
 from test_parsers import DocutilsTestSupport
-
-
-if sys.version_info >= (3, 0):
-    unichr = chr  # noqa
 
 
 def suite():
@@ -25,8 +19,9 @@ def suite():
     s.generateTests(totest)
     return s
 
+
 unichr_exception = DocutilsTestSupport.exception_data(
-    unichr, int("111111111111111111", 16))[0]
+    chr, int("111111111111111111", 16))[0]
 if isinstance(unichr_exception, OverflowError):
     unichr_exception_string = 'code too large (%s)' % unichr_exception
 else:
@@ -45,7 +40,7 @@ space (|nbsp|), a backwards-not-equals (|bne|), and a captial omega (|Omega|).
 .. |bne| unicode:: U0003D U020E5
 .. |Omega| unicode:: U+003A9
 """,
-u"""\
+"""\
 <document source="test data">
     <paragraph>
         Insert an em-dash (
@@ -125,15 +120,15 @@ Copyright |copy| 2003, |BogusMegaCorp (TM)|.
 .. |BogusMegaCorp (TM)| unicode:: BogusMegaCorp U+2122
    .. with trademark sign
 """,
-u"""\
+"""\
 <document source="test data">
     <paragraph>
         Testing comments and extra text.
     <paragraph>
-        Copyright 
+        Copyright \n\
         <substitution_reference refname="copy">
             copy
-         2003, 
+         2003, \n\
         <substitution_reference refname="BogusMegaCorp (TM)">
             BogusMegaCorp (TM)
         .
@@ -172,7 +167,7 @@ u"""\
         <literal_block xml:space="preserve">
             .. |too big for unicode| unicode:: 0x11111111
 """ % (unichr_exception_string,
-       DocutilsTestSupport.exception_data(unichr, int("11111111", 16))[2])]
+       DocutilsTestSupport.exception_data(chr, int("11111111", 16))[2])]
 ]
 
 

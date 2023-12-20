@@ -1,16 +1,15 @@
-#! /usr/bin/env python
+#! /usr/bin/env python3
 
-# $Id: test_peps.py 8481 2020-01-31 08:17:24Z milde $
+# $Id: test_peps.py 9037 2022-03-05 23:31:10Z milde $
 # Author: David Goodger <goodger@python.org>
 # Copyright: This module has been placed in the public domain.
 
 """
 Tests for docutils.transforms.peps.
 """
-from __future__ import absolute_import
 
 if __name__ == '__main__':
-    import __init__
+    import __init__  # noqa: F401
 from test_transforms import DocutilsTestSupport
 from docutils.transforms.peps import TargetNotes
 from docutils.parsers.rst import Parser
@@ -21,6 +20,7 @@ def suite():
     s = DocutilsTestSupport.TransformTestSuite(parser)
     s.generateTests(totest)
     return s
+
 
 totest = {}
 
@@ -48,20 +48,19 @@ A "References" section should be generated.
         <reference name="reference" refname="reference">
             reference
          \n\
-        <footnote_reference auto="1" ids="id3" refname="TARGET_NOTE: id2">
+        <footnote_reference auto="1" ids="footnote-reference-1" refname="TARGET_NOTE: footnote-1">
         .
         A "References" section should be generated.
     <target ids="reference" names="reference" refuri="http://www.example.org">
-    <section ids="id1">
+    <section ids="section-1">
         <title>
             References
-        <footnote auto="1" ids="id2" names="TARGET_NOTE:\\ id2">
+        <footnote auto="1" ids="footnote-1" names="TARGET_NOTE:\\ footnote-1">
             <paragraph>
                 <reference refuri="http://www.example.org">
                     http://www.example.org
 """],
 ])
-
 
 
 if __name__ == '__main__':

@@ -7,33 +7,26 @@ Use ElementTree, which is shipped with Python >= 2.5, in place of lxml.
 
 Bug-Debian: http://bugs.debian.org/714319
 Forwarded: https://sourceforge.net/p/docutils/patches/114/
-Last-Update: 2013-08-06
+Last-Update: 2021-10-31
 ---
- tools/rst2odt_prepstyles.py | 34 ++++++++++++++++++++++++++--------
- 1 file changed, 26 insertions(+), 8 deletions(-)
+ tools/rst2odt_prepstyles.py | 27 +++++++++++++++++++--------
+ 1 file changed, 19 insertions(+), 8 deletions(-)
 
 diff --git a/tools/rst2odt_prepstyles.py b/tools/rst2odt_prepstyles.py
-index 1e61b12..c394941 100755
+index 83bb8bf..ecbc5ec 100755
 --- a/tools/rst2odt_prepstyles.py
 +++ b/tools/rst2odt_prepstyles.py
-@@ -13,7 +13,15 @@ specifications from styles.xml in STYLE_FILE.odt.
+@@ -11,7 +11,8 @@ specifications from styles.xml in STYLE_FILE.odt.
  
- from __future__ import print_function
+ # Author: Michael Schutte <michi@uiae.at>
  
 -from lxml import etree
-+try:
-+    from xml.etree import ElementTree as etree
-+except ImportError:
-+    try:
-+        from elementtree import ElementTree as etree
-+    except ImportError:
-+        raise ImportError('Missing an implementation of ElementTree. ' \
-+                'Please install either Python >= 2.5 or ElementTree.')
++from xml.etree import ElementTree as etree
 +
  import sys
  import zipfile
  from tempfile import mkstemp
-@@ -29,12 +37,22 @@ NAMESPACES = {
+@@ -27,12 +28,22 @@ NAMESPACES = {
  def prepstyle(filename):
  
      zin = zipfile.ZipFile(filename)
@@ -62,7 +55,7 @@ index 1e61b12..c394941 100755
              if attr.startswith("{%s}" % NAMESPACES["fo"]):
                  del el.attrib[attr]
  
-@@ -44,7 +62,7 @@ def prepstyle(filename):
+@@ -42,7 +53,7 @@ def prepstyle(filename):
  
      for item in zin.infolist():
          if item.filename == "styles.xml":

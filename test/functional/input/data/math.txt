@@ -49,7 +49,7 @@ physical system changes in time.
 Math-Accents:
   .. list-table::
      :class: borderless
-     :widths: 26 26 26
+     :width: 100%
 
      * - :math:`\acute{a}`      ``\acute{a}``
        - :math:`\dot{t}`        ``\dot{t}``
@@ -91,23 +91,13 @@ Math split over two lines: If a double backslash is detected outside a
    s_{\mathrm{out}}(x) & = s_{\mathrm{in}}(x') * s_δ(x-x') \\
                        & = ∫ s_{\mathrm{in}}(x')s_δ(x-x')\mathrm{d}x'
 
-Cases ("manually", with ``matrix`` environment):
-
-.. math::
-
-   \mathrm{sgn}(x) = \left\{\begin{matrix}
-                       -1 & x<0\\
-                       1 & x>0
-                     \end{matrix}\right.
-
-Cases with the AMSmath_ ``cases`` environment (not (yet) supported by
-HTML writers with ``--math-output=MathML``):
+Cases with the AMSmath_ ``cases`` environment:
 
 .. math::
 
    \mathrm{sgn}(x) = \begin{cases}
-                       -1 & x<0\\
-                        1 & x>0
+                                -1 & x<0\\
+                       \phantom{-} 1 & x>0
                      \end{cases}
 
 .. _AMSmath: ftp://ftp.ams.org/ams/doc/amsmath/short-math-guide.pdf

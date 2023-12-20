@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 # Author:
 # Contact: grubert@users.sf.net
@@ -21,6 +21,7 @@ except:
 from docutils.core import publish_cmdline, default_description
 from docutils.writers import manpage
 
-description = ("Generates plain unix manual documents.  " + default_description)
+description = ("Generates plain unix manual documents.  "
+               + default_description)
 
 publish_cmdline(writer=manpage.Writer(), description=description)

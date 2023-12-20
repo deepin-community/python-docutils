@@ -9,10 +9,10 @@ writer_name = "latex"
 
 # Extra setting we need
 
-settings_overrides['hyperref_options'] = 'unicode=true'
 settings_overrides['font_encoding'] = 'T1,T2A'
 settings_overrides['stylesheet'] = 'cmlgc'
 settings_overrides['language_code'] = 'ru'
 
-# use "smartquotes" transition:
 settings_overrides['smart_quotes'] = True
+settings_overrides['legacy_column_widths'] = False
+settings_overrides['use_latex_citations'] = True

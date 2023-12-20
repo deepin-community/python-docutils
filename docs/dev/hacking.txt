@@ -1,11 +1,13 @@
+.. include:: ../header.txt
+
 ==========================
  Docutils_ Hacker's Guide
 ==========================
 
 :Author: Lea Wiemann
 :Contact: docutils-develop@lists.sourceforge.net
-:Revision: $Revision: 7302 $
-:Date: $Date: 2012-01-03 20:23:53 +0100 (Di, 03. Jän 2012) $
+:Revision: $Revision: 9082 $
+:Date: $Date: 2022-06-20 12:06:31 +0200 (Mo, 20. Jun 2022) $
 :Copyright: This document has been placed in the public domain.
 
 :Abstract: This is the introduction to Docutils for all persons who
@@ -15,8 +17,8 @@
     knowledge is certainly helpful (though not necessary, strictly
     speaking).
 
-.. _Docutils: http://docutils.sourceforge.net/
-.. _reStructuredText: http://docutils.sourceforge.net/rst.html
+.. _Docutils: https://docutils.sourceforge.io/
+.. _reStructuredText: https://docutils.sourceforge.io/rst.html
 .. _Docutils front-end tools: ../user/tools.html
 
 .. contents::
@@ -32,7 +34,7 @@ Consider the following reStructuredText file::
 
     My *favorite* language is Python_.
 
-    .. _Python: http://www.python.org/
+    .. _Python: https://www.python.org/
 
 Using the ``rst2html.py`` front-end tool, you would get an HTML output
 which looks like this::
@@ -40,7 +42,7 @@ which looks like this::
     [uninteresting HTML code removed]
     <body>
     <div class="document">
-    <p>My <em>favorite</em> language is <a class="reference" href="http://www.python.org/">Python</a>.</p>
+    <p>My <em>favorite</em> language is <a class="reference" href="https://www.python.org/">Python</a>.</p>
     </div>
     </body>
     </html>
@@ -69,7 +71,7 @@ Parsing the Document
 The **Parser** analyzes the the input document and creates a **node
 tree** representation.  In this case we are using the
 **reStructuredText parser** (``docutils/parsers/rst/__init__.py``).
-To see what that node tree looks like, we call ``quicktest.py`` (which
+To see what that node tree looks like, we call quicktest.py_ (which
 can be found in the ``tools/`` directory of the Docutils distribution)
 with our example file (``test.txt``) as first parameter (Windows users
 might need to type ``python quicktest.py test.txt``)::
@@ -84,7 +86,7 @@ might need to type ``python quicktest.py test.txt``)::
             <reference name="Python" refname="python">
                 Python
             .
-        <target ids="python" names="python" refuri="http://www.python.org/">
+        <target ids="python" names="python" refuri="https://www.python.org/">
 
 Let us now examine the node tree:
 
@@ -106,7 +108,7 @@ Transforming the Document
 -------------------------
 
 In the node tree above, the ``reference`` node does not contain the
-target URI (``http://www.python.org/``) yet.
+target URI (``https://www.python.org/``) yet.
 
 Assigning the target URI (from the ``target`` node) to the
 ``reference`` node is *not* done by the parser (the parser only
@@ -133,10 +135,10 @@ has changed after applying the Transforms, we use the
             <emphasis>
                 favorite
              language is
-            <reference name="Python" **refuri="http://www.python.org/"**>
+            <reference name="Python" **refuri="https://www.python.org/"**>
                 Python
             .
-        <target ids="python" names="python" ``refuri="http://www.python.org/"``>
+        <target ids="python" names="python" ``refuri="https://www.python.org/"``>
 
 For our small test document, the only change is that the ``refname``
 attribute of the reference has been replaced by a ``refuri``
@@ -160,17 +162,17 @@ For HTML output, we can test this using the ``rst2html.py`` tool::
 
     $ rst2html.py --link-stylesheet test.txt
     <?xml version="1.0" encoding="utf-8" ?>
-    <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-    <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+    <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+    <html xmlns="https://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
     <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <meta name="generator" content="Docutils 0.3.10: http://docutils.sourceforge.net/" />
+    <meta name="generator" content="Docutils 0.3.10: https://docutils.sourceforge.io/" />
     <title></title>
     <link rel="stylesheet" href="../docutils/writers/html4css1/html4css1.css" type="text/css" />
     </head>
     <body>
     <div class="document">
-    <p>My <em>favorite</em> language is <a class="reference" href="http://www.python.org/">Python</a>.</p>
+    <p>My <em>favorite</em> language is <a class="reference" href="https://www.python.org/">Python</a>.</p>
     </div>
     </body>
     </html>
@@ -249,7 +251,7 @@ on the Docutils-develop_ mailing list.
 
 
 .. _Docutils-develop: ../user/mailing-lists.html#docutils-develop
-
+.. _quicktest.py: ../user/tools.html#quicktest-py
 
 .. |---| unicode:: 8212 .. em-dash
    :trim:

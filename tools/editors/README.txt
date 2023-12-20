@@ -2,7 +2,7 @@
  Editor Support for reStructuredText_
 ======================================
 
-:Date: $Date: 2014-10-21 16:07:59 +0200 (Di, 21. Okt 2014) $
+:Date: $Date: 2022-01-20 11:10:45 +0100 (Do, 20. Jän 2022) $
 
 The files in this directory contain support code for reStructuredText
 editing for the following editors:
@@ -18,10 +18,10 @@ External links:
 * `VST (Vim reStructured Text) is a plugin for Vim7 with folding for
   reST <http://www.vim.org/scripts/script.php?script_id=1334>`__
 
-* `rst mode <http://jedmodes.sf.net/mode/rst/>`__ for the `JED`_
+* `rst mode <https://jedmodes.sourceforge.io/mode/rst/>`__ for the `JED`_
   programmers editor
 
 Additions are welcome.
 
-.. _reStructuredText: http://docutils.sf.net/rst.html
+.. _reStructuredText: https://docutils.sourceforge.io/rst.html
 .. _JED: http://www.jedsoft.org/jed/

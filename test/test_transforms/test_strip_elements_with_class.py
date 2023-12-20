@@ -1,19 +1,19 @@
-#! /usr/bin/env python
+#! /usr/bin/env python3
 
-# $Id: test_strip_elements_with_class.py 8481 2020-01-31 08:17:24Z milde $
+# $Id: test_strip_elements_with_class.py 9037 2022-03-05 23:31:10Z milde $
 # Author: Guenter Milde <milde@users.sf.net>
 # Copyright: This module has been placed in the public domain.
 
 """
 Tests for docutils.transforms.universal.StripClassesAndElements.
 """
-from __future__ import absolute_import
 
 if __name__ == '__main__':
-    import __init__
+    import __init__  # noqa: F401
 from test_transforms import DocutilsTestSupport
 from docutils.parsers.rst import Parser
 from docutils.transforms.universal import StripClassesAndElements
+
 
 def suite():
     parser = Parser()
@@ -22,6 +22,7 @@ def suite():
                             'strip_classes': ['spam', 'noise']})
     s.generateTests(totest)
     return s
+
 
 totest = {}
 
@@ -39,9 +40,9 @@ this is ham
 
 .. code::
    :class: spam
-   
+   \n\
    print("spam")
-   
+   \n\
 .. image:: spam.jpg
    :class: spam
 

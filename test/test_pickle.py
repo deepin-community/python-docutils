@@ -1,5 +1,5 @@
-#! /usr/bin/env python
-# $Id: test_pickle.py 7539 2012-11-26 13:50:06Z milde $
+#! /usr/bin/env python3
+# $Id: test_pickle.py 9037 2022-03-05 23:31:10Z milde $
 # Author: David Goodger <goodger@python.org>
 # Copyright: This module has been placed in the public domain.
 
@@ -8,7 +8,6 @@ Tests of document tree pickling.
 """
 
 import unittest
-import DocutilsTestSupport              # must be imported before docutils
 import pickle
 from docutils import core
 

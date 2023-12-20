@@ -1,6 +1,6 @@
-#! /usr/bin/env python
+#! /usr/bin/env python3
 
-# $Id: test_viewlist.py 8346 2019-08-26 12:11:32Z milde $
+# $Id: test_viewlist.py 9025 2022-03-04 15:55:47Z milde $
 # Author: David Goodger <goodger@python.org>
 # Copyright: This module has been placed in the public domain.
 
@@ -37,7 +37,7 @@ class ViewListTests(unittest.TestCase):
         self.assertEqual(self.b, self.b_list)
         self.assertEqual(self.c, self.c_list)
         self.assertEqual(len(self.a), len(self.a_list))
-        self.assertTrue('d' in self.a) # __contains__
+        self.assertTrue('d' in self.a)  # __contains__
         self.assertEqual([value for value in self.a], self.a_list)
         # get and set values
         self.assertEqual(self.a[2], self.a_list[2])
@@ -190,9 +190,8 @@ Unindented text.
       literal
            block"""
 
-
     def setUp(self):
-        self.a_list = self.text.splitlines(1)
+        self.a_list = self.text.splitlines(True)
         self.a = statemachine.StringList(self.a_list, 'a')
 
     def test_trim_left(self):
@@ -202,11 +201,11 @@ Unindented text.
 
     def test_get_indented(self):
         self.assertEqual(self.a.get_indented(),
-                          ([], 0, 0))
+                         ([], 0, 0))
         block = statemachine.StringList(
             statemachine.string2lines(self.indented_string))
         self.assertEqual(block.get_indented(),
-                          ([s[6:] for s in block], 6, 1))
+                         ([s[6:] for s in block], 6, 1))
 
 
 if __name__ == '__main__':

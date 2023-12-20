@@ -1,5 +1,5 @@
-#!/usr/bin/env python
-# $Id: install.py 8346 2019-08-26 12:11:32Z milde $
+#!/usr/bin/env python3
+# $Id: install.py 8925 2022-01-03 23:48:58Z milde $
 # Copyright: This file has been placed in the public domain.
 
 """
@@ -15,7 +15,6 @@ one of::
     python setup.py install --help
     python setup.py --help
 """
-from __future__ import print_function
 
 from distutils import core
 from setup import do_setup

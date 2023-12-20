@@ -96,12 +96,31 @@ or
     nested
       definition lists
 
+Details disclosure elements
+```````````````````````````
+
+Items of `definition lists`_ with class argument "details" are converted
+to `details`_ disclosure elements with the term becoming the "summary".
+
+.. class:: details
+
+A summary
+  with details only visible after user interaction.
+
+.. class:: details open
+
+Another summary
+  with open details because the source list has the additional class
+  value "open".
+
+.. _details:
+   https://www.w3.org/TR/html52/interactive-elements.html#the-details-element
 
 Field List Variants
 ```````````````````
 
 For field lists, the "compact/open", "narrow" and "run-in" styles are defined
-in the style sheet ``plain.css``.
+in the style sheets ``plain.css`` and ``responsive.css``.
 
 *compact*
   .. class:: compact
@@ -132,6 +151,15 @@ in the style sheet ``plain.css``.
   :A long field name:
        sticks into the field body and the field body starts on a
        new line (if not combined with `run-in`_).
+
+custom *field-indent*
+  .. class:: field-indent-3em
+
+  :Feature: Field body indented by custom amount.
+  :Use:     class value starting with ``field-indent-`` followed by
+            a valid lenght, e.g. ``field-indent-3em``.
+  :The writer:
+            will convert this class value to a ``style`` attribute setting.
 
 .. _`run-in`:
 
@@ -175,7 +203,7 @@ setting (or command line argument).
   from the booktabs_ LaTeX package.
 
   .. _table-style:
-     http://docutils.sourceforge.net/docs/user/config.html#table-style
+     https://docutils.sourceforge.io/docs/user/config.html#table-style
   .. _booktabs:
      http://tug.ctan.org/tex-archive/macros/latex/contrib/booktabs/booktabs.pdf
 

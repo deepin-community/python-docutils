@@ -1,11 +1,11 @@
-===============================
- README: Docutils 0.17.1
-===============================
+=======================
+ README: Docutils 0.19
+=======================
 
 :Author: David Goodger
 :Contact: goodger@python.org
-:Date: $Date: 2021-04-17 14:41:26 +0200 (Sa, 17. Apr 2021) $
-:Web site: http://docutils.sourceforge.net/
+:Date: $Date: 2022-07-05 22:04:21 +0200 (Di, 05. Jul 2022) $
+:Web site: https://docutils.sourceforge.io/
 :Copyright: This document has been placed in the public domain.
 
 .. contents::
@@ -16,18 +16,15 @@ Quick-Start
 
 This is for those who want to get up & running quickly.
 
-1. Docutils requires Python, available from
-   http://www.python.org/.
-
-   See Requirements_ below for details.
+1. Docutils requires **Python**, available from
+   https://www.python.org/.
+   See Dependencies_ below for details.
 
 2. Install the latest stable release from PyPi with pip_::
 
-       python -m pip install docutils
+       python3 -m pip install docutils
 
-   To install a pre-relase, append the option ``--pre``.
-   To install a `development version`_, follow the instructions in
-   section `Installation`_ below.
+   For alternatives and details, see section `Installation`_ below.
 
 3. Use the `front-end scripts`_ to convert reStructuredText documents.
    Try for example::
@@ -36,8 +33,6 @@ This is for those who want to get up & running quickly.
        python tools/rst2html.py FAQ.txt FAQ.html  (Windows)
 
    See Usage_ below for details.
-
-.. _pip: https://pypi.org/project/pip/
 
 
 Purpose
@@ -67,26 +62,24 @@ Support for the following sources is planned:
 * And others as discovered.
 
 .. _PEPs (Python Enhancement Proposals):
-   http://www.python.org/peps/pep-0012.html
+   https://peps.python.org/pep-0012
 
 
-Requirements
+Dependencies
 ============
 
 To run the code, Python_ must be installed.
+(Python is pre-installed with most Linux distributions.)
 
-* Docutils 0.16 and later supports Python 2.7 and 3.5+ natively.  [#2to3]_
+* Docutils 0.19 requires Python 3.7 or later.
+* Docutils 0.16 to 0.18 require Python 2.7 or 3.5+.
 * Docutils 0.14 dropped Python 2.4, 2.5, 3.1 and 3.2 support.
-* Docutils 0.10 dropped Python 2.3 support.
-* From version 0.6, Docutils is compatible with Python 3. [#2to3]_
-* For Docutils 0.5, Python 2.2.1+ is required.
-* Up to Docutils 0.4, Python 2.1 is required.
 
-.. [#2to3] Up to version 0.15, the Docutils codebase was translated
-   "on-demand" using the 2to3 tool.
+.. _Python: https://www.python.org/.
 
-Recommendations
----------------
+
+Optional Dependencies
+---------------------
 
 Docutils uses the following packages for enhanced functionality, if they
 are installed:
@@ -99,15 +92,17 @@ are installed:
 * The `Pygments`_ package provides syntax highlight of "code" directives
   and roles.
 
-* The `recommonmark`_ parser is used to parse input in Markdown format.
+* The `myst`_ or `recommonmark`_ parsers can be used to parse input in
+  Markdown format.
 
 The `Docutils Link List <docs/user/links.html>`__ records projects that
 users of Docutils and reStructuredText may find useful.
 
-.. _Python: http://www.python.org/.
+.. _pip: https://pypi.org/project/pip/
+.. _setuptools: https://pypi.org/project/setuptools/
 .. _Python Imaging Library: http://www.pythonware.com/products/pil/
 .. _Pygments: https://pypi.org/project/Pygments/
-.. _setuptools: https://pypi.org/project/setuptools/
+.. _myst: https://pypi.org/project/myst-docutils/
 .. _recommonmark: https://github.com/rtfd/recommonmark
 
 
@@ -115,53 +110,58 @@ Development version
 ===================
 
 While we are trying to follow a "release early & often" policy,
-features are added frequently.  Since the code in the repository_
-is usually in a bug-free state, we recommend using a current snapshot
-or a working copy.
+features are added frequently.
+Since the code in the `Docutils version repository`_ is usually in a
+bug-free state, we recommend using a current snapshot or a working copy.
 
-To get a _`snapshot`, go to the code page and click the download snapshot
-button:
-
-* Docutils code, documentation, front-end tools, and tests:
+Snapshots:
+  To get a repository _`snapshot`, go to
   https://sourceforge.net/p/docutils/code/HEAD/tree/trunk/docutils/
+  and click the download snapshot button.
 
-* Sandbox (experimental, contributed code):
-  https://sourceforge.net/p/docutils/code/HEAD/tree/trunk/sandbox/
-
-To keep up to date on the latest developments, download fresh copies of the
-snapshots regularly or use a `working copy of the Docutils code repository`__.
+Repository check-out:
+  To keep up to date on the latest developments,
+  use a `working copy`__ of the `Docutils version repository`_.
 
 Continue with the `Installation`_ instructions below.
 
-.. _repository: docs/dev/repository.html
+.. _Docutils version repository: docs/dev/repository.html
+.. _sandbox: https://docutils.sourceforge.io/sandbox/README.html
+
 __ docs/dev/repository.html#checking-out-the-repository
+
 
 Installation
 ============
 
-Steps to install Docutils from source:
+* The simplest way is to install the latest stable release from PyPi with
+  pip_::
 
-* Go to the directory containing the file ``setup.py``.
+    python3 -m pip install docutils
 
-  A snapshot_ must be unpacked in a temporary directory (**not** directly in
-  Python's ``site-packages``) first.
+  To install a pre-relase, append the option ``--pre``.
 
-* Run ``setup.py install``. [#setup-requires-setuptools]_
-  On Windows systems it may be sufficient to double-click ``install.py``.
+* To install a `development version`_ from source with `setuptools`_:
 
-.. [#setup-requires-setuptools] ``setup.py`` requires the `setuptools`_
-   package. For a manual install see the options in `Setting up for Docutils
-   development`__.
+  * Go to the directory containing the file ``setup.py``.
 
-   __ docs/dev/policies.html#setting-up-for-docutils-development
+    A snapshot_ must be unpacked in a temporary directory
+    (**not** directly in Python's ``site-packages``) first.
+
+  * Run ``setup.py install``.
+    See also OS-specific installation instructions below.
+
+* For installing "by hand" or in "development mode", see the
+  `editable installs`_ section in the `Docutils version repository`_
+  documentation.
+
+  .. _editable installs: docs/dev/repository.html#editable-installs
 
 Optional steps:
 
-* `running the test suite`_
+* `Running the test suite`_
 
-* `converting the documentation`_
-
-OS-specific installation instructions follow.
+* `Converting the documentation`_
 
 
 GNU/Linux, BSDs, Unix, Mac OS X, etc.
@@ -178,7 +178,7 @@ GNU/Linux, BSDs, Unix, Mac OS X, etc.
 
        su
        (enter admin password)
-       python setup.py install
+       python3 setup.py install
 
    If the python executable isn't on your path, you'll have to specify
    the complete path, such as ``/usr/local/bin/python``.
@@ -190,9 +190,9 @@ GNU/Linux, BSDs, Unix, Mac OS X, etc.
 
    To install for different Python versions, repeat step 3 for every
    required version. The last installed version will be used in the
-   `shebang line`_ of the ``rst2*.py`` wrapper scripts.
+   `shebang line`_ of the `front-end scripts`_.
 
-   .. _shebang line: http://en.wikipedia.org/wiki/Shebang_%28Unix%29
+   .. _shebang line: https://en.wikipedia.org/wiki/Shebang_%28Unix%29
 
 Windows
 -------
@@ -349,25 +349,18 @@ depend on the computer running the tests.  The difference between the
 two times represents the time required to set up the tests (import
 modules, create data structures, etc.).
 
+A copy of the test output is written to the file ``alltests.out``.
+
 If any of the tests fail, please `open a bug report`_ or `send an email`_
 (see `Bugs <BUGS.html>`_).
 Please include all relevant output, information about your operating
 system, Python version, and Docutils version.  To see the Docutils
-version, use one of the ``rst2*`` front ends or ``tools/quicktest.py``
-with the ``--version`` option, e.g.::
+version, look at the test output or use one of the `front-end scripts`_ 
+with the ``--version`` option.
 
-    cd ../tools
-    ./quicktest.py --version
-
-Windows users type these commands::
-
-    cd ..\tools
-    python quicktest.py --version
-
-
-.. _Docutils Testing: http://docutils.sourceforge.net/docs/dev/testing.html
+.. _Docutils Testing: https://docutils.sourceforge.io/docs/dev/testing.html
 .. _open a bug report:
-   http://sourceforge.net/p/docutils/bugs/
+   https://sourceforge.net/p/docutils/bugs/
 .. _send an email: mailto:docutils-users@lists.sourceforge.net
    ?subject=Test%20suite%20failure
 .. _web interface: https://sourceforge.net/p/docutils/mailman/
@@ -376,10 +369,18 @@ Windows users type these commands::
 Getting Help
 ============
 
-If you have questions or need assistance with Docutils or
+All documentation can be reached from the `Project Documentation
+Overview`_. 
+
+The SourceForge `project page`_ has links to the tracker, mailing
+lists, and code repository.
+
+If you have further questions or need assistance with Docutils or
 reStructuredText, please post a message to the Docutils-users_ mailing
 list.
 
+.. _Project Documentation Overview: docs/index.html
+.. _project page: https://sourceforge.net/p/docutils
 .. _Docutils-users: docs/user/mailing-lists.html#docutils-users
 
 

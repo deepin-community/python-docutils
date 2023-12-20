@@ -1,16 +1,15 @@
-#! /usr/bin/env python
+#! /usr/bin/env python3
 
-# $Id: test_substitution_expansion_length_limit.py 8565 2020-09-14 10:26:03Z milde $
+# $Id: test_substitution_expansion_length_limit.py 9037 2022-03-05 23:31:10Z milde $
 # Author: David Goodger <goodger@python.org>
 # Copyright: This module has been placed in the public domain.
 
 """
 Tests for docutils.transforms.references.Substitutions.
 """
-from __future__ import absolute_import
 
 if __name__ == '__main__':
-    import __init__
+    import __init__  # noqa: F401
 from test_transforms import DocutilsTestSupport
 from docutils.transforms.references import Substitutions
 from docutils.parsers.rst import Parser
@@ -22,6 +21,7 @@ def suite():
                 suite_settings={'line_length_limit': 80})
     s.generateTests(totest)
     return s
+
 
 # pseudoxml representation of the substitution definition content:
 a = '        lol'
@@ -56,10 +56,10 @@ The billion laughs attack for ReStructuredText:
     <paragraph>
         lol
          \n\
-        <problematic ids="id2" refid="id1">
+        <problematic ids="problematic-1" refid="system-message-1">
             |c|
          continuation text
-    <system_message backrefs="id2" ids="id1" level="3" line="9" source="test data" type="ERROR">
+    <system_message backrefs="problematic-1" ids="system-message-1" level="3" line="9" source="test data" type="ERROR">
         <paragraph>
             Substitution definition "c" exceeds the line-length-limit.
 """.format(b, c)],

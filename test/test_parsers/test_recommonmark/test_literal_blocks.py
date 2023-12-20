@@ -1,6 +1,5 @@
 #! /usr/bin/env python3
-# -*- coding: utf-8 -*-
-# $Id: test_literal_blocks.py 8585 2020-12-01 11:38:25Z milde $
+# $Id: test_literal_blocks.py 9037 2022-03-05 23:31:10Z milde $
 # :Copyright: © 2020 Günter Milde.
 # :License: Released under the terms of the `2-Clause BSD license`_, in short:
 #
@@ -14,10 +13,9 @@
 Tests for literal blocks in CommonMark parsers
 Cf. the `CommonMark Specification <https://spec.commonmark.org/>`__
 """
-from __future__ import absolute_import
 
 if __name__ == '__main__':
-    import __init__
+    import __init__  # noqa: F401
 from test_parsers import DocutilsTestSupport
 
 
@@ -25,6 +23,7 @@ def suite():
     s = DocutilsTestSupport.RecommonmarkParserTestSuite()
     s.generateTests(totest)
     return s
+
 
 totest = {}
 
@@ -142,7 +141,7 @@ A paragraph:
 
       A wonky literal block.
     Literal line 2.
-  
+
       Literal line 3.
 """,
 """\
@@ -158,18 +157,18 @@ A paragraph:
 ["""\
 A paragraph:
 ~~~
-  A fenced literal block.
+  A fenced code block.
 Literal line 2.
 
   Literal line 3.
-~~~  
+~~~
 """,
 """\
 <document source="test data">
     <paragraph>
         A paragraph:
     <literal_block classes="code" xml:space="preserve">
-          A fenced literal block.
+          A fenced code block.
         Literal line 2.
         \n\
           Literal line 3.
@@ -189,8 +188,21 @@ with *info string*.
         A literal block (fenced code block)
         with *info string*.
 """],
+["""\
+~~~eval_rst
+Evaluating embedded rST blocks requires the AutoStructify component
+in recommonmark. Otherwise this is just a code block
+with class ``eval_rst``.
+~~~
+""",
+"""\
+<document source="test data">
+    <literal_block classes="code eval_rst" xml:space="preserve">
+        Evaluating embedded rST blocks requires the AutoStructify component
+        in recommonmark. Otherwise this is just a code block
+        with class ``eval_rst``.
+"""],
 ]
-
 
 
 if __name__ == '__main__':

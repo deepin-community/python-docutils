@@ -1,25 +1,23 @@
-#! /usr/bin/env python
+#! /usr/bin/env python3
 
-# $Id: test_images.py 8481 2020-01-31 08:17:24Z milde $
+# $Id: test_images.py 9037 2022-03-05 23:31:10Z milde $
 # Author: David Goodger <goodger@python.org>
 # Copyright: This module has been placed in the public domain.
 
 """
 Tests for images.py image directives.
 """
-from __future__ import absolute_import
 
 if __name__ == '__main__':
-    import __init__
+    import __init__  # noqa: F401
 from test_parsers import DocutilsTestSupport
-
-from docutils.nodes import reprunicode
 
 
 def suite():
     s = DocutilsTestSupport.ParserTestSuite()
     s.generateTests(totest)
     return s
+
 
 totest = {}
 
@@ -281,7 +279,7 @@ totest['images'] = [
         <literal_block xml:space="preserve">
             .. image:: picture.png
                :scale: fifty
-""" % DocutilsTestSupport.exception_data(int, u"fifty")[1][0]],
+""" % DocutilsTestSupport.exception_data(int, "fifty")[1][0]],
 ["""\
 .. image:: picture.png
    :scale: 50
@@ -409,32 +407,32 @@ totest['images'] = [
             .. |img| image:: picture.png
                :align: left
 """],
-[u"""\
+["""\
 .. image:: picture.png
    :align: \xe4
 """,
-u"""\
+"""\
 <document source="test data">
     <system_message level="3" line="1" source="test data" type="ERROR">
         <paragraph>
             Error in "image" directive:
-            invalid option value: (option: "align"; value: %s)
+            invalid option value: (option: "align"; value: 'ä')
             "\xe4" unknown; choose from "top", "middle", "bottom", "left", "center", or "right".
         <literal_block xml:space="preserve">
             .. image:: picture.png
                :align: \xe4
-""" % repr(reprunicode(u'\xe4'))],
+"""],
 ["""
 .. image:: test.png
    :target: Uppercase_
 
-.. _Uppercase: http://docutils.sourceforge.net/
+.. _Uppercase: https://docutils.sourceforge.io/
 """,
 """\
 <document source="test data">
     <reference name="Uppercase" refname="uppercase">
         <image uri="test.png">
-    <target ids="uppercase" names="uppercase" refuri="http://docutils.sourceforge.net/">
+    <target ids="uppercase" names="uppercase" refuri="https://docutils.sourceforge.io/">
 """],
 [r"""
 .. image:: path\ with\ spaces/name\ with\ spaces.png

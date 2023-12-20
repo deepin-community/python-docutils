@@ -1,16 +1,15 @@
-#! /usr/bin/env python
+#! /usr/bin/env python3
 
-# $Id: test_role.py 8571 2020-10-28 08:46:19Z milde $
+# $Id: test_role.py 9037 2022-03-05 23:31:10Z milde $
 # Author: David Goodger <goodger@python.org>
 # Copyright: This module has been placed in the public domain.
 
 """
 Tests for misc.py "role" directive.
 """
-from __future__ import absolute_import
 
 if __name__ == '__main__':
-    import __init__
+    import __init__  # noqa: F401
 from test_parsers import DocutilsTestSupport
 
 
@@ -18,6 +17,7 @@ def suite():
     s = DocutilsTestSupport.ParserTestSuite()
     s.generateTests(totest)
     return s
+
 
 totest = {}
 
@@ -64,15 +64,15 @@ Now that it's defined, :custom:`interpreted` works.
 """\
 <document source="test data">
     <paragraph>
-        Must define 
-        <problematic ids="id2" refid="id1">
+        Must define \n\
+        <problematic ids="problematic-1" refid="system-message-1">
             :custom:`interpreted`
          before using it.
     <system_message level="1" line="1" source="test data" type="INFO">
         <paragraph>
             No role entry for "custom" in module "docutils.parsers.rst.languages.en".
             Trying "custom" as canonical role name.
-    <system_message backrefs="id2" ids="id1" level="3" line="1" source="test data" type="ERROR">
+    <system_message backrefs="problematic-1" ids="system-message-1" level="3" line="1" source="test data" type="ERROR">
         <paragraph>
             Unknown interpreted text role "custom".
     <paragraph>
@@ -207,9 +207,9 @@ Empty :custom:`\\ ` and empty `\\ `:special:
 """\
 <document source="test data">
     <paragraph>
-        Empty 
+        Empty \n\
         <inline classes="custom">
-         and empty 
+         and empty \n\
         <inline classes="special">
 """],
 ["""\
@@ -263,10 +263,10 @@ Can't use the :raw:`role` directly.
 <document source="test data">
     <paragraph>
         Can't use the \n\
-        <problematic ids="id2" refid="id1">
+        <problematic ids="problematic-1" refid="system-message-1">
             :raw:`role`
          directly.
-    <system_message backrefs="id2" ids="id1" level="3" line="1" source="test data" type="ERROR">
+    <system_message backrefs="problematic-1" ids="system-message-1" level="3" line="1" source="test data" type="ERROR">
         <paragraph>
             No format (Writer name) is associated with this role: "raw".
             The "raw" role cannot be used directly.

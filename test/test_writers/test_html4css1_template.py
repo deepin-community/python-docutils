@@ -1,19 +1,18 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
-# $Id: test_html4css1_template.py 8481 2020-01-31 08:17:24Z milde $
+# $Id: test_html4css1_template.py 9037 2022-03-05 23:31:10Z milde $
 # Author: David Goodger <goodger@python.org>
 # Copyright: This module has been placed in the public domain.
 
 """
 Tests for the HTML writer.
 """
-from __future__ import absolute_import
 
 import os
 import platform
 
 if __name__ == '__main__':
-    import __init__
+    import __init__  # noqa: F401
 from test_writers import DocutilsTestSupport
 
 
@@ -21,15 +20,17 @@ def suite():
     settings = {'template': os.path.join(DocutilsTestSupport.testroot,
                                          'data', 'full-template.txt'),
                 'stylesheet_path': '/test.css',
-                'embed_stylesheet': 0,}
+                'embed_stylesheet': 0}
     s = DocutilsTestSupport.PublishTestSuite('html', suite_settings=settings)
     s.generateTests(totest)
     return s
 
+
 if platform.system() == "Windows":
-    drive_prefix = "C:"
+    drive_prefix = os.path.splitdrive(os.getcwd())[0]
 else:
     drive_prefix = ""
+
 
 totest = {}
 
@@ -60,7 +61,7 @@ r'''head_prefix = """\
 
 head = """\
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-<meta name="generator" content="Docutils %(version)s: http://docutils.sourceforge.net/" />
+<meta name="generator" content="Docutils %(version)s: https://docutils.sourceforge.io/" />
 <title>Document Title</title>
 <meta name="author" content="Me" />"""
 
@@ -117,7 +118,7 @@ head_prefix = """\
 
 head = """\
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-<meta name="generator" content="Docutils %(version)s: http://docutils.sourceforge.net/" />
+<meta name="generator" content="Docutils %(version)s: https://docutils.sourceforge.io/" />
 <title>Document Title</title>
 <meta name="author" content="Me" />"""
 
@@ -186,7 +187,7 @@ footer text
 
 meta = """\
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-<meta name="generator" content="Docutils %(version)s: http://docutils.sourceforge.net/" />
+<meta name="generator" content="Docutils %(version)s: https://docutils.sourceforge.io/" />
 <meta name="author" content="Me" />"""
 
 
@@ -204,7 +205,7 @@ html_prolog = """\
 
 html_head = """\
 <meta http-equiv="Content-Type" content="text/html; charset=%%s" />
-<meta name="generator" content="Docutils %(version)s: http://docutils.sourceforge.net/" />
+<meta name="generator" content="Docutils %(version)s: https://docutils.sourceforge.io/" />
 <title>Document Title</title>
 <meta name="author" content="Me" />"""
 
@@ -239,7 +240,7 @@ html_body = """\
 footer text
 </div>"""
 ''' % {'version': DocutilsTestSupport.docutils.__version__,
-        'drive': drive_prefix,
+       'drive': drive_prefix,
     }]
 ]
 

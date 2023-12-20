@@ -1,11 +1,13 @@
+.. include:: ../header.txt
+
 ==================================================
  Creating reStructuredText Interpreted Text Roles
 ==================================================
 
 :Authors: David Goodger
 :Contact: docutils-develop@lists.sourceforge.net
-:Date: $Date: 2012-01-03 20:23:53 +0100 (Di, 03. Jän 2012) $
-:Revision: $Revision: 7302 $
+:Date: $Date: 2022-04-02 23:59:06 +0200 (Sa, 02. Apr 2022) $
+:Revision: $Revision: 9051 $
 :Copyright: This document has been placed in the public domain.
 
 Interpreted text roles are an extension mechanism for inline markup in
@@ -33,10 +35,10 @@ The role function creates and returns inline elements (nodes) and does
 any additional processing required.  Its signature is as follows::
 
     def role_fn(name, rawtext, text, lineno, inliner,
-                options={}, content=[]):
+                options=None, content=None):
         code...
 
-    # Set function attributes for customization:
+    # Optional function attributes for customization:
     role_fn.options = ...
     role_fn.content = ...
 
@@ -46,13 +48,14 @@ Options and Content`_).  The role function parameters are as follows:
 * ``name``: The local name of the interpreted role, the role name
   actually used in the document.
 
-* ``rawtext``: A string containing the enitre interpreted text input,
+* ``rawtext``: A string containing the entire interpreted text input,
   including the role and markup.  Return it as a ``problematic`` node
   linked to a system message if a problem is encountered.
 
 * ``text``: The interpreted text content.
 
-* ``lineno``: The line number where the interpreted text begins.
+* ``lineno``: The line number where the text block containing the
+  interpreted text begins.
 
 * ``inliner``: The ``docutils.parsers.rst.states.Inliner`` object that
   called role_fn.  It contains the several attributes useful for error
@@ -126,7 +129,7 @@ registered with the parser and language mappings added:
        roles.register_canonical_role(name, role_function)
 
    This code is normally placed immediately after the definition of
-   the role funtion.
+   the role function.
 
 2. Add an entry to the ``roles`` dictionary in
    ``docutils/parsers/rst/languages/en.py`` for the role, mapping the
@@ -187,10 +190,14 @@ This is equivalent to::
 Here is the implementation of the role::
 
     def rfc_reference_role(role, rawtext, text, lineno, inliner,
-                           options={}, content=[]):
+                           options=None, content=None):
+        if "#" in text:
+            rfcnum, section = utils.unescape(text).split("#", 1)
+        else:
+            rfcnum, section  = utils.unescape(text), None
         try:
-            rfcnum = int(text)
-            if rfcnum <= 0:
+            rfcnum = int(rfcnum)
+            if rfcnum < 1:
                 raise ValueError
         except ValueError:
             msg = inliner.reporter.error(
@@ -200,8 +207,10 @@ Here is the implementation of the role::
             return [prb], [msg]
         # Base URL mainly used by inliner.rfc_reference, so this is correct:
         ref = inliner.document.settings.rfc_base_url + inliner.rfc_url % rfcnum
-        set_classes(options)
-        node = nodes.reference(rawtext, 'RFC ' + utils.unescape(text), refuri=ref,
+        if section is not None:
+            ref += "#"+section
+        options = normalize_role_options(options)
+        node = nodes.reference(rawtext, 'RFC ' + str(rfcnum), refuri=ref,
                                **options)
         return [node], []
 

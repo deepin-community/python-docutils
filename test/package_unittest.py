@@ -1,6 +1,6 @@
-#! /usr/bin/env python
+#! /usr/bin/env python3
 
-# $Id: package_unittest.py 8359 2019-08-26 16:45:33Z milde $
+# $Id: package_unittest.py 9035 2022-03-05 23:29:48Z milde $
 # Author: Garth Kidd <garth@deadlybloodyserious.com>
 # Copyright: This module has been placed in the public domain.
 
@@ -9,14 +9,12 @@ This module extends unittest.py with `loadTestModules()`, by loading multiple
 test modules from a directory.  Optionally, test packages are also loaded,
 recursively.
 """
-from __future__ import print_function
 
 import sys
 import os
 import getopt
 import types
 import unittest
-import re
 
 
 # So that individual test modules can share a bit of state,
@@ -35,12 +33,14 @@ Options:
   -d, --debug      Debug mode
 """
 
+
 def usageExit(msg=None):
     """Print usage and exit."""
     if msg:
         print(msg)
     print(USAGE)
     sys.exit(2)
+
 
 def parseArgs(argv=sys.argv):
     """Parse command line arguments and set TestFramework state.
@@ -61,11 +61,12 @@ def parseArgs(argv=sys.argv):
             if opt in ('-v', '--verbose'):
                 verbosity = 2
             if opt in ('-d', '--debug'):
-                debug =1
+                debug = 1
         if len(args) != 0:
             usageExit("No command-line arguments supported yet.")
     except getopt.error as msg:
         usageExit(msg)
+
 
 def loadTestModules(path, name='', packages=None):
     """
@@ -85,15 +86,16 @@ def loadTestModules(path, name='', packages=None):
         p = paths.pop(0)
         files = os.listdir(p)
         for filename in files:
-            if filename.startswith(name):
-                fullpath = os.path.join(p, filename)
-                if filename.endswith('.py'):
-                    fullpath = fullpath[len(path)+1:]
-                    testModules.append(path2mod(fullpath))
-                elif packages and os.path.isdir(fullpath) and \
-                      os.path.isfile(os.path.join(fullpath, '__init__.py')):
-                    paths.append(fullpath)
-    # Import modules and add their tests to the suite.
+            if not filename.startswith(name):
+                continue
+            fullpath = os.path.join(p, filename)
+            if filename.endswith('.py'):
+                fullpath = fullpath[len(path)+1:]
+                testModules.append(path2mod(fullpath))
+            elif (packages and os.path.isdir(fullpath)
+                  and os.path.isfile(os.path.join(fullpath, '__init__.py'))):
+                paths.append(fullpath)
+# Import modules and add their tests to the suite.
     sys.path.insert(0, path)
     for mod in testModules:
         if debug:
@@ -101,7 +103,8 @@ def loadTestModules(path, name='', packages=None):
         try:
             module = import_module(mod)
         except ImportError:
-            print("ERROR: Can't import %s, skipping its tests:" % mod, file=sys.stderr)
+            print(f"ERROR: Can't import {mod}, skipping its tests:",
+                  file=sys.stderr)
             sys.excepthook(*sys.exc_info())
         else:
             # if there's a suite defined, incorporate its contents
@@ -124,9 +127,11 @@ def loadTestModules(path, name='', packages=None):
     sys.path.pop(0)
     return testSuite
 
+
 def path2mod(path):
     """Convert a file path to a dotted module name."""
     return path[:-3].replace(os.sep, '.')
+
 
 def import_module(name):
     """Import a dotted-path module name, and return the final component."""
@@ -135,6 +140,7 @@ def import_module(name):
     for comp in components[1:]:
         mod = getattr(mod, comp)
     return mod
+
 
 def main(suite=None):
     """

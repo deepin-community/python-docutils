@@ -1,24 +1,26 @@
-#!/usr/bin/env python
-# $Id: setup.py 8705 2021-04-17 12:41:26Z grubert $
+#!/usr/bin/env python3
+# $Id: setup.py 9103 2022-07-05 20:04:21Z grubert $
 # Copyright: This file has been placed in the public domain.
 
-from __future__ import print_function
-
-import glob
-import os
 import sys
 
 try:
     from setuptools import setup
 except ImportError:
-    print('Error: The "setuptools" module, which is required for the')
-    print('  installation of Docutils, could not be found.\n')
-    print('  You may install  it with `python -m pip install setuptools`')
-    print('  or from a package called "python-setuptools" (or similar)')
-    print('  using your system\'s package manager.\n')
-    print('  Alternatively, install a release from PyPi with')
-    print('  `python -m pip install docutils`.')
-    
+    print("""\
+Error: The "setuptools" module, which is required for the
+  installation of Docutils, could not be found.
+
+  You may install  it with `python -m pip install setuptools`
+  or from a package called "python-setuptools" (or similar)
+  using your system\'s package manager.
+
+  Alternatively, install a release from PyPi with
+  `python -m pip install docutils`.'
+
+  If all this fails, try a "manual install".
+  https://docutils.sourceforge.io/docs/dev/repository.html#install-manually
+""")
     sys.exit(1)
 
 
@@ -30,17 +32,17 @@ Docutils is a modular system for processing documentation
 into useful formats, such as HTML, XML, and LaTeX.  For
 input Docutils supports reStructuredText, an easy-to-read,
 what-you-see-is-what-you-get plaintext markup syntax.""",  # wrap at col 60
-    'url': 'http://docutils.sourceforge.net/',
-    'version': '0.17.1',
+    'url': 'https://docutils.sourceforge.io/',
+    'version': '0.19',
     'author': 'David Goodger',
     'author_email': 'goodger@python.org',
     'maintainer': 'docutils-develop list',
     'maintainer_email': 'docutils-develop@lists.sourceforge.net',
     'license': 'public domain, Python, 2-Clause BSD, GPL 3 (see COPYING.txt)',
     'platforms': 'OS-independent',
-    'python_requires': '>=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*',
+    'python_requires': '>=3.7',
     'include_package_data': True,
-    'exclude_package_data': {"": ["docutils.conf"]},                
+    'exclude_package_data': {"": ["docutils.conf"]},
     'package_dir': {
         'docutils': 'docutils',
         'docutils.tools': 'tools'
@@ -65,6 +67,9 @@ what-you-see-is-what-you-get plaintext markup syntax.""",  # wrap at col 60
         'docutils.writers.xetex',
         'docutils.writers.odf_odt',
     ],
+    'entry_points': {
+        'console_scripts': ['docutils=docutils.__main__:main']
+    },
     'scripts': [
         'tools/rst2html.py',
         'tools/rst2html4.py',
@@ -91,14 +96,11 @@ what-you-see-is-what-you-get plaintext markup syntax.""",  # wrap at col 60
         'License :: OSI Approved :: BSD License',
         'License :: OSI Approved :: GNU General Public License (GPL)',
         'Operating System :: OS Independent',
-        'Programming Language :: Python :: 2',
-        'Programming Language :: Python :: 2.7',
         'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.5',
-        'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
         'Programming Language :: Python :: 3.8',
         'Programming Language :: Python :: 3.9',
+        'Programming Language :: Python :: 3.10',
         'Topic :: Documentation',
         'Topic :: Software Development :: Documentation',
         'Topic :: Text Processing',
@@ -136,8 +138,7 @@ what-you-see-is-what-you-get plaintext markup syntax.""",  # wrap at col 60
 
 def do_setup():
     # Install data files properly.
-    dist = setup(**package_data)
-    return dist
+    return setup(**package_data)
 
 
 if __name__ == '__main__':

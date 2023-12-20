@@ -1,4 +1,4 @@
-# $Id: DocutilsTestSupport.py 8683 2021-04-09 15:44:23Z milde $
+# $Id: DocutilsTestSupport.py 9047 2022-03-17 13:40:11Z milde $
 # Authors: David Goodger <goodger@python.org>;
 #          Garth Kidd <garth@deadlybloodyserious.com>
 # Copyright: This module has been placed in the public domain.
@@ -38,7 +38,6 @@ Exports the following:
     - `HtmlFragmentTestSuite`
     - `DevNull` (output sink)
 """
-from __future__ import print_function
 __docformat__ = 'reStructuredText'
 
 import sys
@@ -47,7 +46,6 @@ import unittest
 import re
 import inspect
 import traceback
-import warnings
 from pprint import pformat
 
 testroot = os.path.abspath(os.path.dirname(__file__) or os.curdir)
@@ -61,12 +59,12 @@ try:
     import package_unittest
     import docutils
     import docutils.core
-    from docutils import frontend, nodes, statemachine, utils
-    from docutils.utils import urischemes
+    from docutils import frontend, nodes, statemachine, utils   # noqa: F401
+    from docutils.utils import urischemes                       # noqa: F401
     from docutils.transforms import universal
-    from docutils.parsers import rst, recommonmark_wrapper
-    from docutils.parsers.rst import states, tableparser, roles, languages
-    from docutils.readers import standalone, pep
+    from docutils.parsers import rst
+    from docutils.parsers.rst import states, tableparser, roles, languages  # noqa: F401, E501
+    from docutils.readers import standalone, pep                # noqa: F401
     from docutils.statemachine import StringList, string2lines
 except ImportError:
     # The importing module (usually __init__.py in one of the
@@ -80,18 +78,15 @@ except ImportError:
 
 try:
     import mypdb as pdb
-except:
+except ImportError:
     import pdb
-
-if sys.version_info >= (3, 0):
-    unicode = str  # noqa
 
 
 # Hack to make repr(StringList) look like repr(list):
 StringList.__repr__ = StringList.__str__
 
 
-class DevNull(object):
+class DevNull:
 
     """Output sink."""
 
@@ -107,6 +102,9 @@ class StandardTestCase(unittest.TestCase):
     """
     Helper class, providing the same interface as unittest.TestCase,
     but with useful setUp and comparison methods.
+
+    The methods assertEqual and assertNotEqual have been overwritten
+    to provide better support for multi-line strings.
     """
 
     def setUp(self):
@@ -140,10 +138,11 @@ class CustomTestCase(StandardTestCase):
     """
     Helper class, providing extended functionality over unittest.TestCase.
 
-    The methods assertEqual and assertNotEqual have been overwritten
-    to provide better support for multi-line strings.  Furthermore,
-    see the compare_output method and the parameter list of __init__.
-    """
+    See the compare_output method and the parameter list of __init__.
+
+    Note: the modified signature is incompatible with
+    the "pytest" and "nose" frameworks.
+    """  # cf. feature-request #81
 
     compare = difflib.Differ().compare
     """Comparison method shared by all subclasses."""
@@ -166,10 +165,9 @@ class CustomTestCase(StandardTestCase):
         self.input = input
         self.expected = expected
         self.run_in_debugger = run_in_debugger
-        self.suite_settings = suite_settings.copy() or {}
+        self.suite_settings = suite_settings.copy() if suite_settings else {}
 
-        # Ring your mother.
-        unittest.TestCase.__init__(self, method_name)
+        super().__init__(method_name)
 
     def __str__(self):
         """
@@ -193,21 +191,13 @@ class CustomTestCase(StandardTestCase):
         self.clear_roles()
 
     def compare_output(self, input, output, expected):
-        """`input`, `output`, and `expected` should all be strings."""
-        if isinstance(input, unicode):
+        """`input` should by bytes, `output` and `expected` strings."""
+        if isinstance(input, str):
             input = input.encode('raw_unicode_escape')
-        if sys.version_info > (3, 0):
-            # API difference: Python 3's node.__str__ doesn't escape
-            #assert expected is None or isinstance(expected, unicode)
-            if isinstance(expected, bytes):
-                expected = expected.decode('utf-8')
-            if isinstance(output, bytes):
-                output = output.decode('utf-8')
-        else:
-            if isinstance(expected, unicode):
-                expected = expected.encode('raw_unicode_escape')
-            if isinstance(output, unicode):
-                output = output.encode('raw_unicode_escape')
+        if isinstance(expected, bytes):
+            expected = expected.decode('utf-8')
+        if isinstance(output, bytes):
+            output = output.decode('utf-8')
         # Normalize line endings:
         if expected:
             expected = '\n'.join(expected.splitlines())
@@ -219,8 +209,8 @@ class CustomTestCase(StandardTestCase):
             print('\n%s\ninput:' % (self,), file=sys.stderr)
             print(input, file=sys.stderr)
             try:
-                comparison = ''.join(self.compare(expected.splitlines(1),
-                                                  output.splitlines(1)))
+                comparison = ''.join(self.compare(expected.splitlines(True),
+                                                  output.splitlines(True)))
                 print('-: expected\n+: output', file=sys.stderr)
                 print(comparison, file=sys.stderr)
             except AttributeError:      # expected or output not a string
@@ -272,7 +262,7 @@ class CustomTestSuite(unittest.TestSuite):
             if not mydir:
                 mydir = os.curdir
             if callerpath.startswith(mydir):
-                self.id = callerpath[len(mydir) + 1:] # caller's module
+                self.id = callerpath[len(mydir) + 1:]  # caller's module
             else:
                 self.id = callerpath
         else:
@@ -321,26 +311,26 @@ class TransformTestCase(CustomTestCase):
     cases that have nothing to do with the input and output of the transform.
     """
 
-    option_parser = frontend.OptionParser(components=(rst.Parser,))
-    settings = option_parser.get_default_values()
+    settings = frontend.get_default_settings(rst.Parser)
     settings.report_level = 1
     settings.halt_level = 5
     settings.debug = package_unittest.debug
     settings.warning_stream = DevNull()
     unknown_reference_resolvers = ()
 
-    def __init__(self, *args, **kwargs):
-        self.transforms = kwargs['transforms']
+    def __init__(self, *args, parser=None, transforms=None, **kwargs):
+        assert transforms is not None, 'required argument'
+        self.transforms = transforms
         """List of transforms to perform for this test case."""
 
-        self.parser = kwargs['parser']
+        assert parser is not None, 'required argument'
+        self.parser = parser
         """Input parser for this test case."""
 
-        del kwargs['transforms'], kwargs['parser'] # only wanted here
         CustomTestCase.__init__(self, *args, **kwargs)
 
     def supports(self, format):
-        return 1
+        return True
 
     def test_transforms(self):
         if self.run_in_debugger:
@@ -411,7 +401,7 @@ class TransformTestSuite(CustomTestSuite):
             for casenum in range(len(cases)):
                 case = cases[casenum]
                 run_in_debugger = False
-                if len(case)==3:
+                if len(case) == 3:
                     # TODO: (maybe) change the 3rd argument to a dict, so it
                     # can handle more cases by keyword ('disable', 'debug',
                     # 'settings'), here and in other generateTests methods.
@@ -442,8 +432,7 @@ class ParserTestCase(CustomTestCase):
     parser = rst.Parser()
     """Parser shared by all ParserTestCases."""
 
-    option_parser = frontend.OptionParser(components=(rst.Parser,))
-    settings = option_parser.get_default_values()
+    settings = frontend.get_default_settings(rst.Parser)
     settings.report_level = 5
     settings.halt_level = 5
     settings.debug = package_unittest.debug
@@ -485,7 +474,7 @@ class ParserTestSuite(CustomTestSuite):
             for casenum in range(len(cases)):
                 case = cases[casenum]
                 run_in_debugger = False
-                if len(case)==3:
+                if len(case) == 3:
                     if case[2]:
                         run_in_debugger = True
                     else:
@@ -504,8 +493,7 @@ class PEPParserTestCase(ParserTestCase):
     parser = rst.Parser(rfc2822=True, inliner=rst.states.Inliner())
     """Parser shared by all PEPParserTestCases."""
 
-    option_parser = frontend.OptionParser(components=(rst.Parser, pep.Reader))
-    settings = option_parser.get_default_values()
+    settings = frontend.get_default_settings(rst.Parser, pep.Reader)
     settings.report_level = 5
     settings.halt_level = 5
     settings.debug = package_unittest.debug
@@ -518,36 +506,44 @@ class PEPParserTestSuite(ParserTestSuite):
     test_case_class = PEPParserTestCase
 
 
+# Optional tests with 3rd party CommonMark parser
+# ===============================================
+
+# TODO: test with alternative CommonMark parsers?
+md_parser_name = 'recommonmark'
+# md_parser_name = 'pycmark'
+# md_parser_name = 'myst'
+md_skip_msg = f'Cannot test "{md_parser_name}". Parser not found.'
+try:
+    md_parser_class = docutils.parsers.get_parser_class(
+                                                md_parser_name)
+except ImportError:
+    md_parser_class = None
+if md_parser_class and md_parser_name == 'recommonmark':
+    import recommonmark
+    if recommonmark.__version__ < '0.6.0':
+        md_parser_class = None
+        md_skip_msg = f'"{md_parser_name}" parser too old, skip tests'
+
+
+@unittest.skipUnless(md_parser_class, md_skip_msg)
 class RecommonmarkParserTestCase(ParserTestCase):
 
-    """Recommonmark-specific parser test case."""
+    """Test case for 3rd-party CommonMark parsers."""
 
-    parser = recommonmark_wrapper.Parser()
-    """Parser shared by all RecommonmarkParserTestCases."""
+    if md_parser_class:
+        parser = md_parser_class()
+        settings = frontend.get_default_settings(md_parser_class)
+        settings.report_level = 5
+        settings.halt_level = 5
+        settings.debug = package_unittest.debug
 
-    option_parser = frontend.OptionParser(
-                        components=(recommonmark_wrapper.Parser,))
-    settings = option_parser.get_default_values()
-    settings.report_level = 5
-    settings.halt_level = 5
-    settings.debug = package_unittest.debug
 
 class RecommonmarkParserTestSuite(ParserTestSuite):
 
     """A collection of RecommonmarkParserTestCases."""
 
     test_case_class = RecommonmarkParserTestCase
-
-    def generateTests(self, dict, dictname='totest'):
-        if 'recommonmark' not in recommonmark_wrapper.Parser.supported:
-            return
-        # TODO: currently the tests are too version-specific
-        from recommonmark import __version__ as recommonmark_version
-        if recommonmark_version != '0.4.0':
-            return        
-        # suppress UserWarnings from recommonmark parser
-        warnings.filterwarnings('ignore', message='Unsupported.*type')
-        ParserTestSuite.generateTests(self, dict, dictname='totest')
 
 
 class GridTableParserTestCase(CustomTestCase):
@@ -664,13 +660,12 @@ class WriterPublishTestCase(CustomTestCase, docutils.SettingsSpec):
 
     settings_default_overrides = {'_disable_config': True,
                                   'strict_visitor': True}
-    writer_name = '' # set in subclasses or constructor
+    writer_name = ''  # set in subclasses or constructor
 
-    def __init__(self, *args, **kwargs):
-        if 'writer_name' in kwargs:
-            self.writer_name = kwargs['writer_name']
-            del kwargs['writer_name']
-        CustomTestCase.__init__(self, *args, **kwargs)
+    def __init__(self, *args, writer_name='', **kwargs):
+        if writer_name:
+            self.writer_name = writer_name
+        super().__init__(*args, **kwargs)
 
     def test_publish(self):
         if self.run_in_debugger:
@@ -700,7 +695,7 @@ class PublishTestSuite(CustomTestSuite):
             for casenum in range(len(cases)):
                 case = cases[casenum]
                 run_in_debugger = False
-                if len(case)==3:
+                if len(case) == 3:
                     if case[2]:
                         run_in_debugger = True
                     else:
@@ -745,15 +740,15 @@ class HtmlWriterPublishPartsTestCase(WriterPublishTestCase):
                                       ' content="text/html; charset=%s" />\n')
     standard_generator_template = (
         '<meta name="generator"'
-        ' content="Docutils %s: http://docutils.sourceforge.net/" />\n')
+        ' content="Docutils %s: https://docutils.sourceforge.io/" />\n')
     standard_html_meta_value = (
         standard_content_type_template
         + standard_generator_template % docutils.__version__)
     standard_meta_value = standard_html_meta_value % 'utf-8'
-    standard_html_prolog = """\
-<?xml version="1.0" encoding="%s" ?>
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-"""
+    standard_html_prolog = (
+        '<?xml version="1.0" encoding="%s" ?>\n'
+        '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" '
+        '"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">\n')
 
     def format_output(self, parts):
         """Minimize & standardize the output."""
@@ -796,7 +791,7 @@ class HtmlPublishPartsTestSuite(CustomTestSuite):
             for casenum in range(len(cases)):
                 case = cases[casenum]
                 run_in_debugger = False
-                if len(case)==3:
+                if len(case) == 3:
                     if case[2]:
                         run_in_debugger = True
                     else:
@@ -818,6 +813,7 @@ def exception_data(func, *args, **kwds):
     except Exception as detail:
         return (detail, detail.args,
                 '%s: %s' % (detail.__class__.__name__, detail))
+    return None, [], "No exception"
 
 
 def _format_str(*args):
@@ -842,13 +838,9 @@ def _format_str(*args):
     return_tuple = []
     for i in args:
         r = repr(i)
-        if ( (isinstance(i, bytes) or isinstance(i, unicode))
-             and '\n' in i):
+        if isinstance(i, (str, bytes)) and '\n' in i:
             stripped = ''
-            if isinstance(i, unicode) and r.startswith('u'):
-                stripped = r[0]
-                r = r[1:]
-            elif isinstance(i, bytes) and r.startswith('b'):
+            if isinstance(i, bytes) and r.startswith('b'):
                 stripped = r[0]
                 r = r[1:]
             # quote_char = "'" or '"'
@@ -856,9 +848,9 @@ def _format_str(*args):
             assert quote_char in ("'", '"'), quote_char
             assert r[0] == r[-1]
             r = r[1:-1]
-            r = (stripped + 3 * quote_char + '\\\n' +
-                 re.sub(r'(?<!\\)((\\\\)*)\\n', r'\1\n', r) +
-                 3 * quote_char)
+            r = (stripped + 3*quote_char + '\\\n'
+                 + re.sub(r'(?<!\\)((\\\\)*)\\n', r'\1\n', r)
+                 + 3*quote_char)
             r = re.sub(r' \n', r' \\n\\\n', r)
         return_tuple.append(r)
     return tuple(return_tuple)

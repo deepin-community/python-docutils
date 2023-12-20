@@ -1,23 +1,22 @@
-#! /usr/bin/env python
-# coding: utf-8
-
-# $Id: test_TableParser.py 8481 2020-01-31 08:17:24Z milde $
+#! /usr/bin/env python3
+# $Id: test_TableParser.py 9037 2022-03-05 23:31:10Z milde $
 # Author: David Goodger <goodger@python.org>
 # Copyright: This module has been placed in the public domain.
 
 """
 Tests for states.py.
 """
-from __future__ import absolute_import
 
 if __name__ == '__main__':
-    import __init__
+    import __init__  # noqa: F401
 from test_parsers import DocutilsTestSupport
+
 
 def suite():
     s = DocutilsTestSupport.GridTableParserTestSuite()
     s.generateTests(totest)
     return s
+
 
 totest = {}
 
@@ -43,17 +42,17 @@ totest['grid_tables'] = [
  [[(0, 0, 1, ['A table with']),
    (0, 0, 1, ['two columns.'])]])],
 # Combining chars in grid tables still fail
-# [u"""\
+# ["""\
 # +--------------+------------------+
 # | A tāble w̅ith | comb̲ining chars. |
 # +--------------+------------------+
 # """,
-# [(0, 0, 2, 15, [u'A table with']),
-#  (0, 15, 2, 30, [u'combining chars.'])],
+# [(0, 0, 2, 15, ['A table with']),
+#  (0, 15, 2, 30, ['combining chars.'])],
 # ([14, 14],
 #  [],
-#  [[(0, 0, 1, [u'A table with']),
-#    (0, 0, 1, [u'combining chars.'])]])],
+#  [[(0, 0, 1, ['A table with']),
+#    (0, 0, 1, ['combining chars.'])]])],
 ["""\
 +--------------+-------------+
 | A table with | two columns |

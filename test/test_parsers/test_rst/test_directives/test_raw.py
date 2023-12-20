@@ -1,19 +1,17 @@
-#! /usr/bin/env python
+#! /usr/bin/env python3
 
-# $Id: test_raw.py 8481 2020-01-31 08:17:24Z milde $
+# $Id: test_raw.py 9037 2022-03-05 23:31:10Z milde $
 # Author: David Goodger <goodger@python.org>
 # Copyright: This module has been placed in the public domain.
 
 """
 Tests for misc.py "raw" directive.
 """
-from __future__ import absolute_import
 
 import os.path
-import sys
 
 if __name__ == '__main__':
-    import __init__
+    import __init__  # noqa: F401
 from test_parsers import DocutilsTestSupport
 
 
@@ -22,16 +20,13 @@ def suite():
     s.generateTests(totest)
     return s
 
+
 mydir = 'test_parsers/test_rst/test_directives/'
 raw1 = os.path.join(mydir, 'raw1.txt')
 utf_16_file = os.path.join(mydir, 'utf-16.csv')
 utf_16_file_rel = DocutilsTestSupport.utils.relative_path(None, utf_16_file)
 utf_16_error_str = ("UnicodeDecodeError: 'ascii' codec can't decode byte 0xfe "
                     "in position 0: ordinal not in range(128)")
-if sys.version_info < (3, 0):
-    utf_16_error_str = ("UnicodeError: Unable to decode input data.  "
-                        "Tried the following encodings: 'ascii'.\n"
-                        "            (%s)" % utf_16_error_str)
 
 totest = {}
 
@@ -84,12 +79,12 @@ totest['raw'] = [
         <literal_block xml:space="preserve">
             .. raw:: html
                :file: rawfile.html
-            
+            \n\
                <p>Can't have both content and file attribute.</p>
 """],
 [r"""
 .. raw:: latex html
- 
+
    \[ \sum_{n=1}^\infty \frac{1}{n} \text{ etc.} \]
 """,
 """\
@@ -131,7 +126,7 @@ Raw input file is UTF-16-encoded, and is not valid ASCII.
                :file: %s
                :encoding: ascii
 """ % (utf_16_error_str, utf_16_file_rel)],
-[u"""\
+["""\
 .. raw:: html
    :encoding: utf-8
 

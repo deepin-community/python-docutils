@@ -1,25 +1,24 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
-# $Id: test_s5.py 8481 2020-01-31 08:17:24Z milde $
+# $Id: test_s5.py 9037 2022-03-05 23:31:10Z milde $
 # Author: David Goodger <goodger@python.org>
 # Copyright: This module has been placed in the public domain.
 
 """
 Tests for the S5/HTML writer.
 """
-from __future__ import absolute_import
 
 import os
 import platform
 
 if __name__ == '__main__':
-    import __init__
+    import __init__  # noqa: F401
 from test_writers import DocutilsTestSupport
 
 
 def suite():
     settings = {'stylesheet_path': '/test.css',
-                'embed_stylesheet': 0,}
+                'embed_stylesheet': 0}
     s = DocutilsTestSupport.PublishTestSuite('s5', suite_settings=settings)
     s.generateTests(totest_1)
     settings['hidden_controls'] = 0
@@ -27,12 +26,13 @@ def suite():
     s.generateTests(totest_2)
     return s
 
+
 interpolations = {
         'version': DocutilsTestSupport.docutils.__version__,
         'drive': '', }
 
-if platform.system() == "Windows":
-    interpolations['drive'] = "C:"
+if platform.system() == 'Windows':
+    interpolations['drive'] = os.path.splitdrive(os.getcwd())[0]
 
 totest_1 = {}
 totest_2 = {}
@@ -56,7 +56,7 @@ Slide text.
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-<meta name="generator" content="Docutils %(version)s: http://docutils.sourceforge.net/" />
+<meta name="generator" content="Docutils %(version)s: https://docutils.sourceforge.io/" />
 <meta name="version" content="S5 1.1" />
 <title>Show Title</title>
 <link rel="stylesheet" href="%(drive)s/test.css" type="text/css" />
@@ -121,7 +121,7 @@ We're just checking the settings
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-<meta name="generator" content="Docutils %(version)s: http://docutils.sourceforge.net/" />
+<meta name="generator" content="Docutils %(version)s: https://docutils.sourceforge.io/" />
 <meta name="version" content="S5 1.1" />
 <title>Bogus Slide Show</title>
 <link rel="stylesheet" href="%(drive)s/test.css" type="text/css" />

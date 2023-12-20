@@ -1,6 +1,5 @@
 #! /usr/bin/env python3
-# -*- coding: utf-8 -*-
-# $Id: test_line_length_limit_default.py 8585 2020-12-01 11:38:25Z milde $
+# $Id: test_line_length_limit_default.py 9037 2022-03-05 23:31:10Z milde $
 # :Copyright: © 2020 Günter Milde.
 # :License: Released under the terms of the `2-Clause BSD license`_, in short:
 #
@@ -15,10 +14,9 @@
 Tests for inline markup in docutils/parsers/rst/states.py.
 Interpreted text tests are in a separate module, test_interpreted.py.
 """
-from __future__ import absolute_import
 
 if __name__ == '__main__':
-    import __init__
+    import __init__  # noqa: F401
 from test_parsers import DocutilsTestSupport
 
 
@@ -26,6 +24,7 @@ def suite():
     s = DocutilsTestSupport.RecommonmarkParserTestSuite()
     s.generateTests(totest)
     return s
+
 
 totest = {}
 

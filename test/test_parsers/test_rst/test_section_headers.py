@@ -1,17 +1,14 @@
-# -*- coding: utf-8 -*-
-#! /usr/bin/env python
-
-# $Id: test_section_headers.py 8481 2020-01-31 08:17:24Z milde $
+#! /usr/bin/env python3
+# $Id: test_section_headers.py 9037 2022-03-05 23:31:10Z milde $
 # Author: David Goodger <goodger@python.org>
 # Copyright: This module has been placed in the public domain.
 
 """
 Tests for states.py.
 """
-from __future__ import absolute_import
 
 if __name__ == '__main__':
-    import __init__
+    import __init__  # noqa: F401
 from test_parsers import DocutilsTestSupport
 
 
@@ -19,6 +16,7 @@ def suite():
     s = DocutilsTestSupport.ParserTestSuite()
     s.generateTests(totest)
     return s
+
 
 totest = {}
 
@@ -127,13 +125,13 @@ Test short underline.
         <paragraph>
             Test short underline.
 """],
-[u"""\
+["""\
 à with combining varia
 ======================
 
 Do not count combining chars in title column width.
 """,
-u"""\
+"""\
 <document source="test data">
     <section ids="a-with-combining-varia" names="a\u0300\\ with\\ combining\\ varia">
         <title>
@@ -807,17 +805,17 @@ Paragraph
         <paragraph>
             Possible incomplete section title.
             Treating the overline as ordinary text because it's so short.
-    <section dupnames="..." ids="id1">
+    <section dupnames="..." ids="section-1">
         <title>
             ...
         <system_message level="1" line="4" source="test data" type="INFO">
             <paragraph>
                 Possible incomplete section title.
                 Treating the overline as ordinary text because it's so short.
-        <section dupnames="..." ids="id2">
+        <section dupnames="..." ids="section-2">
             <title>
                 ...
-            <system_message backrefs="id2" level="1" line="5" source="test data" type="INFO">
+            <system_message backrefs="section-2" level="1" line="5" source="test data" type="INFO">
                 <paragraph>
                     Duplicate implicit target name: "...".
             <system_message level="1" line="7" source="test data" type="INFO">
@@ -828,10 +826,10 @@ Paragraph
         <paragraph>
             Possible incomplete section title.
             Treating the overline as ordinary text because it's so short.
-    <section dupnames="..." ids="id3">
+    <section dupnames="..." ids="section-3">
         <title>
             ...
-        <system_message backrefs="id3" level="1" line="8" source="test data" type="INFO">
+        <system_message backrefs="section-3" level="1" line="8" source="test data" type="INFO">
             <paragraph>
                 Duplicate implicit target name: "...".
         <paragraph>

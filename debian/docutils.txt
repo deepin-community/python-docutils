@@ -1,0 +1,12 @@
+========
+docutils
+========
+
+-------------------------------------------------------
+generic command line interface for the docutils package
+-------------------------------------------------------
+
+:Manual section: 1
+:Manual group: text processing
+
+

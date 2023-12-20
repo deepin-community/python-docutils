@@ -1,6 +1,5 @@
 #! /usr/bin/env python3
-# -*- coding: utf-8 -*-
-# $Id: test_html_blocks.py 8594 2020-12-15 23:06:43Z milde $
+# $Id: test_html_blocks.py 9037 2022-03-05 23:31:10Z milde $
 # :Copyright: © 2020 Günter Milde.
 # :License: Released under the terms of the `2-Clause BSD license`_, in short:
 #
@@ -14,10 +13,9 @@
 Tests for HTML blocks in CommonMark parsers
 Cf. the `CommonMark Specification <https://spec.commonmark.org/>`__
 """
-from __future__ import absolute_import
 
 if __name__ == '__main__':
-    import __init__
+    import __init__  # noqa: F401
 from test_parsers import DocutilsTestSupport
 
 
@@ -25,6 +23,7 @@ def suite():
     s = DocutilsTestSupport.RecommonmarkParserTestSuite()
     s.generateTests(totest)
     return s
+
 
 totest = {}
 
@@ -65,28 +64,29 @@ A paragraph:
 """,
 """\
 <document source="test data">
-    <paragraph>
-        <raw format="html" xml:space="preserve">
-            <a href="foo">
-        \n\
-        <emphasis>
-            bar
-        \n\
-        <raw format="html" xml:space="preserve">
-            </a>
-"""],
-["""\
-<!-- foo -->*bar*
-*baz*
-""",
-"""\
-<document source="test data">
     <raw format="html" xml:space="preserve">
-        <!-- foo -->*bar*
-        *baz*
+        <a href="foo">
+        *bar*
+        </a>
 """],
+# In recommonmark 0.7.0, some raw blocks at paragraph start make the
+# paragraph a raw block :(
+# ["""\
+# <!-- foo -->*bar* (raw because of the comment tag at start of paragraph)
+# *baz*
+# """,
+# """\
+# <document source="test data">
+#     <paragraph>
+#         <raw format="html" xml:space="preserve">
+#             <!-- foo -->
+#         <emphasis>
+#             bar
+#     <paragraph>
+#         <emphasis>
+#             baz
+# """],
 ]
-
 
 
 if __name__ == '__main__':

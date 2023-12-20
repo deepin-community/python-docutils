@@ -1,4 +1,8 @@
-with open('functional/tests/_standalone_rst_defaults.py') as _f:
+import filecmp as _filecmp
+
+
+with open('functional/tests/_standalone_rst_defaults.py',
+          encoding='utf-8') as _f:
     exec(_f.read())
 
 # Source and destination file names:
@@ -11,14 +15,11 @@ writer_name = 's5_html'
 # Settings:
 settings_overrides['theme'] = 'small-black'
 # local copy of default stylesheet:
-settings_overrides['stylesheet_path'] = ( 
-    'functional/input/data/html4css1.css')
+settings_overrides['stylesheet_path'] = 'functional/input/data/html4css1.css'
 
 
 # Extra functional tests.
 # Prefix all names with '_' to avoid confusing `docutils.core.publish_file`.
-
-import filecmp as _filecmp
 
 def _test_more(expected_dir, output_dir, test_case, parameters):
     """Compare ``ui/<theme>`` directories."""
@@ -46,6 +47,7 @@ def _test_more(expected_dir, output_dir, test_case, parameters):
         parts.append('The following paths are unique:')
         parts.extend(uniques)
     test_case.assertTrue(not parts, '\n'.join(parts))
+
 
 def _compare_directories(expected, output):
     dircmp = _filecmp.dircmp(expected, output, ['.svn', 'CVS'])

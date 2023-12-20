@@ -1,5 +1,4 @@
-# -*- coding: utf-8 -*-
-# $Id: local-parser.py 7504 2012-08-27 07:55:20Z grubert $
+# $Id: local-parser.py 9026 2022-03-04 15:57:13Z milde $
 # Authors: Engelbert Gruber <grubert@users.sourceforge.net>
 #          Toshio Kuratomi <toshio@fedoraproject.org>
 # Copyright: This module is put into the public domain.
@@ -10,6 +9,7 @@ mini-reader to test get_reader_class with local reader
 
 from docutils import parsers
 
+
 class Parser(parsers.Parser):
 
     supported = ('dummy',)
@@ -17,5 +17,4 @@ class Parser(parsers.Parser):
 
     def parser(self, inputstring, document):
         self.setup_parse(inputstring, document)
-        document = dict()
         self.finish_parse()

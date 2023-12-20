@@ -1,14 +1,16 @@
+.. include:: ../header.txt
+
 =======================================
  Creating reStructuredText_ Directives
 =======================================
 
 :Authors: Dethe Elza, David Goodger, Lea Wiemann
 :Contact: docutils-develop@lists.sourceforge.net
-:Date: $Date: 2012-01-03 20:23:53 +0100 (Di, 03. Jän 2012) $
-:Revision: $Revision: 7302 $
+:Date: $Date: 2022-04-02 23:59:06 +0200 (Sa, 02. Apr 2022) $
+:Revision: $Revision: 9051 $
 :Copyright: This document has been placed in the public domain.
 
-.. _reStructuredText: http://docutils.sourceforge.net/rst.html
+.. _reStructuredText: https://docutils.sourceforge.io/rst.html
 
 
 Directives are the primary extension mechanism of reStructuredText.
@@ -194,7 +196,7 @@ package (in the ``__init__.py`` module):
   of integers into a Python list of integers.  Raises ValueError for
   non-positive-integer values.
 
-- ``encoding``: Verfies the encoding argument by lookup.  Raises
+- ``encoding``: Verifies the encoding argument by lookup.  Raises
   ValueError for unknown encodings.
 
 A further utility function, ``choice``, is supplied to enable
@@ -377,7 +379,7 @@ early version of the image directive class::
     from docutils.parsers.rst import Directive
 
     def align(argument):
-        """Conversion function for the "align" option.""" 
+        """Conversion function for the "align" option."""
         return directives.choice(argument, ('left', 'center', 'right'))
 
     class Image(Directive):
@@ -426,5 +428,5 @@ For an example usage of the ``pending`` node, see the implementation
 of the ``contents`` directive in
 docutils.parsers.rst.directives.parts__.
 
-.. _transform: ../ref/transforms.html
-__ http://docutils.sf.net/docutils/parsers/rst/directives/parts.py
+.. _transform: ../api/transforms.html
+__ https://docutils.sourceforge.io/docutils/parsers/rst/directives/parts.py

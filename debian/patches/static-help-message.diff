@@ -7,23 +7,38 @@ mention build-time locale there.
 
 Bug: https://bugs.debian.org/791587
 Forwarded: no
-Last-Update: 2015-07-21
+Last-Update: 2022-07-08
 ---
- docutils/frontend.py | 4 ++--
- 1 file changed, 2 insertions(+), 2 deletions(-)
+ docutils/frontend.py        | 4 ++--
+ test/data/help/docutils.txt | 3 ++-
+ 2 files changed, 4 insertions(+), 3 deletions(-)
 
 diff --git a/docutils/frontend.py b/docutils/frontend.py
-index 5cb29a1..d7eb979 100644
+index 0decc90..17c236d 100644
 --- a/docutils/frontend.py
 +++ b/docutils/frontend.py
-@@ -529,8 +529,8 @@ class OptionParser(optparse.OptionParser, docutils.SettingsSpec):
+@@ -582,8 +582,8 @@ class OptionParser(optparse.OptionParser, docutils.SettingsSpec):
            ['--output-encoding-error-handler'],
            {'default': 'strict', 'validator': validate_encoding_error_handler}),
-          ('Specify text encoding and error handler for error output.  '
--          'Default: %s:%s.'
+          ('Specify text encoding and optionally error handler '
+-          'for error output.  Default: %s:%s.'
 -          % (default_error_encoding, default_error_encoding_error_handler),
-+          'Default text encoding: system encoding. Default error handler: %s.'
-+          % default_error_encoding_error_handler,
++          'for error output.  Default text encoding: system encoding. '
++          'Default error handler: %s.' % default_error_encoding_error_handler,
            ['--error-encoding', '-e'],
            {'metavar': '<name[:handler]>', 'default': default_error_encoding,
             'validator': validate_encoding_and_error_handler}),
+diff --git a/test/data/help/docutils.txt b/test/data/help/docutils.txt
+index 5b260c3..b965c16 100644
+--- a/test/data/help/docutils.txt
++++ b/test/data/help/docutils.txt
+@@ -68,7 +68,8 @@ General Docutils Options
+                         "xmlcharrefreplace", "backslashreplace".
+ --error-encoding=<name[:handler]>, -e <name[:handler]>
+                         Specify text encoding and optionally error handler for
+-                        error output.  Default: utf-8:backslashreplace.
++                        error output.  Default text encoding: system encoding.
++                        Default error handler: backslashreplace.
+ --error-encoding-error-handler=ERROR_ENCODING_ERROR_HANDLER
+                         Specify the error handler for unencodable characters
+                         in error output.  Default: backslashreplace.

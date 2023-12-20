@@ -1,22 +1,24 @@
-#! /usr/bin/env python
+#! /usr/bin/env python3
 
-# $Id: test_code_none.py 8481 2020-01-31 08:17:24Z milde $
+# $Id: test_code_none.py 9037 2022-03-05 23:31:10Z milde $
 # Author: Guenter Milde
 # Copyright: This module has been placed in the public domain.
 
 """
 Test the 'code' directive in body.py with syntax_highlight = 'none'.
 """
-from __future__ import absolute_import
 
 if __name__ == '__main__':
-    import __init__
+    import __init__  # noqa: F401
 from test_parsers import DocutilsTestSupport
 
+
 def suite():
-    s = DocutilsTestSupport.ParserTestSuite(suite_settings={'syntax_highlight':'none'})
+    s = DocutilsTestSupport.ParserTestSuite(
+            suite_settings={'syntax_highlight': 'none'})
     s.generateTests(totest)
     return s
+
 
 totest = {}
 

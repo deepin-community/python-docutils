@@ -1,11 +1,10 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
-# $Id: quicktest.py 8346 2019-08-26 12:11:32Z milde $
+# $Id: quicktest.py 9047 2022-03-17 13:40:11Z milde $
 # Authors: Garth Kidd <garth@deadlybloodyserious.com>;
 #          David Goodger <goodger@python.org>
 # Copyright: This module has been placed in the public domain.
 
-from __future__ import print_function
 try:
     import locale
     locale.setlocale(locale.LC_ALL, '')
@@ -16,7 +15,7 @@ import sys
 import os
 import getopt
 import docutils
-from docutils.frontend import OptionParser
+from docutils import frontend
 from docutils.utils import new_document
 from docutils.parsers.rst import Parser
 
@@ -52,6 +51,7 @@ options = [('pretty', 'p',
 """See ``distutils.fancy_getopt.FancyGetopt.__init__`` for a description of
 the data structure: (long option, short option, description)."""
 
+
 def usage():
     print(usage_header)
     for longopt, shortopt, description in options:
@@ -69,21 +69,26 @@ def usage():
             sys.stdout.write('%-15s' % ' ')
         print(description)
 
+
 def _pretty(input, document, optargs):
     return document.pformat()
+
 
 def _rawxml(input, document, optargs):
     return document.asdom().toxml()
 
+
 def _styledxml(input, document, optargs):
     docnode = document.asdom().childNodes[0]
-    return '%s\n%s\n%s' % (
-          '<?xml version="1.0" encoding="ISO-8859-1"?>',
-          '<?xml-stylesheet type="text/xsl" href="%s"?>'
-          % optargs['styledxml'], docnode.toxml())
+    return '\n'.join(('<?xml version="1.0" encoding="ISO-8859-1"?>',
+                      '<?xml-stylesheet type="text/xsl" href="%s"?>'
+                      % optargs['styledxml'],
+                      docnode.toxml()))
+
 
 def _prettyxml(input, document, optargs):
     return document.asdom().toprettyxml('    ', '\n')
+
 
 def _test(input, document, optargs):
     tq = '"""'
@@ -97,28 +102,31 @@ def _test(input, document, optargs):
 %s
 %s],
 ]
-""" % ( tq, escape(input.rstrip()), tq, tq, escape(output.rstrip()), tq )
+""" % (tq, escape(input.rstrip()), tq, tq, escape(output.rstrip()), tq)
+
 
 def escape(text):
     """
     Return `text` in triple-double-quoted Python string form.
     """
-    text = text.replace('\\', '\\\\')   # escape backslashes
-    text = text.replace('"""', '""\\"') # break up triple-double-quotes
-    text = text.replace(' \n', ' \\n\\\n') # protect trailing whitespace
+    text = text.replace('\\', '\\\\')       # escape backslashes
+    text = text.replace('"""', '""\\"')     # break up triple-double-quotes
+    text = text.replace(' \n', ' \\n\\\n')  # protect trailing whitespace
     return text
+
 
 _outputFormatters = {
     'rawxml': _rawxml,
     'styledxml': _styledxml,
     'xml': _prettyxml,
-    'pretty' : _pretty,
-    'test': _test
-    }
+    'pretty': _pretty,
+    'test': _test}
+
 
 def format(outputFormat, input, document, optargs):
     formatter = _outputFormatters[outputFormat]
     return formatter(input, document, optargs)
+
 
 def getArgs():
     if os.name == 'mac' and len(sys.argv) <= 1:
@@ -126,11 +134,12 @@ def getArgs():
     else:
         return posixGetArgs(sys.argv[1:])
 
+
 def posixGetArgs(argv):
     outputFormat = 'pretty'
     # convert fancy_getopt style option list to getopt.getopt() arguments
-    shortopts = ''.join([option[1] + ':' * (option[0][-1:] == '=')
-                         for option in options if option[1]])
+    shortopts = ''.join(option[1] + ':' * (option[0][-1:] == '=')
+                        for option in options if option[1])
     longopts = [option[0] for option in options if option[0]]
     try:
         opts, args = getopt.getopt(argv, shortopts, longopts)
@@ -145,8 +154,8 @@ def posixGetArgs(argv):
         elif o in ['-V', '--version']:
             sys.stderr.write('quicktest.py (Docutils %s%s)\n' %
                              (docutils.__version__,
-                              docutils.__version_details__ and
-                              ' [%s]'%docutils.__version_details__ or ''))
+                              docutils.__version_details__
+                              and ' [%s]'%docutils.__version_details__ or ''))
             sys.exit()
         elif o in ['-r', '--rawxml']:
             outputFormat = 'rawxml'
@@ -177,6 +186,7 @@ def posixGetArgs(argv):
         outputFile = open(args.pop(0), 'w')
     return inputFile, outputFile, outputFormat, optargs
 
+
 def macGetArgs():
     import EasyDialogs
     EasyDialogs.Message("""\
@@ -192,10 +202,11 @@ Use the next dialog to build a command line:
     argv = EasyDialogs.GetArgv(optionlist=optionlist, addfolder=0)
     return posixGetArgs(argv)
 
+
 def main():
     # process cmdline arguments:
     inputFile, outputFile, outputFormat, optargs = getArgs()
-    settings = OptionParser(components=(Parser,)).get_default_values()
+    settings = frontend.get_default_settings(Parser)
     settings.debug = optargs['debug']
     parser = Parser()
     input = inputFile.read()

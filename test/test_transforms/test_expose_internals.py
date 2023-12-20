@@ -1,18 +1,16 @@
-#! /usr/bin/env python
+#! /usr/bin/env python3
 
-# $Id: test_expose_internals.py 8481 2020-01-31 08:17:24Z milde $
+# $Id: test_expose_internals.py 9037 2022-03-05 23:31:10Z milde $
 # Author: Lea Wiemann <LeWiemann@gmail.com>
 # Copyright: This module has been placed in the public domain.
 
 """
 Test module for universal.ExposeInternals transform.
 """
-from __future__ import absolute_import
-
 
 if __name__ == '__main__':
-    import __init__
-from test_transforms import DocutilsTestSupport # before importing docutils!
+    import __init__  # noqa: F401
+from test_transforms import DocutilsTestSupport  # before importing docutils!
 from docutils.transforms.universal import ExposeInternals
 from docutils.parsers.rst import Parser
 

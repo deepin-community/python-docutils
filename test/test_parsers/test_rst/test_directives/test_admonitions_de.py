@@ -1,23 +1,24 @@
-#! /usr/bin/env python
+#! /usr/bin/env python3
 
-# $Id: test_admonitions_de.py 8481 2020-01-31 08:17:24Z milde $
+# $Id: test_admonitions_de.py 9037 2022-03-05 23:31:10Z milde $
 # Author: David Goodger <goodger@python.org>
 # Copyright: This module has been placed in the public domain.
 
 """
 Tests for admonitions.py directives in German document.
 """
-from __future__ import absolute_import
 
 if __name__ == '__main__':
-    import __init__
+    import __init__  # noqa: F401
 from test_parsers import DocutilsTestSupport
+
 
 def suite():
     settings = {'language_code': 'de'}
     s = DocutilsTestSupport.ParserTestSuite(suite_settings=settings)
     s.generateTests(totest)
     return s
+
 
 totest = {}
 
@@ -212,7 +213,7 @@ totest['admonitions'] = [
             1 argument(s) required, 0 supplied.
         <literal_block xml:space="preserve">
             .. admonition::
-            
+            \n\
                Generic admonitions require a title.
 """],
 ]

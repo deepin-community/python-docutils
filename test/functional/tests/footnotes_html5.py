@@ -1,4 +1,5 @@
-with open('functional/tests/_standalone_rst_defaults.py') as _f:
+with open('functional/tests/_standalone_rst_defaults.py',
+          encoding='utf-8') as _f:
     exec(_f.read())
 
 # Source and destination file names.
@@ -9,7 +10,9 @@ test_destination = "footnotes_html5.html"
 writer_name = "html5"
 
 # Settings:
-settings_overrides['footnote_references']='superscript'
 # local copy of stylesheets:
 # (Test runs in ``docutils/test/``, we need relative path from there.)
 settings_overrides['stylesheet_dirs'] = ('.', 'functional/input/data')
+settings_overrides['stylesheet_path'] = 'minimal.css,responsive.css'
+settings_overrides['footnote_references'] = 'superscript'
+settings_overrides['section_self_link'] = True

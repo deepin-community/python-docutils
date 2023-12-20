@@ -1,23 +1,22 @@
-#! /usr/bin/env python
-# .. coding: utf-8
-
-# $Id: test_SimpleTableParser.py 8481 2020-01-31 08:17:24Z milde $
+#! /usr/bin/env python3
+# $Id: test_SimpleTableParser.py 9037 2022-03-05 23:31:10Z milde $
 # Author: David Goodger <goodger@python.org>
 # Copyright: This module has been placed in the public domain.
 
 """
 Tests for states.py.
 """
-from __future__ import absolute_import
 
 if __name__ == '__main__':
-    import __init__
+    import __init__  # noqa: F401
 from test_parsers import DocutilsTestSupport
+
 
 def suite():
     s = DocutilsTestSupport.SimpleTableParserTestSuite()
     s.generateTests(totest)
     return s
+
 
 totest = {}
 
@@ -31,15 +30,15 @@ A table with  two columns.
  [],
  [[[0, 0, 1, ['A table with']],
    [0, 0, 1, ['two columns.']]]])],
-[u"""\
+["""\
 ============  ===============
 A tāble w̅ith  comb̲ining chars
 ============  ===============
 """,
 ([12, 15],
  [],
- [[[0, 0, 1, [u'A ta\u0304ble w\u0305ith']],
-   [0, 0, 1, [u'comb\u0332ining chars']]]])],
+ [[[0, 0, 1, ['A ta\u0304ble w\u0305ith']],
+   [0, 0, 1, ['comb\u0332ining chars']]]])],
 ["""\
 ============  ============
 A table with  two columns
@@ -66,9 +65,9 @@ second row.
 ==========  ===========
 A table with four rows,
 -----------------------
-and two     columns.   
-First and   last rows     
-contain column spans.   
+and two     columns.
+First and   last rows
+contain column spans.
 =======================
 """,
 ([10, 11],
@@ -97,10 +96,10 @@ Another bad    table
 ===========  ================
 A table with two header rows,
 -----------------------------
-the first    with a span.    
+the first    with a span.
 ===========  ================
-Two body     rows,           
-the second with a span.      
+Two body     rows,
+the second with a span.
 =============================
 """,
 ([11, 16],

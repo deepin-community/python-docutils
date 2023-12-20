@@ -1,16 +1,15 @@
-#! /usr/bin/env python
+#! /usr/bin/env python3
 
-# $Id: test_substitutions.py 8481 2020-01-31 08:17:24Z milde $
+# $Id: test_substitutions.py 9037 2022-03-05 23:31:10Z milde $
 # Author: David Goodger <goodger@python.org>
 # Copyright: This module has been placed in the public domain.
 
 """
 Tests for states.py.
 """
-from __future__ import absolute_import
 
 if __name__ == '__main__':
-    import __init__
+    import __init__  # noqa: F401
 from test_parsers import DocutilsTestSupport
 
 
@@ -18,6 +17,7 @@ def suite():
     s = DocutilsTestSupport.ParserTestSuite()
     s.generateTests(totest)
     return s
+
 
 totest = {}
 
@@ -136,13 +136,13 @@ Followed by a paragraph.
         <paragraph>
             Followed by a block quote.
 """],
-[u"""\
+["""\
 Substitutions support case differences:
 
 .. |eacute| replace:: \u00E9
 .. |Eacute| replace:: \u00C9
 """,
-u"""\
+"""\
 <document source="test data">
     <paragraph>
         Substitutions support case differences:
@@ -288,7 +288,7 @@ Elements that are prohibited inside of substitution definitions:
         <paragraph>
             Substitution definition contains illegal element <footnote_reference>:
         <literal_block xml:space="preserve">
-            <footnote_reference auto="1" ids="id1">
+            <footnote_reference auto="1" ids="footnote-reference-1">
         <literal_block xml:space="preserve">
             .. |auto-numbered footnote| replace:: [#]_
 """],

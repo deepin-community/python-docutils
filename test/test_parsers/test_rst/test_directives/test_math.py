@@ -1,16 +1,15 @@
-#! /usr/bin/env python
+#! /usr/bin/env python3
 
-# $Id: test_math.py 8481 2020-01-31 08:17:24Z milde $
+# $Id: test_math.py 9037 2022-03-05 23:31:10Z milde $
 # Author: Guenter Milde <milde@users.sf.net>
 # Copyright: This module has been placed in the public domain.
 
 """
 Tests for the 'math' directive.
 """
-from __future__ import absolute_import
 
 if __name__ == '__main__':
-    import __init__
+    import __init__  # noqa: F401
 from test_parsers import DocutilsTestSupport
 
 
@@ -18,6 +17,7 @@ def suite():
     s = DocutilsTestSupport.ParserTestSuite()
     s.generateTests(totest)
     return s
+
 
 totest = {}
 
@@ -81,7 +81,7 @@ totest['content with blank line'] = [
 .. math::
 
   1+1=2
-  
+
   E = mc^2
 """,
 """\

@@ -1,5 +1,4 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
+#!/usr/bin/env python3
 # :Copyright: © 2011, 2017 Günter Milde.
 # :License: Released under the terms of the `2-Clause BSD license`_, in short:
 #
@@ -10,7 +9,7 @@
 #
 # .. _2-Clause BSD license: https://opensource.org/licenses/BSD-2-Clause
 
-# :Id: $Id: generate_punctuation_chars.py 8554 2020-09-04 16:52:11Z milde $
+# :Id: $Id: generate_punctuation_chars.py 9068 2022-06-13 12:05:08Z milde $
 #
 # ::
 
@@ -25,7 +24,7 @@
 # which may give different results for different Python versions.
 #
 # Updating the module with changed `unicode_punctuation_categories` (due to
-# a new Python or Unicode standard version is an API cange (may render valid
+# a new Python or Unicode standard version is an API change (may render valid
 # rST documents invalid). It should only be done for "feature releases" and
 # requires also updating the specification of `inline markup recognition
 # rules`_ in ../../docs/ref/rst/restructuredtext.txt.
@@ -33,26 +32,15 @@
 # .. _inline markup recognition rules:
 #     ../../docs/ref/rst/restructuredtext.html#inline-markup
 
-from __future__ import print_function
-
 import sys
 import unicodedata
-
-if sys.version_info >= (3, 0):
-    unichr = chr  # unichr not available in Py3k
-else:
-    import codecs
-    sys.stdout = codecs.getwriter('UTF-8')(sys.stdout)
 
 
 # Template for utils.punctuation_chars
 # ------------------------------------
-#
-# Problem: ``ur`` prefix fails with Py 3.5 ::
 
-module_template = u'''#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-# :Id: $Id: generate_punctuation_chars.py 8554 2020-09-04 16:52:11Z milde $
+module_template = r'''#!/usr/bin/env python3
+# :Id: $Id: generate_punctuation_chars.py 9068 2022-06-13 12:05:08Z milde $
 # :Copyright: © 2011, 2017 Günter Milde.
 # :License: Released under the terms of the `2-Clause BSD license`_, in short:
 #
@@ -67,8 +55,8 @@ module_template = u'''#!/usr/bin/env python
 # ``docutils/tools/dev/generate_punctuation_chars.py``.
 # ::
 
-import sys, re
-import unicodedata
+import re
+import sys
 
 """Docutils character category patterns.
 
@@ -89,10 +77,12 @@ import unicodedata
 
    The category of some characters changed with the development of the
    Unicode standard. The current lists are generated with the help of the
-   "unicodedata" module of Python %(python_version)s (based on Unicode version %(unidata_version)s).
+   "unicodedata" module of Python %(python_version)s
+   (based on Unicode version %(unidata_version)s).
 
    .. _inline markup recognition rules:
-      http://docutils.sf.net/docs/ref/rst/restructuredtext.html#inline-markup-recognition-rules
+      https://docutils.sourceforge.io/docs/ref/rst/restructuredtext.html
+      #inline-markup-recognition-rules
 """
 
 %(openers)s
@@ -100,21 +90,21 @@ import unicodedata
 %(delimiters)s
 if sys.maxunicode >= 0x10FFFF: # "wide" build
 %(delimiters_wide)s
-closing_delimiters = u'\\\\\\\\.,;!?'
+closing_delimiters = '\\\\.,;!?'
 
 
 # Matching open/close quotes
 # --------------------------
 
 quote_pairs = {# open char: matching closing characters # usage example
-               u'\\xbb':   u'\\xbb',         # » » Swedish
-               u'\\u2018': u'\\u201a',       # ‘ ‚ Albanian/Greek/Turkish
-               u'\\u2019': u'\\u2019',       # ’ ’ Swedish
-               u'\\u201a': u'\\u2018\\u2019', # ‚ ‘ German ‚ ’ Polish
-               u'\\u201c': u'\\u201e',       # “ „ Albanian/Greek/Turkish
-               u'\\u201e': u'\\u201c\\u201d', # „ “ German „ ” Polish
-               u'\\u201d': u'\\u201d',       # ” ” Swedish
-               u'\\u203a': u'\\u203a',       # › › Swedish
+               '\xbb':   '\xbb',         # » » Swedish
+               '\u2018': '\u201a',       # ‘ ‚ Albanian/Greek/Turkish
+               '\u2019': '\u2019',       # ’ ’ Swedish
+               '\u201a': '\u2018\u2019', # ‚ ‘ German ‚ ’ Polish
+               '\u201c': '\u201e',       # “ „ Albanian/Greek/Turkish
+               '\u201e': '\u201c\u201d', # „ “ German „ ” Polish
+               '\u201d': '\u201d',       # ” ” Swedish
+               '\u203a': '\u203a',       # › › Swedish
               }
 """Additional open/close quote pairs."""
 
@@ -131,7 +121,7 @@ def match_chars(c1, c2):
         i = openers.index(c1)
     except ValueError:  # c1 not in openers
         return False
-    return c2 == closers[i] or c2 in quote_pairs.get(c1, u'')\
+    return c2 == closers[i] or c2 in quote_pairs.get(c1, '')
 '''
 
 
@@ -142,16 +132,16 @@ def match_chars(c1, c2):
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #
 # For details about Unicode categories, see
-# http://www.unicode.org/Public/5.1.0/ucd/UCD.html#General_Category_Values
+# https://www.unicode.org/Public/5.1.0/ucd/UCD.html#General_Category_Values
 # ::
 
 unicode_punctuation_categories = {
-    # 'Pc': 'Connector', # not used in Docutils inline markup recognition
+    # 'Pc': 'Connector',  # not used in Docutils inline markup recognition
     'Pd': 'Dash',
     'Ps': 'Open',
     'Pe': 'Close',
-    'Pi': 'Initial quote', # may behave like Ps or Pe depending on usage
-    'Pf': 'Final quote', # may behave like Ps or Pe depending on usage
+    'Pi': 'Initial quote',  # may behave like Ps or Pe depending on usage
+    'Pf': 'Final quote',    # may behave like Ps or Pe depending on usage
     'Po': 'Other'
     }
 """Unicode character categories for punctuation"""
@@ -178,12 +168,12 @@ def unicode_charlists(categories, cp_min=0, cp_max=None):
     # categories with not too high characters):
     if cp_max is None:
         cp_max = max(x for x in range(sys.maxunicode+1)
-                    if unicodedata.category(unichr(x)) in categories)
+                     if unicodedata.category(chr(x)) in categories)
         # print(cp_max) # => 74867 for unicode_punctuation_categories
     charlists = {}
     for cat in categories:
-        charlists[cat] = [unichr(x) for x in range(cp_min, cp_max+1)
-                            if unicodedata.category(unichr(x)) == cat]
+        charlists[cat] = [chr(x) for x in range(cp_min, cp_max+1)
+                          if unicodedata.category(chr(x)) == cat]
     return charlists
 
 
@@ -201,7 +191,7 @@ def character_category_patterns():
     recognition rules`_.
     """
 
-    cp_min = 160 # ASCII chars have special rules for backwards compatibility
+    cp_min = 160  # ASCII chars have special rules for backwards compatibility
     ucharlists = unicode_charlists(unicode_punctuation_categories, cp_min)
     """Strings of characters in Unicode punctuation character categories"""
 
@@ -212,21 +202,21 @@ def character_category_patterns():
 
     # low quotation marks are also used as closers (e.g. in Greek)
     # move them to category Pi:
-    ucharlists['Ps'].remove(u'‚') # 201A  SINGLE LOW-9 QUOTATION MARK
-    ucharlists['Ps'].remove(u'„') # 201E  DOUBLE LOW-9 QUOTATION MARK
-    ucharlists['Pi'] += [u'‚', u'„']
+    ucharlists['Ps'].remove('‚')  # 201A  SINGLE LOW-9 QUOTATION MARK
+    ucharlists['Ps'].remove('„')  # 201E  DOUBLE LOW-9 QUOTATION MARK
+    ucharlists['Pi'] += ['‚', '„']
 
-    ucharlists['Pi'].remove(u'‛') # 201B  SINGLE HIGH-REVERSED-9 QUOTATION MARK
-    ucharlists['Pi'].remove(u'‟') # 201F  DOUBLE HIGH-REVERSED-9 QUOTATION MARK
-    ucharlists['Pf'] += [u'‛', u'‟']
+    ucharlists['Pi'].remove('‛')  # 201B  … HIGH-REVERSED-9 QUOTATION MARK
+    ucharlists['Pi'].remove('‟')  # 201F  … HIGH-REVERSED-9 QUOTATION MARK
+    ucharlists['Pf'] += ['‛', '‟']
 
     # 301F  LOW DOUBLE PRIME QUOTATION MARK misses the opening pendant:
-    ucharlists['Ps'].insert(ucharlists['Pe'].index(u'\u301f'), u'\u301d')
+    ucharlists['Ps'].insert(ucharlists['Pe'].index('\u301f'), '\u301d')
 
-    # print(u''.join(ucharlists['Ps']).encode('utf8')
-    # print(u''.join(ucharlists['Pe']).encode('utf8')
-    # print(u''.join(ucharlists['Pi']).encode('utf8')
-    # print(u''.join(ucharlists['Pf']).encode('utf8')
+    # print(''.join(ucharlists['Ps']).encode('utf-8')
+    # print(''.join(ucharlists['Pe']).encode('utf-8')
+    # print(''.join(ucharlists['Pi']).encode('utf-8')
+    # print(''.join(ucharlists['Pf']).encode('utf-8')
 
     # The Docutils character categories
     # ---------------------------------
@@ -236,25 +226,26 @@ def character_category_patterns():
     # recognition rules`_)
 
     # allowed before markup if there is a matching closer
-    openers = [u'"\'(<\\[{']
+    openers = ['"\'(<\\[{']
     for category in ('Ps', 'Pi', 'Pf'):
         openers.extend(ucharlists[category])
 
     # allowed after markup if there is a matching opener
-    closers = [u'"\')>\\]}']
+    closers = ['"\')>\\]}']
     for category in ('Pe', 'Pf', 'Pi'):
         closers.extend(ucharlists[category])
 
     # non-matching, allowed on both sides
-    delimiters = [u'\\-/:']
+    delimiters = [r'\-/:']
     for category in ('Pd', 'Po'):
         delimiters.extend(ucharlists[category])
 
     # non-matching, after markup
     closing_delimiters = [r'\\.,;!?']
 
-    return [u''.join(chars) for chars in (openers, closers, delimiters,
-                                            closing_delimiters)]
+    return [''.join(chars) for chars in (openers, closers, delimiters,
+                                         closing_delimiters)]
+
 
 def separate_wide_chars(s):
     """Return (s1,s2) with characters above 0xFFFF in s2"""
@@ -263,45 +254,46 @@ def separate_wide_chars(s):
     l2 = [ch for ch in s if ord(ch) > maxunicode_narrow]
     return ''.join(l1), ''.join(l2)
 
+
 def mark_intervals(s):
     """Return s with shortcut notation for runs of consecutive characters
 
     Sort string and replace 'cdef' by 'c-f' and similar.
     """
-    l =[]
-    s = sorted([ord(ch) for ch in s])
+    lst = []
+    s = sorted(ord(ch) for ch in s)
     for n in s:
         try:
-            if l[-1][-1]+1 == n:
-                l[-1].append(n)
+            if lst[-1][-1] + 1 == n:
+                lst[-1].append(n)
             else:
-                l.append([n])
+                lst.append([n])
         except IndexError:
-            l.append([n])
+            lst.append([n])
 
-    l2 = []
-    for i in l:
-        i = [unichr(n) for n in i]
+    lst2 = []
+    for i in lst:
+        i = [chr(n) for n in i]
         if len(i) > 2:
-            i = i[0], u'-', i[-1]
-        l2.extend(i)
+            i = i[0], '-', i[-1]
+        lst2.extend(i)
 
-    return ''.join(l2)
+    return ''.join(lst2)
 
-def wrap_string(s, startstring= "(u'",
-                    endstring = "')", wrap=67):
+
+def wrap_string(s, startstring="('", endstring="')", wrap=67):
     """Line-wrap a unicode string literal definition."""
     c = len(startstring)
-    contstring = "'\n" + ' ' * (len(startstring)-2) + "u'"
-    l = [startstring]
+    contstring = "'\n" + ' '*(len(startstring)-2) + "'"
+    lst = [startstring]
     for ch in s.replace("'", r"\'"):
         c += 1
         if ch == '\\' and c > wrap:
             c = len(startstring)
             ch = contstring + ch
-        l.append(ch)
-    l.append(endstring)
-    return ''.join(l)
+        lst.append(ch)
+    lst.append(endstring)
+    return ''.join(lst)
 
 
 def print_differences(old, new, name):
@@ -310,13 +302,14 @@ def print_differences(old, new, name):
         print('new %s:' % name)
         for c in new:
             if c not in old:
-                print('  %04x'%ord(c), unicodedata.name(c))
+                print('  %04x'%ord(c), c, unicodedata.name(c))
         print('removed %s:' % name)
         for c in old:
             if c not in new:
                 print('  %04x'%ord(c), unicodedata.name(c))
     else:
         print('%s unchanged' % name)
+
 
 # Output
 # ------
@@ -354,20 +347,16 @@ if __name__ == '__main__':
 
 # Test: compare module content with re-generated definitions
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# ::
-
-    if args.test:
-
+#
 # Import the punctuation_chars module from the source
 # or Py3k build path for local Python modules::
 
-        if sys.version_info < (3, 0):
-            sys.path.insert(0, '../../docutils')
-        else:
-            sys.path.insert(0, '../../build/lib')
+    if args.test:
 
-        from docutils.utils.punctuation_chars import (openers, closers,
-                                          delimiters, closing_delimiters)
+        sys.path.insert(0, '../../docutils')
+
+        from docutils.utils.punctuation_chars import (
+                 openers, closers, delimiters, closing_delimiters)
 
         print('Check for differences between the current `punctuation_chars`'
               ' module\n and a regeneration based on Unicode version %s:'
@@ -375,16 +364,10 @@ if __name__ == '__main__':
 
         print_differences(openers, o, 'openers')
         if o_wide:
-            if sys.version_info < (3, 0):
-                print('+ openers-wide = ur"""%s"""' % o_wide.encode('utf8'))
-            else:
-                print('+ openers-wide = r"""%s"""' % o_wide.encode('utf8'))
+            print('+ openers-wide = r"""%s"""' % o_wide.encode('utf-8'))
         print_differences(closers, c, 'closers')
         if c_wide:
-            if sys.version_info < (3, 0):
-                print('+ closers-wide = ur"""%s"""' % c_wide.encode('utf8'))
-            else:
-                print('+ closers-wide = r"""%s"""' % c_wide.encode('utf8'))
+            print('+ closers-wide = r"""%s"""' % c_wide.encode('utf-8'))
 
         print_differences(delimiters, d + d_wide, 'delimiters')
         print_differences(closing_delimiters, cd, 'closing_delimiters')
@@ -400,17 +383,17 @@ if __name__ == '__main__':
 # Replacements::
 
     substitutions = {
-        'python_version': '.'.join(str(s) for s in sys.version_info[:3]),
+        'python_version': sys.version.split()[0],
         'unidata_version': unicodedata.unidata_version,
         'openers': wrap_string(o.encode('unicode-escape').decode(),
-                               startstring="openers = (u'"),
+                               startstring="openers = ('"),
         'closers': wrap_string(c.encode('unicode-escape').decode(),
-                               startstring="closers = (u'"),
+                               startstring="closers = ('"),
         'delimiters': wrap_string(d.encode('unicode-escape').decode(),
-                                  startstring="delimiters = (u'"),
+                                  startstring="delimiters = ('"),
         'delimiters_wide': wrap_string(
                             d_wide.encode('unicode-escape').decode(),
-                            startstring="    delimiters += (u'")
+                            startstring="    delimiters += ('")
         }
 
-    print(module_template % substitutions)
+    print(module_template % substitutions, end='')

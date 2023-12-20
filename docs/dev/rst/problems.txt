@@ -1,10 +1,12 @@
+.. include:: ../../header2.txt
+
 ==============================
  Problems With StructuredText
 ==============================
 :Author: David Goodger
 :Contact: docutils-develop@lists.sourceforge.net
-:Revision: $Revision: 7302 $
-:Date: $Date: 2012-01-03 20:23:53 +0100 (Di, 03. Jän 2012) $
+:Revision: $Revision: 9051 $
+:Date: $Date: 2022-04-02 23:59:06 +0200 (Sa, 02. Apr 2022) $
 :Copyright: This document has been placed in the public domain.
 
 There are several problems, unresolved issues, and areas of
@@ -847,10 +849,9 @@ reStructuredText's syntax (#4) is definitely the most readable.  The
 text is separated from the link URI and the footnote, resulting in
 cleanly readable text.
 
-.. _StructuredText:
-   http://www.zope.org/DevHome/Members/jim/StructuredTextWiki/FrontPage
-.. _Setext: http://docutils.sourceforge.net/mirror/setext.html
-.. _reStructuredText: http://docutils.sourceforge.net/rst.html
+.. _StructuredText: https://zopestructuredtext.readthedocs.org/
+.. _Setext: https://docutils.sourceforge.io/mirror/setext.html
+.. _reStructuredText: https://docutils.sourceforge.io/rst.html
 .. _detailed description:
    http://homepage.ntlworld.com/tibsnjoan/docutils/STNG-format.html
 .. _STMinus: http://www.cis.upenn.edu/~edloper/pydoc/stminus.html

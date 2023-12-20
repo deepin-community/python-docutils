@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf8 -*-
 # :Copyright: © 2020 Günter Milde.
 # :License: Released under the terms of the `2-Clause BSD license`_, in short:
 #
@@ -14,10 +13,8 @@ Test for targets in CommonMark parsers.
 Cf. the `CommonMark Specification <https://spec.commonmark.org/>`__
 """
 
-from __future__ import absolute_import
-
 if __name__ == '__main__':
-    import __init__
+    import __init__  # noqa: F401
 from test_parsers import DocutilsTestSupport
 
 
@@ -25,6 +22,7 @@ def suite():
     s = DocutilsTestSupport.RecommonmarkParserTestSuite()
     s.generateTests(totest)
     return s
+
 
 totest = {}
 
@@ -38,7 +36,7 @@ External hyperlink [target]s:
 <document source="test data">
     <paragraph>
         External hyperlink \n\
-        <reference name="target" refuri="http://www.python.org/">
+        <reference refuri="http://www.python.org/">
             target
         s:
 """],
@@ -67,7 +65,7 @@ Duplicate external [targets] (different URIs):
 <document source="test data">
     <paragraph>
         Duplicate external \n\
-        <reference name="targets" refuri="first wins">
+        <reference name="targets" refuri="first%20wins">
             targets
          (different URIs):
 """],
@@ -107,10 +105,10 @@ Paragraph.
             Title
         <paragraph>
             Paragraph.
-    <section dupnames="title" ids="id1">
+    <section dupnames="title" ids="title-1">
         <title>
             Title
-        <system_message backrefs="id1" level="1" line="8" source="test data" type="INFO">
+        <system_message backrefs="title-1" level="1" line="8" source="test data" type="INFO">
             <paragraph>
                 Duplicate implicit target name: "title".
         <paragraph>

@@ -1,6 +1,6 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
-# $Id: test_buildhtml.py 8500 2020-03-03 20:53:38Z milde $
+# $Id: test_buildhtml.py 9072 2022-06-15 11:31:09Z milde $
 # Author: engelbert gruber <grubert@users.sourceforge.net>
 # Copyright: This module has been placed in the public domain.
 
@@ -33,6 +33,7 @@ buildhtml_path = os.path.abspath(os.path.join(
                     os.path.dirname(__file__) or os.curdir,
                     '..', 'buildhtml.py'))
 
+
 def process_and_return_filelist(options):
     dirs = []
     files = []
@@ -54,39 +55,40 @@ def process_and_return_filelist(options):
     cin.close()
     cout.close()
     p.wait()
-    return (dirs, files)
+    return dirs, files
+
 
 class BuildHtmlTests(unittest.TestCase):
-    tree = ( "_tmp_test_tree",
-             "_tmp_test_tree/one.txt",
-             "_tmp_test_tree/two.txt",
-             "_tmp_test_tree/dir1",
-             "_tmp_test_tree/dir1/one.txt",
-             "_tmp_test_tree/dir1/two.txt",
-             "_tmp_test_tree/dir2",
-             "_tmp_test_tree/dir2/one.txt",
-             "_tmp_test_tree/dir2/two.txt",
-             "_tmp_test_tree/dir2/sub",
-             "_tmp_test_tree/dir2/sub/one.txt",
-             "_tmp_test_tree/dir2/sub/two.txt",
-             )
+    tree = ("_tmp_test_tree",
+            "_tmp_test_tree/one.txt",
+            "_tmp_test_tree/two.txt",
+            "_tmp_test_tree/dir1",
+            "_tmp_test_tree/dir1/one.txt",
+            "_tmp_test_tree/dir1/two.txt",
+            "_tmp_test_tree/dir2",
+            "_tmp_test_tree/dir2/one.txt",
+            "_tmp_test_tree/dir2/two.txt",
+            "_tmp_test_tree/dir2/sub",
+            "_tmp_test_tree/dir2/sub/one.txt",
+            "_tmp_test_tree/dir2/sub/two.txt",
+            )
 
     def setUp(self):
         self.root = tempfile.mkdtemp()
 
         for s in self.tree:
             s = os.path.join(self.root, s)
-            if not "." in s:
+            if "." not in s:
                 os.mkdir(s)
             else:
-                fd_s = open(s, "w")
+                fd_s = open(s, "w", encoding='utf-8')
                 fd_s.write("dummy")
                 fd_s.close()
 
     def tearDown(self):
         for i in range(len(self.tree) - 1, -1, -1):
             s = os.path.join(self.root, self.tree[i])
-            if not "." in s:
+            if "." not in s:
                 os.rmdir(s)
             else:
                 os.remove(s)
@@ -94,14 +96,15 @@ class BuildHtmlTests(unittest.TestCase):
 
     def test_1(self):
         opts = ["--dry-run", self.root]
-        dirs, files = process_and_return_filelist( opts )
+        dirs, files = process_and_return_filelist(opts)
         self.assertEqual(files.count("one.txt"), 4)
 
     def test_local(self):
         opts = ["--dry-run", "--local", self.root]
-        dirs, files = process_and_return_filelist( opts )
-        self.assertEqual( len(dirs), 1)
-        self.assertEqual( files, [])
+        dirs, files = process_and_return_filelist(opts)
+        self.assertEqual(len(dirs), 1)
+        self.assertEqual(files, [])
+
 
 if __name__ == '__main__':
     unittest.main()
