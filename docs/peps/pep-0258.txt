@@ -1,7 +1,7 @@
 PEP: 258
 Title: Docutils Design Specification
-Version: $Revision: 8644 $
-Last-Modified: $Date: 2021-03-26 14:51:36 +0100 (Fr, 26. Mär 2021) $
+Version: $Revision: 8995 $
+Last-Modified: $Date: 2022-01-29 23:26:10 +0100 (Sa, 29. Jän 2022) $
 Author: David Goodger <goodger@python.org>
 Discussions-To: <doc-sig@python.org>
 Status: Rejected
@@ -497,7 +497,7 @@ The ``tools/`` directory contains several front ends for common
 Docutils processing.  See `Docutils Front-End Tools`_ for details.
 
 .. _Docutils Front-End Tools:
-   http://docutils.sourceforge.net/docs/user/tools.html
+   https://docutils.sourceforge.io/docs/user/tools.html
 
 
 Document Tree
@@ -836,17 +836,17 @@ Example::
    This would break "``from __future__ import``" statements introduced
    in Python 2.1 for multiple module docstrings (main docstring plus
    additional docstring(s)).  The Python Reference Manual specifies:
-   
+
        A future statement must appear near the top of the module.  The
        only lines that can appear before a future statement are:
-   
+
        * the module docstring (if any),
        * comments,
        * blank lines, and
        * other future statements.
-   
+
    Resolution?
-   
+
    1. Should we search for docstrings after a ``__future__``
       statement?  Very ugly.
 
@@ -978,13 +978,13 @@ stylist code will lower the barrier considerably.
    (http://www.python.org/peps/pep-0216.html)
 
 .. _docutils.dtd:
-   http://docutils.sourceforge.net/docs/ref/docutils.dtd
+   https://docutils.sourceforge.io/docs/ref/docutils.dtd
 
 .. _soextbl.dtd:
-   http://docutils.sourceforge.net/docs/ref/soextblx.dtd
+   https://docutils.sourceforge.io/docs/ref/soextblx.dtd
 
 .. _The Docutils Document Tree:
-   http://docutils.sourceforge.net/docs/ref/doctree.html
+   https://docutils.sourceforge.io/docs/ref/doctree.html
 
 .. _VMS error condition severity levels:
    http://www.openvms.compaq.com:8000/73final/5841/841pro_027.html
@@ -993,7 +993,7 @@ stylist code will lower the barrier considerably.
 .. _log4j project: http://logging.apache.org/log4j/docs/index.html
 
 .. _Docutils Python Source DTD:
-   http://docutils.sourceforge.net/docs/dev/pysource.dtd
+   https://docutils.sourceforge.io/docs/dev/pysource.dtd
 
 .. _ISO 639: http://www.loc.gov/standards/iso639-2/englangn.html
 
@@ -1006,7 +1006,7 @@ stylist code will lower the barrier considerably.
 ==================
 
 A SourceForge project has been set up for this work at
-http://docutils.sourceforge.net/.
+https://docutils.sourceforge.io/.
 
 
 ===========

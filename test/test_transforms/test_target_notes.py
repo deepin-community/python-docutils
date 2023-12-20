@@ -1,6 +1,6 @@
-#! /usr/bin/env python
+#! /usr/bin/env python3
 
-# $Id: test_target_notes.py 8481 2020-01-31 08:17:24Z milde $
+# $Id: test_target_notes.py 9277 2022-11-26 23:15:13Z milde $
 # Author: David Goodger <goodger@python.org>
 # Copyright: This module has been placed in the public domain.
 
@@ -8,22 +8,43 @@
 Tests for `docutils.transforms.references.TargetNotes` (via
 `docutils.transforms.universal.LastReaderPending`).
 """
-from __future__ import absolute_import
+
+from pathlib import Path
+import sys
+import unittest
 
 if __name__ == '__main__':
-    import __init__
-from test_transforms import DocutilsTestSupport
-from docutils.transforms.references import PropagateTargets, \
-     AnonymousHyperlinks, IndirectHyperlinks, ExternalTargets, \
-     InternalTargets, DanglingReferences, Footnotes
+    # prepend the "docutils root" to the Python library path
+    # so we import the local `docutils` package.
+    sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+
+from docutils.frontend import get_default_settings
 from docutils.parsers.rst import Parser
+from docutils.transforms.references import (PropagateTargets, AnonymousHyperlinks,
+                                            IndirectHyperlinks, ExternalTargets,
+                                            InternalTargets, DanglingReferences)
+from docutils.transforms.universal import TestMessages
+from docutils.utils import new_document
 
 
-def suite():
-    parser = Parser()
-    s = DocutilsTestSupport.TransformTestSuite(parser)
-    s.generateTests(totest)
-    return s
+class TransformTestCase(unittest.TestCase):
+    def test_transforms(self):
+        parser = Parser()
+        settings = get_default_settings(Parser)
+        settings.warning_stream = ''
+        for name, (transforms, cases) in totest.items():
+            for casenum, (case_input, case_expected) in enumerate(cases):
+                with self.subTest(id=f'totest[{name!r}][{casenum}]'):
+                    document = new_document('test data', settings.copy())
+                    parser.parse(case_input, document)
+                    # Don't do a ``populate_from_components()`` because that
+                    # would enable the Transformer's default transforms.
+                    document.transformer.add_transforms(transforms)
+                    document.transformer.add_transform(TestMessages)
+                    document.transformer.apply_transforms()
+                    output = document.pformat()
+                    self.assertEqual(output, case_expected)
+
 
 totest = {}
 
@@ -47,9 +68,9 @@ A reference to a target_.
         <reference name="target" refuri="http://example.org">
             target
          \n\
-        <footnote_reference auto="1" ids="id2" refid="id1">
+        <footnote_reference auto="1" ids="footnote-reference-1" refid="footnote-1">
         .
-    <footnote auto="1" ids="id1" names="TARGET_NOTE:\\ id1">
+    <footnote auto="1" ids="footnote-1" names="TARGET_NOTE:\\ footnote-1">
         <paragraph>
             <reference refuri="http://example.org">
                 http://example.org
@@ -70,9 +91,9 @@ A reference to a target_.
             target
         <inline classes="custom">
              \n\
-        <footnote_reference auto="1" classes="custom" ids="id2" refid="id1">
+        <footnote_reference auto="1" classes="custom" ids="footnote-reference-1" refid="footnote-1">
         .
-    <footnote auto="1" ids="id1" names="TARGET_NOTE:\\ id1">
+    <footnote auto="1" ids="footnote-1" names="TARGET_NOTE:\\ footnote-1">
         <paragraph>
             <reference refuri="http://example.org">
                 http://example.org
@@ -81,5 +102,4 @@ A reference to a target_.
 
 
 if __name__ == '__main__':
-    import unittest
-    unittest.main(defaultTest='suite')
+    unittest.main()

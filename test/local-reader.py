@@ -1,5 +1,4 @@
-# -*- coding: utf-8 -*-
-# $Id: local-reader.py 7504 2012-08-27 07:55:20Z grubert $
+# $Id: local-reader.py 9037 2022-03-05 23:31:10Z milde $
 # Authors: Engelbert Gruber <grubert@users.sourceforge.net>
 #          Toshio Kuratomi <toshio@fedoraproject.org>
 # Copyright: This module is put into the public domain.
@@ -8,8 +7,8 @@
 mini-reader to test get_reader_class with local reader
 """
 
-import docutils
 from docutils import readers
+
 
 class Reader(readers.Reader):
 

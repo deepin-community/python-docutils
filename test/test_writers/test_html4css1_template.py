@@ -1,35 +1,57 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
-# $Id: test_html4css1_template.py 8481 2020-01-31 08:17:24Z milde $
+# $Id: test_html4css1_template.py 9369 2023-05-02 23:04:27Z milde $
 # Author: David Goodger <goodger@python.org>
 # Copyright: This module has been placed in the public domain.
 
 """
 Tests for the HTML writer.
 """
-from __future__ import absolute_import
 
+from pathlib import Path
 import os
 import platform
+import sys
+import unittest
 
 if __name__ == '__main__':
-    import __init__
-from test_writers import DocutilsTestSupport
+    # prepend the "docutils root" to the Python library path
+    # so we import the local `docutils` package.
+    sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+
+import docutils
+from docutils.core import publish_string
+
+# TEST_ROOT is ./test/ from the docutils root
+TEST_ROOT = os.path.abspath(os.path.join(__file__, '..', '..'))
 
 
-def suite():
-    settings = {'template': os.path.join(DocutilsTestSupport.testroot,
-                                         'data', 'full-template.txt'),
-                'stylesheet_path': '/test.css',
-                'embed_stylesheet': 0,}
-    s = DocutilsTestSupport.PublishTestSuite('html', suite_settings=settings)
-    s.generateTests(totest)
-    return s
+class WriterPublishTestCase(unittest.TestCase):
+    # maxDiff = None
+    def test_publish(self):
+        writer_name = 'html4'
+        template_path = os.path.join(TEST_ROOT, 'data', 'full-template.txt')
+        for name, cases in totest.items():
+            for casenum, (case_input, case_expected) in enumerate(cases):
+                with self.subTest(id=f'totest[{name!r}][{casenum}]'):
+                    output = publish_string(
+                        source=case_input,
+                        writer_name=writer_name,
+                        settings_overrides={
+                            '_disable_config': True,
+                            'strict_visitor': True,
+                            'template': template_path,
+                            'stylesheet_path': '/test.css',
+                            'embed_stylesheet': False,
+                        }).decode()
+                    self.assertEqual(output, case_expected)
+
 
 if platform.system() == "Windows":
-    drive_prefix = "C:"
+    drive_prefix = os.path.splitdrive(os.getcwd())[0]
 else:
     drive_prefix = ""
+
 
 totest = {}
 
@@ -51,8 +73,8 @@ Section
 
 Some text.
 """,
-r'''head_prefix = """\
-<?xml version="1.0" encoding="utf-8" ?>
+fr'''head_prefix = """\
+<?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>"""
@@ -60,13 +82,13 @@ r'''head_prefix = """\
 
 head = """\
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-<meta name="generator" content="Docutils %(version)s: http://docutils.sourceforge.net/" />
-<title>Document Title</title>
-<meta name="author" content="Me" />"""
+<meta name="generator" content="Docutils {docutils.__version__}: https://docutils.sourceforge.io/" />
+<meta name="author" content="Me" />
+<title>Document Title</title>"""
 
 
 stylesheet = """\
-<link rel="stylesheet" href="%(drive)s/test.css" type="text/css" />"""
+<link rel="stylesheet" href="{drive_prefix}/test.css" type="text/css" />"""
 
 
 body_prefix = """\
@@ -109,7 +131,7 @@ footer text
 
 
 head_prefix = """\
-<?xml version="1.0" encoding="utf-8" ?>
+<?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>"""
@@ -117,13 +139,13 @@ head_prefix = """\
 
 head = """\
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-<meta name="generator" content="Docutils %(version)s: http://docutils.sourceforge.net/" />
-<title>Document Title</title>
-<meta name="author" content="Me" />"""
+<meta name="generator" content="Docutils {docutils.__version__}: https://docutils.sourceforge.io/" />
+<meta name="author" content="Me" />
+<title>Document Title</title>"""
 
 
 stylesheet = """\
-<link rel="stylesheet" href="%(drive)s/test.css" type="text/css" />"""
+<link rel="stylesheet" href="{drive_prefix}/test.css" type="text/css" />"""
 
 
 body_prefix = """\
@@ -186,7 +208,7 @@ footer text
 
 meta = """\
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-<meta name="generator" content="Docutils %(version)s: http://docutils.sourceforge.net/" />
+<meta name="generator" content="Docutils {docutils.__version__}: https://docutils.sourceforge.io/" />
 <meta name="author" content="Me" />"""
 
 
@@ -198,15 +220,15 @@ fragment = """\
 
 
 html_prolog = """\
-<?xml version="1.0" encoding="%%s" ?>
+<?xml version="1.0" encoding="%s"?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">"""
 
 
 html_head = """\
-<meta http-equiv="Content-Type" content="text/html; charset=%%s" />
-<meta name="generator" content="Docutils %(version)s: http://docutils.sourceforge.net/" />
-<title>Document Title</title>
-<meta name="author" content="Me" />"""
+<meta http-equiv="Content-Type" content="text/html; charset=%s" />
+<meta name="generator" content="Docutils {docutils.__version__}: https://docutils.sourceforge.io/" />
+<meta name="author" content="Me" />
+<title>Document Title</title>"""
 
 
 html_title = """\
@@ -238,11 +260,8 @@ html_body = """\
 <hr class="footer" />
 footer text
 </div>"""
-''' % {'version': DocutilsTestSupport.docutils.__version__,
-        'drive': drive_prefix,
-    }]
+''']
 ]
 
 if __name__ == '__main__':
-    import unittest
-    unittest.main(defaultTest='suite')
+    unittest.main()

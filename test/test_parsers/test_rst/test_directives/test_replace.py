@@ -1,23 +1,40 @@
-#! /usr/bin/env python
+#! /usr/bin/env python3
 
-# $Id: test_replace.py 8481 2020-01-31 08:17:24Z milde $
+# $Id: test_replace.py 9277 2022-11-26 23:15:13Z milde $
 # Author: David Goodger <goodger@python.org>
 # Copyright: This module has been placed in the public domain.
 
 """
 Tests for misc.py "replace" directive.
 """
-from __future__ import absolute_import
+
+from pathlib import Path
+import sys
+import unittest
 
 if __name__ == '__main__':
-    import __init__
-from test_parsers import DocutilsTestSupport
+    # prepend the "docutils root" to the Python library path
+    # so we import the local `docutils` package.
+    sys.path.insert(0, str(Path(__file__).resolve().parents[4]))
+
+from docutils.frontend import get_default_settings
+from docutils.parsers.rst import Parser
+from docutils.utils import new_document
 
 
-def suite():
-    s = DocutilsTestSupport.ParserTestSuite()
-    s.generateTests(totest)
-    return s
+class ParserTestCase(unittest.TestCase):
+    def test_parser(self):
+        parser = Parser()
+        settings = get_default_settings(Parser)
+        settings.warning_stream = ''
+        for name, cases in totest.items():
+            for casenum, (case_input, case_expected) in enumerate(cases):
+                with self.subTest(id=f'totest[{name!r}][{casenum}]'):
+                    document = new_document('test data', settings.copy())
+                    parser.parse(case_input, document)
+                    output = document.pformat()
+                    self.assertEqual(output, case_expected)
+
 
 totest = {}
 
@@ -55,7 +72,7 @@ Test the |name| directive.
             Substitution definition "name" empty or invalid.
         <literal_block xml:space="preserve">
             .. |name| replace:: paragraph 1
-            
+            \n\
                                 paragraph 2
 """],
 ["""\
@@ -84,13 +101,13 @@ I recommend you try |Python|_.
 """\
 <document source="test data">
     <substitution_definition names="Python">
-        Python, 
+        Python, \n\
         <emphasis>
             the
          best language around
     <target ids="python" names="python" refuri="http://www.python.org/">
     <paragraph>
-        I recommend you try 
+        I recommend you try \n\
         <reference refname="python">
             <substitution_reference refname="Python">
                 Python
@@ -101,20 +118,20 @@ I recommend you try |Python|_.
 """,
 """\
 <document source="test data">
-    <system_message ids="id1" level="2" line="1" source="test data" type="WARNING">
+    <system_message ids="system-message-1" level="2" line="1" source="test data" type="WARNING">
         <paragraph>
             Inline emphasis start-string without end-string.
-    <system_message ids="id3" level="2" line="1" source="test data" type="WARNING">
+    <system_message ids="system-message-2" level="2" line="1" source="test data" type="WARNING">
         <paragraph>
             Inline strong start-string without end-string.
-    <system_message ids="id5" level="2" line="1" source="test data" type="WARNING">
+    <system_message ids="system-message-3" level="2" line="1" source="test data" type="WARNING">
         <paragraph>
             Inline literal start-string without end-string.
     <system_message level="3" line="1" source="test data" type="ERROR">
         <paragraph>
             Substitution definition contains illegal element <problematic>:
         <literal_block xml:space="preserve">
-            <problematic ids="id2" refid="id1">
+            <problematic ids="problematic-1" refid="system-message-1">
                 *
         <literal_block xml:space="preserve">
             .. |name| replace::  *error in **inline ``markup
@@ -134,5 +151,4 @@ I recommend you try |Python|_.
 
 
 if __name__ == '__main__':
-    import unittest
-    unittest.main(defaultTest='suite')
+    unittest.main()

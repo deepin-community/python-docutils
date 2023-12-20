@@ -1,6 +1,6 @@
-#! /usr/bin/env python
+#! /usr/bin/env python3
 
-# $Id: test_get_reader_class.py 8481 2020-01-31 08:17:24Z milde $
+# $Id: test_get_reader_class.py 9277 2022-11-26 23:15:13Z milde $
 # Author: grubert abadger1999
 # Maintainer: docutils-develop@lists.sourceforge.net
 # Copyright: This module has been placed in the public domain.
@@ -8,28 +8,37 @@
 """
 test get_reader_class
 """
-from __future__ import absolute_import
 
-if __name__ == '__main__':
-    import __init__
-from test_readers import DocutilsTestSupport
-from docutils.readers import get_reader_class
+from pathlib import Path
+import sys
+import unittest
+
+# Prepend the "docutils root" to the Python library path
+# so we import the local `docutils` and `test` packages.
+# ensure `test` package can be loaded also if not running as __main__
+# (required by ``python -m unittest``
+DOCUTILS_ROOT = Path(__file__).resolve().parents[2]
+if str(DOCUTILS_ROOT) not in sys.path:
+    sys.path.insert(0, str(DOCUTILS_ROOT))
+
+from docutils.readers import get_reader_class  # noqa: E402
 
 
-class GetReaderClassTestCase(DocutilsTestSupport.StandardTestCase):
+class GetReaderClassTestCase(unittest.TestCase):
 
     def test_registered_reader(self):
-        rdr = get_reader_class('pep')
+        get_reader_class('pep')
         # raises ImportError on failure
 
     def test_bogus_reader(self):
-        self.assertRaises(ImportError,
-                          get_reader_class, 'nope')
+        with self.assertRaises(ImportError):
+            get_reader_class('nope')
 
     def test_local_reader(self):
-        # requires local-reader.py in test directory (testroot)
-        wr = get_reader_class('local-reader')
+        # requires local-reader.py in `test` package
+        get_reader_class('test.local-reader')
+        # raises ImportError on failure
+
 
 if __name__ == '__main__':
-    import unittest
     unittest.main()

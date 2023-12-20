@@ -1,26 +1,45 @@
-#! /usr/bin/env python
+#! /usr/bin/env python3
 
-# $Id: test_code_none.py 8481 2020-01-31 08:17:24Z milde $
+# $Id: test_code_none.py 9277 2022-11-26 23:15:13Z milde $
 # Author: Guenter Milde
 # Copyright: This module has been placed in the public domain.
 
 """
 Test the 'code' directive in body.py with syntax_highlight = 'none'.
 """
-from __future__ import absolute_import
+
+from pathlib import Path
+import sys
+import unittest
 
 if __name__ == '__main__':
-    import __init__
-from test_parsers import DocutilsTestSupport
+    # prepend the "docutils root" to the Python library path
+    # so we import the local `docutils` package.
+    sys.path.insert(0, str(Path(__file__).resolve().parents[4]))
 
-def suite():
-    s = DocutilsTestSupport.ParserTestSuite(suite_settings={'syntax_highlight':'none'})
-    s.generateTests(totest)
-    return s
+from docutils.frontend import get_default_settings
+from docutils.parsers.rst import Parser
+from docutils.utils import new_document
+
+
+class ParserTestCase(unittest.TestCase):
+    def test_parser(self):
+        parser = Parser()
+        settings = get_default_settings(Parser)
+        settings.warning_stream = ''
+        settings.syntax_highlight = 'none'
+        for name, cases in totest.items():
+            for casenum, (case_input, case_expected) in enumerate(cases):
+                with self.subTest(id=f'totest[{name!r}][{casenum}]'):
+                    document = new_document('test data', settings.copy())
+                    parser.parse(case_input, document)
+                    output = document.pformat()
+                    self.assertEqual(output, case_expected)
+
 
 totest = {}
 
-totest['code-parsing-none'] = [
+totest['code_parsing_none'] = [
 ["""\
 .. code::
 
@@ -78,5 +97,4 @@ totest['code-parsing-none'] = [
 
 
 if __name__ == '__main__':
-    import unittest
-    unittest.main(defaultTest='suite')
+    unittest.main()

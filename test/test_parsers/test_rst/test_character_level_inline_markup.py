@@ -1,7 +1,5 @@
-#! /usr/bin/env python
-# -*- coding: utf-8 -*-
-
-# $Id: test_character_level_inline_markup.py 8481 2020-01-31 08:17:24Z milde $
+#! /usr/bin/env python3
+# $Id: test_character_level_inline_markup.py 9277 2022-11-26 23:15:13Z milde $
 # Author: David Goodger <goodger@python.org>
 # Copyright: This module has been placed in the public domain.
 
@@ -11,16 +9,35 @@ with the "character-level-inline-markup" setting.
 
 Experimental.
 """
-from __future__ import absolute_import
+
+from pathlib import Path
+import sys
+import unittest
 
 if __name__ == '__main__':
-    import __init__
-from test_parsers import DocutilsTestSupport
+    # prepend the "docutils root" to the Python library path
+    # so we import the local `docutils` package.
+    sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 
-def suite():
-    s = DocutilsTestSupport.ParserTestSuite(suite_settings={'character_level_inline_markup': True})
-    s.generateTests(totest)
-    return s
+from docutils.frontend import get_default_settings
+from docutils.parsers.rst import Parser
+from docutils.utils import new_document
+
+
+class ParserTestCase(unittest.TestCase):
+    def test_parser(self):
+        parser = Parser()
+        settings = get_default_settings(Parser)
+        settings.warning_stream = ''
+        settings.character_level_inline_markup = True
+        for name, cases in totest.items():
+            for casenum, (case_input, case_expected) in enumerate(cases):
+                with self.subTest(id=f'totest[{name!r}][{casenum}]'):
+                    document = new_document('test data', settings.copy())
+                    parser.parse(case_input, document)
+                    output = document.pformat()
+                    self.assertEqual(output, case_expected)
+
 
 totest = {}
 
@@ -72,13 +89,13 @@ Also *this**.
         } (open/close pairs)
         <emphasis>
             emphasis
-        ., 
+        ., \n\
         <emphasis>
             emphasis
-        ,, 
+        ,, \n\
         <emphasis>
             emphasis
-        !, and 
+        !, and \n\
         <emphasis>
             emphasis
         (closing delimiters),
@@ -108,26 +125,26 @@ Also *this**.
         but not
         (*), [*], '*' or '"*"' ("quoted" start-string),
         *args or * (escaped; whitespace behind start-string),
-        or 
+        or \n\
         <emphasis>
             the* *stars* *inside
          (escaped; whitespace before end-string).
     <paragraph>
         However, '
-        <problematic ids="id2" refid="id1">
+        <problematic ids="problematic-1" refid="system-message-1">
             *
         args' triggers a warning.
-    <system_message backrefs="id2" ids="id1" level="2" line="15" source="test data" type="WARNING">
+    <system_message backrefs="problematic-1" ids="system-message-1" level="2" line="15" source="test data" type="WARNING">
         <paragraph>
             Inline emphasis start-string without end-string.
     <paragraph>
-        Also 
+        Also \n\
         <emphasis>
             this
-        <problematic ids="id4" refid="id3">
+        <problematic ids="problematic-2" refid="system-message-2">
             *
         .
-    <system_message backrefs="id4" ids="id3" level="2" line="17" source="test data" type="WARNING">
+    <system_message backrefs="problematic-2" ids="system-message-2" level="2" line="17" source="test data" type="WARNING">
         <paragraph>
             Inline emphasis start-string without end-string.
 """],
@@ -186,12 +203,12 @@ require escaping with simple-inline-markup.
         Strong asterisk: \n\
         <strong>
             *
-        
+        \n\
         and
-        strong double asterisk: 
+        strong double asterisk: \n\
         <strong>
             **
-        
+        \n\
         require escaping with simple-inline-markup.
 """],
 ]
@@ -203,7 +220,7 @@ With simple-inline-markup, this is ```interpreted text``` in backquotes!
 """\
 <document source="test data">
     <paragraph>
-        With simple-inline-markup, this is 
+        With simple-inline-markup, this is \n\
         <literal>
             `interpreted text
         ` in backquotes!
@@ -214,10 +231,10 @@ With simple-inline-markup, this is ```interpreted text``` in backquotes!
 """\
 <document source="test data">
     <paragraph>
-        <problematic ids="id2" refid="id1">
+        <problematic ids="problematic-1" refid="system-message-1">
             ``
         literal without closing backquotes
-    <system_message backrefs="id2" ids="id1" level="2" line="1" source="test data" type="WARNING">
+    <system_message backrefs="problematic-1" ids="system-message-1" level="2" line="1" source="test data" type="WARNING">
         <paragraph>
             Inline literal start-string without end-string.
 """],
@@ -269,7 +286,7 @@ beware of _ref_ or __attr__ or object.__attr__
 """],
 ]
 
-totest['embedded_URIs'] = [
+totest['embedded_uris'] = [
 [r"""
 Escape chars in URIs:
 
@@ -308,7 +325,7 @@ underscore.
     <paragraph>
         This isn't a _target; targets require backquotes.
     <paragraph>
-        With simple-inline-markup, 
+        With simple-inline-markup, \n\
         <target ids="this" names="this">
             this
         _ is a a target followed by an
@@ -328,20 +345,20 @@ Adjacent footnote refs are possible with simple-inline-markup:
 <document source="test data">
     <paragraph>
         Adjacent footnote refs are possible with simple-inline-markup:
-        <footnote_reference auto="*" ids="id1">
-        <footnote_reference auto="1" ids="id2" refname="label">
-         
-        <footnote_reference auto="1" ids="id3">
-        <footnote_reference ids="id4" refname="2">
+        <footnote_reference auto="*" ids="footnote-reference-1">
+        <footnote_reference auto="1" ids="footnote-reference-2" refname="label">
+         \n\
+        <footnote_reference auto="1" ids="footnote-reference-3">
+        <footnote_reference ids="footnote-reference-4" refname="2">
             2
-         
-        <footnote_reference ids="id5" refname="1">
+         \n\
+        <footnote_reference ids="footnote-reference-5" refname="1">
             1
-        <footnote_reference auto="*" ids="id6">
-    <footnote auto="1" ids="id7">
+        <footnote_reference auto="*" ids="footnote-reference-6">
+    <footnote auto="1" ids="footnote-1">
         <paragraph>
             test1
-    <footnote auto="*" ids="id8">
+    <footnote auto="*" ids="footnote-2">
         <paragraph>
             test2
 """],
@@ -356,9 +373,9 @@ Adjacent citation refs are possible with simple-inline-markup:
 <document source="test data">
     <paragraph>
         Adjacent citation refs are possible with simple-inline-markup:
-        <citation_reference ids="id1" refname="citation">
+        <citation_reference ids="citation-reference-1" refname="citation">
             citation
-        <citation_reference ids="id2" refname="cit1">
+        <citation_reference ids="citation-reference-2" refname="cit1">
             CIT1
 """],
 ]
@@ -399,7 +416,7 @@ http://example.com/rST_for_all.html
     <paragraph>
         <reference refuri="http://example.com/*content">
             http://example.com/*content
-        <problematic ids="id2" refid="id1">
+        <problematic ids="problematic-1" refid="system-message-1">
             *
         /whatever
         <reference refuri="http://example.com/">
@@ -407,13 +424,13 @@ http://example.com/rST_for_all.html
         <reference name="rST_for" refname="rst_for">
             rST_for
         all.html
-    <system_message backrefs="id2" ids="id1" level="2" line="8" source="test data" type="WARNING">
+    <system_message backrefs="problematic-1" ids="system-message-1" level="2" line="8" source="test data" type="WARNING">
         <paragraph>
             Inline emphasis start-string without end-string.
 """],
 ]
 
-totest['markup recognition rules'] = [
+totest['markup_recognition_rules'] = [
 ["""\
 __This__ is an anonymous reference with simple-inline-markup.
 """,
@@ -445,11 +462,11 @@ lines.
         p
         with backslash-escaped whitespace, including newlines.
 """],
-[u"""\
+["""\
 text-*separated*\u2010*by*\u2011*various*\u2012*dashes*\u2013*and*\u2014*hyphens*.
 \u00bf*punctuation*? \u00a1*examples*!\xa0*no-break-space*\xa0.
 """,
-u"""\
+"""\
 <document source="test data">
     <paragraph>
         text-
@@ -483,7 +500,7 @@ u"""\
         \xa0.
 """],
 # Whitespace characters:
-[u"""\
+["""\
 inline markup surrounded by various whitespace characters:
 *newline*
 or *space* or one of
@@ -506,7 +523,7 @@ or *space* or one of
 \u3000*IDEOGRAPHIC SPACE*\u3000,
 \u2028*LINE SEPARATOR*\u2028
 """,
-u"""\
+"""\
 <document source="test data">
     <paragraph>
         inline markup surrounded by various whitespace characters:
@@ -589,7 +606,7 @@ u"""\
         <emphasis>
             LINE SEPARATOR
 """],
-[u"""\
+["""\
 no inline markup due to whitespace inside and behind: *
 newline
 *
@@ -612,7 +629,7 @@ newline
 *\u3000IDEOGRAPHIC SPACE\u3000*
 *\u2028LINE SEPARATOR\u2028*
 """,
-u"""\
+"""\
 <document source="test data">
     <paragraph>
         no inline markup due to whitespace inside and behind: *
@@ -637,9 +654,10 @@ u"""\
         *\u3000IDEOGRAPHIC SPACE\u3000*
         *
         LINE SEPARATOR
-        *"""],
+        *
+"""],
 # « * » ‹ * › « * » ‹ * › « * » ‹ * › French,
-[u"""\
+["""\
 "Quoted" markup start-string (matched openers & closers) -> no markup:
 
 '*' "*" (*) <*> [*] {*}
@@ -657,7 +675,7 @@ Some international quoting styles:
 
 But this is „*’ emphasized »*‹.
 """,
-u"""\
+"""\
 <document source="test data">
     <paragraph>
         "Quoted" markup start-string (matched openers & closers) -> no markup:
@@ -684,5 +702,4 @@ u"""\
 
 
 if __name__ == '__main__':
-    import unittest
-    unittest.main(defaultTest='suite')
+    unittest.main()

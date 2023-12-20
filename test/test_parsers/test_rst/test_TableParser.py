@@ -1,23 +1,54 @@
-#! /usr/bin/env python
-# coding: utf-8
-
-# $Id: test_TableParser.py 8481 2020-01-31 08:17:24Z milde $
+#! /usr/bin/env python3
+# $Id: test_TableParser.py 9277 2022-11-26 23:15:13Z milde $
 # Author: David Goodger <goodger@python.org>
 # Copyright: This module has been placed in the public domain.
 
 """
 Tests for states.py.
 """
-from __future__ import absolute_import
+
+from pathlib import Path
+import sys
+import unittest
 
 if __name__ == '__main__':
-    import __init__
-from test_parsers import DocutilsTestSupport
+    # prepend the "docutils root" to the Python library path
+    # so we import the local `docutils` package.
+    sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 
-def suite():
-    s = DocutilsTestSupport.GridTableParserTestSuite()
-    s.generateTests(totest)
-    return s
+from docutils.parsers.rst import tableparser
+from docutils.statemachine import StringList, string2lines
+
+
+class GridTableParserTestCase(unittest.TestCase):
+    def test_parse_table(self):
+        parser = tableparser.GridTableParser()
+        for name, cases in totest.items():
+            for casenum, case in enumerate(cases):
+                case_input, case_table, case_expected = case
+                lines_input = StringList(string2lines(case_input), 'test data')
+                parser.setup(lines_input)
+                try:
+                    parser.find_head_body_sep()
+                    parser.parse_table()
+                    output = parser.cells
+                except Exception as details:
+                    output = f'{details.__class__.__name__}: {details}'
+                self.assertEqual(output, case_table)
+
+    def test_parse(self):
+        parser = tableparser.GridTableParser()
+        for name, cases in totest.items():
+            for casenum, case in enumerate(cases):
+                case_input, case_table, case_expected = case
+                lines_input = StringList(string2lines(case_input), 'test data')
+                with self.subTest(id=f'totest[{name!r}][{casenum}]'):
+                    try:
+                        output = parser.parse(lines_input)
+                    except Exception as details:
+                        output = f'{details.__class__.__name__}: {details}'
+                    self.assertEqual(output, case_expected)
+
 
 totest = {}
 
@@ -43,17 +74,17 @@ totest['grid_tables'] = [
  [[(0, 0, 1, ['A table with']),
    (0, 0, 1, ['two columns.'])]])],
 # Combining chars in grid tables still fail
-# [u"""\
+# ["""\
 # +--------------+------------------+
 # | A tāble w̅ith | comb̲ining chars. |
 # +--------------+------------------+
 # """,
-# [(0, 0, 2, 15, [u'A table with']),
-#  (0, 15, 2, 30, [u'combining chars.'])],
+# [(0, 0, 2, 15, ['A table with']),
+#  (0, 15, 2, 30, ['combining chars.'])],
 # ([14, 14],
 #  [],
-#  [[(0, 0, 1, [u'A table with']),
-#    (0, 0, 1, [u'combining chars.'])]])],
+#  [[(0, 0, 1, ['A table with']),
+#    (0, 0, 1, ['combining chars.'])]])],
 ["""\
 +--------------+-------------+
 | A table with | two columns |
@@ -217,5 +248,4 @@ totest['grid_tables'] = [
 
 
 if __name__ == '__main__':
-    import unittest
-    unittest.main(defaultTest='suite')
+    unittest.main()

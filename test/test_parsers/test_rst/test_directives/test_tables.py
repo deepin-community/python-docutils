@@ -1,70 +1,171 @@
-#! /usr/bin/env python
+#! /usr/bin/env python3
 
-# $Id: test_tables.py 8497 2020-03-03 20:45:54Z milde $
+# $Id: test_tables.py 9277 2022-11-26 23:15:13Z milde $
 # Author: David Goodger <goodger@python.org>
 # Copyright: This module has been placed in the public domain.
 
 """
 Tests for tables.py directives.
 """
-from __future__ import absolute_import
 
 import os
-import sys
 import csv
 import platform
+from pathlib import Path
+import sys
+import unittest
 
 if __name__ == '__main__':
-    import __init__
-from test_parsers import DocutilsTestSupport
-from docutils.parsers.rst.directives import tables
+    # prepend the "docutils root" to the Python library path
+    # so we import the local `docutils` package.
+    sys.path.insert(0, str(Path(__file__).resolve().parents[4]))
+
+from docutils.frontend import get_default_settings
+from docutils.parsers.rst import Parser
+from docutils.utils import new_document
+
+# TEST_ROOT is ./test/ from the docutils root
+TEST_ROOT = os.path.abspath(os.path.join(__file__, '..', '..', '..', '..'))
 
 
-if sys.version_info >= (3, 0):
-    unicode = str  # noqa
-    unichr = chr  # noqa
+class ParserTestCase(unittest.TestCase):
+    def test_parser(self):
+        parser = Parser()
+        settings = get_default_settings(Parser)
+        settings.warning_stream = ''
+        settings.halt_level = 5
+        for name, cases in totest.items():
+            for casenum, (case_input, case_expected) in enumerate(cases):
+                with self.subTest(id=f'totest[{name!r}][{casenum}]'):
+                    document = new_document('test data', settings.copy())
+                    parser.parse(case_input, document)
+                    output = document.pformat()
+                    self.assertEqual(output, case_expected)
 
 
-def suite():
-    s = DocutilsTestSupport.ParserTestSuite()
-    s.generateTests(totest)
-    return s
-
-mydir = 'test_parsers/test_rst/test_directives/'
+mydir = os.path.join(TEST_ROOT, 'test_parsers/test_rst/test_directives')
 utf_16_csv = os.path.join(mydir, 'utf-16.csv')
-utf_16_csv_rel = DocutilsTestSupport.utils.relative_path(None, utf_16_csv)
 empty_txt = os.path.join(mydir, 'empty.txt')
 
-unichr_exception = DocutilsTestSupport.exception_data(
-    unichr, int("9999999999999", 16))[0]
-if isinstance(unichr_exception, OverflowError):
-    unichr_exception_string = 'code too large (%s)' % unichr_exception
-else:
+try:
+    chr(0x9999999999999)
+except OverflowError as unichr_exception:
+    unichr_exception_string = f'code too large ({unichr_exception})'
+except Exception as unichr_exception:
     unichr_exception_string = str(unichr_exception)
+else:
+    unichr_exception_string = ''
 
-# some error messages changed in Python 3.3, CPython has backported to 2.7.4,
-# PyPy has not
 csv_eod_error_str = 'unexpected end of data'
-if sys.version_info < (2,7,4) or (platform.python_implementation() == 'PyPy'
-                                  and sys.version_info < (3,0)):
-    csv_eod_error_str = 'newline inside string'
 # pypy adds a line number
 if platform.python_implementation() == 'PyPy':
     csv_eod_error_str = 'line 1: ' + csv_eod_error_str
 csv_unknown_url = "'bogus.csv'"
-if sys.version_info < (3, 0):
-    csv_unknown_url = "bogus.csv"
 
 
-def null_bytes():
+try:
     with open(utf_16_csv, 'rb') as f:
         csv_data = f.read()
-    csv_data = unicode(csv_data, 'latin1').splitlines()
-    reader = csv.reader([tables.CSVTable.encode_for_csv(line + '\n')
-                         for line in csv_data])
+    csv_data = str(csv_data, 'latin1').splitlines()
+    reader = csv.reader([line + '\n' for line in csv_data])
     next(reader)
+except Exception as detail:
+    null_bytes_exception = detail
+else:
+    null_bytes_exception = None
 
-null_bytes_exception = DocutilsTestSupport.exception_data(null_bytes)[0]
+# Null bytes are valid in Python 3.11+:
+if null_bytes_exception is None:
+    bad_encoding_result = """\
+<document source="test data">
+    <table>
+        <title>
+            bad encoding
+        <tgroup cols="4">
+            <colspec colwidth="25">
+            <colspec colwidth="25">
+            <colspec colwidth="25">
+            <colspec colwidth="25">
+            <tbody>
+                <row>
+                    <entry>
+                        <paragraph>
+                            \xfe\xff"Treat"
+                    <entry>
+                        <paragraph>
+                            "Quantity"
+                    <entry>
+                        <paragraph>
+                            "Description"
+                    <entry>
+                <row>
+                    <entry>
+                        <paragraph>
+                            "Albatr\u00b0\u00df"
+                    <entry>
+                        <paragraph>
+                            2.99
+                    <entry>
+                        <paragraph>
+                            "\u00a1Ona\x03\xc3\x03\xc4\x03\xb9\x03\xba!"
+                    <entry>
+                <row>
+                    <entry>
+                        <paragraph>
+                            "CrunchyFrog"
+                    <entry>
+                        <paragraph>
+                            1.49
+                    <entry>
+                        <paragraph>
+                            "Ifwetooktheb\u00f6nesout
+                    <entry>
+                        <paragraph>
+                            itwouldn\x20\x19tbe
+                <row>
+                    <entry>
+                        <paragraph>
+                            crunchy
+                    <entry>
+                        <paragraph>
+                            nowwouldit?"
+                    <entry>
+                    <entry>
+                <row>
+                    <entry>
+                        <paragraph>
+                            "GannetRipple"
+                    <entry>
+                        <paragraph>
+                            1.99
+                    <entry>
+                        <paragraph>
+                            "\xbfOna\x03\xc3\x03\xc4\x03\xb9\x03\xba?"
+                    <entry>
+    <paragraph>
+        (7- and 8-bit text encoded as UTF-16 has lots of null/zero bytes.)
+"""
+else:
+    bad_encoding_result = """\
+<document source="test data">
+    <system_message level="3" line="1" source="test data" type="ERROR">
+        <paragraph>
+            Error with CSV data in "csv-table" directive:
+            %s
+        <literal_block xml:space="preserve">
+            .. csv-table:: bad encoding
+               :file: %s
+               :encoding: latin-1
+    <paragraph>
+        (7- and 8-bit text encoded as UTF-16 has lots of null/zero bytes.)
+""" % (null_bytes_exception, utf_16_csv)
+
+try:
+    int('y')
+except ValueError as detail:
+    invalid_literal = detail.args[0]
+else:
+    invalid_literal = ''
 
 totest = {}
 
@@ -155,7 +256,7 @@ totest['table'] = [
     <table>
         <title>
             title with an \n\
-            <problematic ids="id2" refid="id1">
+            <problematic ids="problematic-1" refid="system-message-1">
                 *
             error
         <tgroup cols="2">
@@ -169,7 +270,7 @@ totest['table'] = [
                     <entry>
                         <paragraph>
                             table
-    <system_message backrefs="id2" ids="id1" level="2" line="1" source="test data" type="WARNING">
+    <system_message backrefs="problematic-1" ids="system-message-1" level="2" line="1" source="test data" type="WARNING">
         <paragraph>
             Inline emphasis start-string without end-string.
 """],
@@ -385,7 +486,7 @@ totest['table'] = [
 """],
 ]
 
-totest['csv-table'] = [
+totest['csv_table'] = [
 ["""\
 .. csv-table:: inline with integral header
    :width: 80%
@@ -630,12 +731,12 @@ totest['csv-table'] = [
                     <entry>
                     <entry>
 """],
-[u"""\
+["""\
 .. csv-table:: non-ASCII characters
 
    Heiz\xf6lr\xfccksto\xdfabd\xe4mpfung
 """,
-u"""\
+"""\
 <document source="test data">
     <table>
         <title>
@@ -766,7 +867,7 @@ u"""\
     <table>
         <title>
             error in the \n\
-            <problematic ids="id2" refid="id1">
+            <problematic ids="problematic-1" refid="system-message-1">
                 *
             title
         <tgroup cols="3">
@@ -784,7 +885,7 @@ u"""\
                     <entry>
                         <paragraph>
                             data
-    <system_message backrefs="id2" ids="id1" level="2" line="1" source="test data" type="WARNING">
+    <system_message backrefs="problematic-1" ids="system-message-1" level="2" line="1" source="test data" type="WARNING">
         <paragraph>
             Inline emphasis start-string without end-string.
 """],
@@ -812,11 +913,11 @@ u"""\
     <system_message level="4" line="1" source="test data" type="SEVERE">
         <paragraph>
             Problems with "csv-table" directive URL "bogus.csv":
-            unknown url type: %s.
+            unknown url type: 'bogus.csv'.
         <literal_block xml:space="preserve">
             .. csv-table:: bad URL
                :url: bogus.csv
-""" % csv_unknown_url],
+"""],
 ["""\
 .. csv-table:: column mismatch
    :widths: 10,20
@@ -867,7 +968,7 @@ u"""\
                :widths: 0 0 0
             \n\
                some, csv, data
-""" % DocutilsTestSupport.exception_data(int, u"y")[1][0]],
+""" % invalid_literal],
 ["""\
 .. csv-table:: good delimiter
    :delim: /
@@ -1031,30 +1132,77 @@ u"""\
 
 (7- and 8-bit text encoded as UTF-16 has lots of null/zero bytes.)
 """ % utf_16_csv,
-"""\
-<document source="test data">
-    <system_message level="3" line="1" source="test data" type="ERROR">
-        <paragraph>
-            Error with CSV data in "csv-table" directive:
-            %s
-        <literal_block xml:space="preserve">
-            .. csv-table:: bad encoding
-               :file: %s
-               :encoding: latin-1
-    <paragraph>
-        (7- and 8-bit text encoded as UTF-16 has lots of null/zero bytes.)
-""" % (null_bytes_exception, utf_16_csv)],
+bad_encoding_result
+],
 ["""\
 .. csv-table:: good encoding
    :file: %s
    :encoding: utf-16
    :header-rows: 1
 """ % utf_16_csv,
-u"""\
+"""\
 <document source="test data">
     <table>
         <title>
             good encoding
+        <tgroup cols="3">
+            <colspec colwidth="33">
+            <colspec colwidth="33">
+            <colspec colwidth="33">
+            <thead>
+                <row>
+                    <entry>
+                        <paragraph>
+                            Treat
+                    <entry>
+                        <paragraph>
+                            Quantity
+                    <entry>
+                        <paragraph>
+                            Description
+            <tbody>
+                <row>
+                    <entry>
+                        <paragraph>
+                            Albatr\u00b0\u00df
+                    <entry>
+                        <paragraph>
+                            2.99
+                    <entry>
+                        <paragraph>
+                            \u00a1On a \u03c3\u03c4\u03b9\u03ba!
+                <row>
+                    <entry>
+                        <paragraph>
+                            Crunchy Frog
+                    <entry>
+                        <paragraph>
+                            1.49
+                    <entry>
+                        <paragraph>
+                            If we took the b\u00f6nes out, it wouldn\u2019t be
+                            crunchy, now would it?
+                <row>
+                    <entry>
+                        <paragraph>
+                            Gannet Ripple
+                    <entry>
+                        <paragraph>
+                            1.99
+                    <entry>
+                        <paragraph>
+                            \u00bfOn a \u03c3\u03c4\u03b9\u03ba?
+"""],
+["""\
+.. csv-table:: auto encoding
+   :file: %s
+   :header-rows: 1
+""" % utf_16_csv,
+"""\
+<document source="test data">
+    <table>
+        <title>
+            auto encoding
         <tgroup cols="3">
             <colspec colwidth="33">
             <colspec colwidth="33">
@@ -1118,7 +1266,7 @@ u"""\
 """ % empty_txt],
 ]
 
-totest['list-table'] = [
+totest['list_table'] = [
 ["""\
 .. list-table:: list table with integral header
    :widths: 10 20 30
@@ -1461,5 +1609,4 @@ totest['list-table'] = [
 
 
 if __name__ == '__main__':
-    import unittest
-    unittest.main(defaultTest='suite')
+    unittest.main()

@@ -1,13 +1,15 @@
 .. -*- coding: utf-8 -*-
 
+.. include:: ../../header2.txt
+
 =======================================
  reStructuredText Markup Specification
 =======================================
 
 :Author: David Goodger
 :Contact: docutils-develop@lists.sourceforge.net
-:Revision: $Revision: 8644 $
-:Date: $Date: 2021-03-26 14:51:36 +0100 (Fr, 26. Mär 2021) $
+:Revision: $Revision: 9322 $
+:Date: $Date: 2023-01-17 16:40:43 +0100 (Di, 17. Jän 2023) $
 :Copyright: This document has been placed in the public domain.
 
 .. Note::
@@ -67,7 +69,7 @@ Here are examples of `body elements`_:
 
       Paragraphs contain text and may contain inline markup:
       *emphasis*, **strong emphasis**, `interpreted text`, ``inline
-      literals``, standalone hyperlinks (http://www.python.org),
+      literals``, standalone hyperlinks (https://www.python.org),
       external hyperlinks (Python_), internal cross-references
       (example_), footnote references ([1]_), citation references
       ([CIT2002]_), substitution references (|example|), and _`inline
@@ -187,7 +189,7 @@ Here are examples of `body elements`_:
 
   - `Hyperlink targets`_::
 
-        .. _Python: http://www.python.org
+        .. _Python: https://www.python.org
 
         .. _example:
 
@@ -330,47 +332,62 @@ than the marker.  For example, field lists may have very long markers
         body on the same line as the marker.
 
 
+.. _escape:
+
 Escaping Mechanism
 ==================
 
 The character set universally available to plaintext documents, 7-bit
 ASCII, is limited.  No matter what characters are used for markup,
 they will already have multiple meanings in written text.  Therefore
-markup characters *will* sometimes appear in text **without being
-intended as markup**.  Any serious markup system requires an escaping
+markup characters will sometimes appear in text without being
+intended as markup.  Any serious markup system requires an escaping
 mechanism to override the default meaning of the characters used for
-the markup.  In reStructuredText we use the backslash, commonly used
+the markup.  In reStructuredText we use the *backslash*, commonly used
 as an escaping character in other domains.
 
-A backslash followed by any character (except whitespace characters
-in non-URI contexts)
-escapes that character.  The escaped character represents the
-character itself, and is prevented from playing a role in any markup
-interpretation.  The backslash is removed from the output.  A literal
-backslash is represented by two backslashes in a row (the first
-backslash "escapes" the second, preventing it being interpreted in an
-"escaping" role).
+A backslash (``\``) escapes the following character.
 
-In non-URI contexts,
-backslash-escaped whitespace characters are removed from the document.
-This allows for character-level `inline markup`_.
+* "Escaping" backslash characters are represented by NULL characters in
+  the `Document Tree`_ and removed from the output document by the
+  Docutils writers_.
 
-In URIs, backslash-escaped whitespace represents a single space.
+* Escaped non-white characters are prevented from playing a role in any
+  markup interpretation. The escaped character represents the character
+  itself. (A literal backslash can be specified by two backslashes in a
+  row -- the first backslash escapes the second. [#caveat]_)
 
-There are two contexts in which backslashes have no special meaning:
-literal blocks and inline literals.  In these contexts, a single
-backslash represents a literal backslash, without having to double up.
+* Escaped whitespace characters are removed from the output document
+  together with the escaping backslash. This allows for `character-level
+  inline markup`_.
 
-Please note that the reStructuredText specification and parser do not
-address the issue of the representation or extraction of text input
-(how and in what form the text actually *reaches* the parser).
-Backslashes and other characters may serve a character-escaping
-purpose in certain contexts and must be dealt with appropriately.  For
-example, Python uses backslashes in strings to escape certain
-characters, but not others.  The simplest solution when backslashes
-appear in Python docstrings is to use raw docstrings::
+  In `URI context` [#uri-context]_, backslash-escaped whitespace
+  represents a single space.
 
-    r"""This is a raw docstring.  Backslashes (\) are not touched."""
+Backslashes have no special meaning in `literal context` [#literal-context]_.
+Here, a single backslash represents a literal backslash, without having
+to double up. [#caveat]_
+
+.. [#caveat] Please note that the reStructuredText specification and
+   parser do not address the issue of the representation or extraction of
+   text input (how and in what form the text actually *reaches* the
+   parser). Backslashes and other characters may serve a
+   character-escaping purpose in certain contexts and must be dealt with
+   appropriately.  For example, Python uses backslashes in string
+   literals to escape certain characters. The simplest solution when
+   backslashes appear in Python docstrings is to use raw docstrings::
+
+     r"""This is a raw docstring.  Backslashes (\) are not touched."""
+
+.. [#uri-context] In contexts where Docutils expects a URI (the link
+   block of `external hyperlink targets`_ or the argument of an image_ or
+   figure_ directive), whitespace is ignored by default
+
+.. [#literal-context] In literal context (`literal blocks`_ and `inline
+   literals`_, content of the code_, math_, and raw_ directives, content
+   of the `"raw" role`_ and `custom roles`_ based on it),
+   reStructuredText markup characters lose their semantics so there is no
+   reason to escape them.
 
 .. _reference name:
 
@@ -398,7 +415,7 @@ and treating the backquoted text as a reference name::
 
     Want to learn about `my favorite programming language`_?
 
-    .. _my favorite programming language: http://www.python.org
+    .. _my favorite programming language: https://www.python.org
 
 Simple reference names may also optionally use backquotes.
 
@@ -424,10 +441,10 @@ For example, the following `hyperlink references`_ are equivalent::
 Hyperlinks_, footnotes_, and citations_ all share the same namespace
 for reference names.  The labels of citations (simple reference names)
 and manually-numbered footnotes (numbers) are entered into the same
-database as other hyperlink names.  This means that a footnote
-(defined as "``.. [1]``") which can be referred to by a footnote
-reference (``[1]_``), can also be referred to by a plain hyperlink
-reference (1_).  Of course, each type of reference (hyperlink,
+database as other hyperlink names.  This means that a footnote_
+(defined as "``.. [#note]``") which can be referred to by a footnote
+reference (``[#note]_``), can also be referred to by a plain hyperlink
+reference (``note_``).  Of course, each type of reference (hyperlink,
 footnote, citation) may be processed and rendered differently.  Some
 care should be taken to avoid reference name conflicts.
 
@@ -461,9 +478,11 @@ the "document title" can become the document subtitle.  The rest of
 the sections are then lifted up a level or two.  See the `DocTitle
 transform`_ for details.
 
-.. [#] The `title configuration setting`__ and the `title directive`__
-   set a document title that does not become part of the document body.
+.. [#] The `"title" configuration setting`__ and the `"title"
+   directive`__ set the document's `title attribute`_ that does not
+   become part of the document body.
 
+   .. _title attribute: ../doctree.html#title-attribute
    __ ../../user/config.html#title
    __ directives.html#metadata-document-title
 
@@ -478,13 +497,17 @@ adornment: "underlines" below the title text, or underlines and
 matching "overlines" above the title.  An underline/overline is a
 single repeated punctuation character that begins in column 1 and
 forms a line extending at least as far as the right edge of the title
-text.  Specifically, an underline/overline character may be any
+text. [#]_  Specifically, an underline/overline character may be any
 non-alphanumeric printable 7-bit ASCII character [#]_.  When an
 overline is used, the length and character used must match the
 underline.  Underline-only adornment styles are distinct from
 overline-and-underline styles that use the same character.  There may
 be any number of levels of section titles, although some output
 formats may have limits (HTML has 6 levels).
+
+.. [#] The key is the visual length of the title in a mono-spaced font.
+   The adornment may need more or less characters than title, if the
+   title contains wide__ or combining__ characters.
 
 .. [#] The following are all valid section title adornment
    characters::
@@ -495,6 +518,9 @@ formats may have limits (HTML has 6 levels).
    recommended::
 
        = - ` : . ' " ~ ^ _ * + #
+
+__ https://en.wikipedia.org/wiki/Halfwidth_and_fullwidth_forms#In_Unicode
+__ https://en.wikipedia.org/wiki/Combining_character
 
 Rather than imposing a fixed number and order of section title
 adornment styles, the order enforced will be the order as encountered.
@@ -738,11 +764,18 @@ one line.  This text is parsed as an enumerated list item::
 
     A. Einstein was a really smart dude.
 
-If a single-line paragraph begins with text identical to an enumerator
-("A.", "1.", "(b)", "I)", etc.), the first character will have to be
-escaped in order to have the line parsed as an ordinary paragraph::
-
-    \A. Einstein was a really smart dude.
+.. Caution:: 
+    If a single-line paragraph begins with text identical to an enumerator
+    ("A.", "1.", "(b)", "I)", etc.), the first character will have to be
+    escaped in order to have the line parsed as an ordinary paragraph::
+    
+        \A. Einstein was a really smart dude.
+        
+    Alternatively, you can escape the delimiter ::
+    
+        A\. Einstein was a really smart dude.
+        
+    or use a literal NO-BREAK SPACE after the initial.    
 
 Examples of nested enumerated lists::
 
@@ -769,14 +802,24 @@ Doctree elements: definition_list_, definition_list_item_, term_,
 classifier_, definition_.
 
 Each definition list item contains a term, optional classifiers, and a
-definition.  A term is a simple one-line word or phrase.  Optional
-classifiers may follow the term on the same line, each after an inline
-" : " (space, colon, space).  A definition is a block indented
-relative to the term, and may contain multiple paragraphs and other
-body elements.  There may be no blank line between a term line and a
-definition block (this distinguishes definition lists from `block
-quotes`_).  Blank lines are required before the first and after the
-last definition list item, but are optional in-between.  For example::
+definition.
+
+* A `term` is a simple one-line word or phrase.  Escape_ a leading hyphen
+  to prevent recognition as an `option list`_ item.
+
+* Optional `classifiers` may follow the term on the same line, each after
+  an inline " : " (space, colon, space).  Inline markup is parsed in the
+  term line before the classifier delimiters are recognized.  A delimiter
+  will only be recognized if it appears outside of any inline markup.
+
+* A `definition` is a block indented relative to the term, and may
+  contain multiple paragraphs and other body elements.  There may be no
+  blank line between a term line and a definition block (this
+  distinguishes definition lists from `block quotes`_). Blank lines are
+  required before the first and after the last definition list item, but
+  are optional in-between.
+
+Example::
 
     term 1
         Definition 1.
@@ -792,9 +835,8 @@ last definition list item, but are optional in-between.  For example::
     term 4 : classifier one : classifier two
         Definition 4.
 
-Inline markup is parsed in the term line before the classifier
-delimiter (" : ") is recognized.  The delimiter will only be
-recognized if it appears outside of any inline markup.
+    \-term 5
+        Without escaping, this would be an option list item.
 
 A definition list may be used in various ways, including:
 
@@ -892,11 +934,16 @@ Doctree elements: docinfo_, address_, author_, authors_, contact_,
 copyright_, date_, organization_, revision_, status_, topic_,
 version_.
 
-When a field list is the first non-comment element in a document
-(after the document title, if there is one), it may have its fields
+When a field list is the first element in a document
+(after the document title, if there is one) [#]_, it may have its fields
 transformed to document bibliographic data.  This bibliographic data
 corresponds to the front matter of a book, such as the title page and
 copyright page.
+
+.. [#] In addition to the document title and subtitle, also comments_,
+   `substitution definitions`_, `hyperlink targets`_, and "header",
+   "footer", "meta", and "raw" directives_ may be placed before the
+   bibliographic fields.
 
 Certain registered field names (listed below) are recognized and
 transformed to the corresponding doctree elements, most becoming child
@@ -962,15 +1009,16 @@ RCS Keywords
 
 `Bibliographic fields`_ recognized by the parser are normally checked
 for RCS [#]_ keywords and cleaned up [#]_.  RCS keywords may be
-entered into source files as "$keyword$", and once stored under RCS or
-CVS [#]_, they are expanded to "$keyword: expansion text $".  For
-example, a "Status" field will be transformed to a "status" element::
+entered into source files as "$keyword$", and once stored under RCS,
+CVS [#]_, or SVN [#]_, they are expanded to "$keyword: expansion text $".
+For example, a "Status" field will be transformed to a "status" element::
 
     :Status: $keyword: expansion text $
 
 .. [#] Revision Control System.
 .. [#] RCS keyword processing can be turned off (unimplemented).
 .. [#] Concurrent Versions System.  CVS uses the same keywords as RCS.
+.. [#] Subversion Versions System. Uses the same keywords as RCS.
 
 Processed, the "status" element's text will become simply "expansion
 text".  The dollar sign delimiters and leading RCS keyword name are
@@ -980,6 +1028,7 @@ The RCS keyword processing only kicks in when the field list is in
 bibliographic context (first non-comment construct in the document,
 after a document title if there is one).
 
+.. _option list:
 
 Option Lists
 ------------
@@ -987,8 +1036,8 @@ Option Lists
 Doctree elements: option_list_, option_list_item_, option_group_, option_,
 option_string_, option_argument_, description_.
 
-Option lists are two-column lists of command-line options and
-descriptions, documenting a program's options.  For example::
+Option lists map a program's command-line options to descriptions
+documenting them.  For example::
 
     -a         Output all.
     -b         Output both (this description is
@@ -1042,10 +1091,11 @@ this with any special syntax.  The complete option word should be
 given, supported by notes about truncation if and when applicable.
 
 Options may be followed by an argument placeholder, whose role and
-syntax should be explained in the description text.  Either a space or
-an equals sign may be used as a delimiter between options and option
-argument placeholders; short options ("-" or "+" prefix only) may omit
-the delimiter.  Option arguments may take one of two forms:
+syntax should be explained in the description text.
+Either a space or an equals sign may be used as a delimiter between long
+options and option argument placeholders;
+short options ("-" or "+" prefix only) use a space or omit the delimiter.
+Option arguments may take one of two forms:
 
 - Begins with a letter (``[a-zA-Z]``) and subsequently consists of
   letters, numbers, underscores and hyphens (``[a-zA-Z0-9_-]``).
@@ -1057,8 +1107,9 @@ Multiple option "synonyms" may be listed, sharing a single
 description.  They must be separated by comma-space.
 
 There must be at least two spaces between the option(s) and the
-description.  The description may contain multiple body elements.  The
-first line after the option marker determines the indentation of the
+description (which can also start on the next line).  The description
+may contain multiple body elements.
+The first line after the option marker determines the indentation of the
 description.  As with other types of lists, blank lines are required
 before the first option list item and after the last, but are optional
 between option entries.
@@ -1859,7 +1910,7 @@ indirect.
 
        .. _Python DOC-SIG mailing list archive:
        .. _archive:
-       .. _Doc-SIG: http://mail.python.org/pipermail/doc-sig/
+       .. _Doc-SIG: https://mail.python.org/pipermail/doc-sig/
 
    An inline form of internal hyperlink target is available; see
    `Inline Internal Targets`_.
@@ -1884,12 +1935,12 @@ indirect.
 
        `Write to me`_ with your questions.
 
-       .. _Python: http://www.python.org
+       .. _Python: https://www.python.org
        .. _Write to me: jdoe@example.com
 
    After processing into HTML, the hyperlinks might be expressed as::
 
-       See the <a href="http://www.python.org">Python</a> home page
+       See the <a href="https://www.python.org">Python</a> home page
        for info.
 
        <a href="mailto:jdoe@example.com">Write to me</a> with your
@@ -1903,13 +1954,13 @@ indirect.
    permitted to allow for line wrapping).  The following external
    hyperlink targets are equivalent::
 
-       .. _one-liner: http://docutils.sourceforge.net/rst.html
+       .. _one-liner: https://docutils.sourceforge.io/rst.html
 
-       .. _starts-on-this-line: http://
+       .. _starts-on-this-line: https://
           docutils.sourceforge.net/rst.html
 
        .. _entirely-below:
-          http://docutils.
+          https://docutils.
           sourceforge.net/rst.html
 
    Escaped whitespace is preserved as intentional spaces, e.g.::
@@ -2005,12 +2056,12 @@ instead of one::
 Anonymous targets begin with ".. __:"; no reference name is required
 or allowed::
 
-    .. __: http://www.python.org
+    .. __: https://www.python.org
 
 As a convenient alternative, anonymous targets may begin with "__"
 only::
 
-    __ http://www.python.org
+    __ https://www.python.org
 
 The reference name of the reference is not used to match the reference
 to its target.  Instead, the order of anonymous hyperlink references
@@ -2308,7 +2359,7 @@ Replacement text
         |RST| source readability.
 
         .. |RST| replace:: reStructuredText
-        .. _RST: http://docutils.sourceforge.net/rst.html
+        .. _RST: https://docutils.sourceforge.io/rst.html
 
     Note the trailing underscore in the first use of a substitution
     reference.  This indicates a reference to the corresponding
@@ -2508,10 +2559,10 @@ inline markup:
    Docutils 0.13 uses `Unicode version 5.2.0`_.
 
 .. _Unicode categories:
-   http://www.unicode.org/Public/5.1.0/ucd/UCD.html#General_Category_Values
-.. _Unicode version 5.2.0: http://www.unicode.org/Public/5.2.0/
+   https://www.unicode.org/Public/5.1.0/ucd/UCD.html#General_Category_Values
+.. _Unicode version 5.2.0: https://www.unicode.org/Public/5.2.0/
 .. _quotation marks in international usage:
-   http://en.wikipedia.org/wiki/Quotation_mark,_non-English_usage
+   https://en.wikipedia.org/wiki/Quotation_mark,_non-English_usage
 
 The inline markup recognition rules were devised to allow 90% of non-markup
 uses of "*", "`", "_", and "|" without escaping. For example, none of the
@@ -2720,9 +2771,10 @@ backquotes in an end-string context (according to the recognition
 rules above).  No markup interpretation (including backslash-escape
 interpretation) is done within inline literals.
 
-Line breaks are *not* preserved in inline literals.  Although a
-reStructuredText parser will preserve runs of spaces in its output,
-the final representation of the processed document is dependent on the
+Line breaks and sequences of whitespace characters
+are *not* protected in inline literals.
+Although a reStructuredText parser will preserve them in its output,
+the final representation of the processed document depends on the
 output formatter, thus the preservation of whitespace cannot be
 guaranteed.  If the preservation of line breaks and/or other
 whitespace is important, `literal blocks`_ should be used.
@@ -2775,7 +2827,7 @@ A hyperlink reference may directly embed a target URI or (since
 Docutils 0.11) a hyperlink reference within angle brackets ("<...>")
 as follows::
 
-    See the `Python home page <http://www.python.org>`_ for info.
+    See the `Python home page <https://www.python.org>`_ for info.
 
     This `link <Python home page_>`_ is an alias to the link above.
 
@@ -2785,7 +2837,7 @@ This is exactly equivalent to::
 
     This link_ is an alias to the link above.
 
-    .. _Python home page: http://www.python.org
+    .. _Python home page: https://www.python.org
     .. _link: `Python home page`_
 
 The bracketed URI must be preceded by whitespace and be the last text
@@ -2797,16 +2849,16 @@ With two trailing underscores, the reference and target are both
 anonymous, and the target cannot be referred to again.  These are
 "one-off" hyperlinks.  For example::
 
-    `RFC 2396 <http://www.rfc-editor.org/rfc/rfc2396.txt>`__ and `RFC
-    2732 <http://www.rfc-editor.org/rfc/rfc2732.txt>`__ together
+    `RFC 2396 <https://www.rfc-editor.org/rfc/rfc2396.txt>`__ and `RFC
+    2732 <https://www.rfc-editor.org/rfc/rfc2732.txt>`__ together
     define the syntax of URIs.
 
 Equivalent to::
 
     `RFC 2396`__ and `RFC 2732`__ together define the syntax of URIs.
 
-    __ http://www.rfc-editor.org/rfc/rfc2396.txt
-    __ http://www.rfc-editor.org/rfc/rfc2732.txt
+    __ https://www.rfc-editor.org/rfc/rfc2396.txt
+    __ https://www.rfc-editor.org/rfc/rfc2732.txt
 
 `Standalone hyperlinks`_ are treated as URIs, even if they end with an
 underscore like in the example of a Python function documentation::
@@ -2971,11 +3023,11 @@ A URI (absolute URI [#URI]_ or standalone email address) within a text
 block is treated as a general external hyperlink with the URI itself
 as the link's text.  For example::
 
-    See http://www.python.org for info.
+    See https://www.python.org for info.
 
 would be marked up in HTML as::
 
-    See <a href="http://www.python.org">http://www.python.org</a> for
+    See <a href="https://www.python.org">https://www.python.org</a> for
     info.
 
 Two forms of URI are recognized:
@@ -2996,7 +3048,7 @@ Two forms of URI are recognized:
      use slashes to separate hierarchical components of the path.
      Examples are web pages and FTP sites::
 
-         http://www.python.org
+         https://www.python.org
 
          ftp://ftp.python.org/pub/python
 
@@ -3068,9 +3120,9 @@ default (e.g. "px" with HTML, "pt" with `latex2e`). See the writer
 specific documentation in the `user doc`__ for details.
 
 .. _length units in CSS2:
-   http://www.w3.org/TR/CSS2/syndata.html#length-units
+   https://www.w3.org/TR/CSS2/syndata.html#length-units
 .. _length units in CSS3:
-   http://www.w3.org/TR/css-values-3/#absolute-lengths
+   https://www.w3.org/TR/css-values-3/#absolute-lengths
 .. _How to configure the size of a pixel:
    ../../user/latex.html#size-of-a-pixel
 __ ../../user/
@@ -3094,32 +3146,41 @@ Markup errors are handled according to the specification in `PEP
 258`_.
 
 
-.. _reStructuredText: http://docutils.sourceforge.net/rst.html
-.. _Docutils: http://docutils.sourceforge.net/
+.. _reStructuredText: https://docutils.sourceforge.io/rst.html
+.. _Docutils: https://docutils.sourceforge.io/
 .. _Docutils Generic DTD: ../docutils.dtd
 .. _transforms:
-   http://docutils.sourceforge.net/docutils/transforms/
+   https://docutils.sourceforge.io/docutils/transforms/
 .. _Grouch: http://www.mems-exchange.org/software/grouch/
-.. _RFC822: http://www.rfc-editor.org/rfc/rfc822.txt
+.. _RFC822: https://www.rfc-editor.org/rfc/rfc822.txt
 .. _DocTitle transform:
 .. _DocInfo transform:
-   http://docutils.sourceforge.net/docutils/transforms/frontmatter.py
+   https://docutils.sourceforge.io/docutils/transforms/frontmatter.py
 .. _getopt.py:
-   http://www.python.org/doc/current/lib/module-getopt.html
+   https://docs.python.org/3/library/getopt.html
 .. _GNU libc getopt_long():
-   http://www.gnu.org/software/libc/manual/html_node/Getopt-Long-Options.html
+   https://www.gnu.org/software/libc/manual/html_node/Getopt-Long-Options.html
 .. _doctest module:
-   http://www.python.org/doc/current/lib/module-doctest.html
+   https://docs.python.org/3/library/doctest.html
 .. _Emacs table mode: http://table.sourceforge.net/
 .. _Official IANA Registry of URI Schemes:
    http://www.iana.org/assignments/uri-schemes
 .. _Retired Index of WWW Addressing Schemes:
-   http://www.w3.org/Addressing/schemes.html
-.. _World Wide Web Consortium: http://www.w3.org/
+   https://www.w3.org/Addressing/schemes.html
+.. _World Wide Web Consortium: https://www.w3.org/
 .. _HTML Techniques for Web Content Accessibility Guidelines:
-   http://www.w3.org/TR/WCAG10-HTML-TECHS/#link-text
+   https://www.w3.org/TR/WCAG10-HTML-TECHS/#link-text
+.. _RFC2396: https://www.rfc-editor.org/rfc/rfc2396.txt
+.. _RFC2732: https://www.rfc-editor.org/rfc/rfc2732.txt
+.. _Zope: http://www.zope.com/
+.. _PEP 258: ../../peps/pep-0258.html
+.. _writers: ../../peps/pep-0258.html#writers
+
 .. _reStructuredText Directives: directives.html
 .. _admonition: directives.html#admonitions
+.. _code: directives.html#code
+.. _math: directives.html#math
+.. _raw: directives.html#raw
 .. _figure: directives.html#figure
 .. _image: directives.html#image
 .. _meta: directives.html#metadata
@@ -3128,12 +3189,11 @@ Markup errors are handled according to the specification in `PEP
 .. _table directive: directives.html#table
 .. _list table: directives.html#list-table
 .. _CSV table: directives.html#csv-table
+.. _custom roles: directives.html#role
 .. _reStructuredText Interpreted Text Roles: roles.html
-.. _RFC2396: http://www.rfc-editor.org/rfc/rfc2396.txt
-.. _RFC2732: http://www.rfc-editor.org/rfc/rfc2732.txt
-.. _Zope: http://www.zope.com/
-.. _PEP 258: ../../peps/pep-0258.html
+.. _"raw" role: roles.html#raw
 
+.. _Document Tree:
 .. _The Docutils Document Tree: ../doctree.html
 .. _"classes" attribute:  ../doctree.html#classes
 .. _topic: ../doctree.html#topic

@@ -1,6 +1,6 @@
-#! /usr/bin/env python
+#! /usr/bin/env python3
 
-# $Id: test_traversals.py 7463 2012-06-22 19:49:51Z milde $
+# $Id: test_traversals.py 9277 2022-11-26 23:15:13Z milde $
 # Author: Martin Blais <blais@furius.ca>
 # Copyright: This module has been placed in the public domain.
 
@@ -8,12 +8,17 @@
 Test module for traversals.
 """
 
+from pathlib import Path
+import sys
 import unittest
-import DocutilsTestSupport              # must be imported before docutils
-from docutils import nodes, core, io, utils, writers
-from docutils.writers.null import Writer as NullWriter
-import docutils
 
+if __name__ == '__main__':
+    # prepend the "docutils root" to the Python library path
+    # so we import the local `docutils` package.
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+
+import docutils
+from docutils import core, nodes, writers
 
 
 stop_traversal_input = '''
@@ -23,7 +28,7 @@ stop_traversal_input = '''
 
 Happily, happily going by train.
 
-.. attention:: Attention, attention.  This is a public annoucement.  
+.. attention:: Attention, attention.  This is a public annoucement.
                You must get off the train now.
 
 KaZoom! Train crashes.
@@ -31,6 +36,7 @@ KaZoom! Train crashes.
 - Told ya!!!  Get off the train next time.
 
 '''
+
 
 class AttentiveVisitor(nodes.SparseNodeVisitor):
 
@@ -41,6 +47,7 @@ class AttentiveVisitor(nodes.SparseNodeVisitor):
         raise RuntimeError("It's too late for attention, "
                            "more discipline is needed!.")
 
+
 class AttentiveWriter(writers.Writer):
 
     def translate(self):
@@ -50,6 +57,7 @@ class AttentiveWriter(writers.Writer):
         self.document.walkabout(visitor)
         self.document.walk(visitor)
 
+
 class StopTraversalTests(unittest.TestCase, docutils.SettingsSpec):
 
     """
@@ -58,19 +66,18 @@ class StopTraversalTests(unittest.TestCase, docutils.SettingsSpec):
     """
     def test_stop_traversal(self):
         # Load some document tree in memory.
-        doctree = docutils.core.publish_doctree(
+        doctree = core.publish_doctree(
             source=stop_traversal_input,
             reader_name='standalone',
             parser_name='restructuredtext',
             settings_spec=self)
         self.assertTrue(isinstance(doctree, nodes.document))
 
-        parts = docutils.core.publish_parts(
-           reader_name='doctree', source_class=docutils.io.DocTreeInput,
-           source=doctree, source_path='test',
-           writer=AttentiveWriter())
+        core.publish_parts(
+            reader_name='doctree', source_class=docutils.io.DocTreeInput,
+            source=doctree, source_path='test',
+            writer=AttentiveWriter())
 
 
 if __name__ == '__main__':
     unittest.main()
-

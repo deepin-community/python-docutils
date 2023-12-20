@@ -1,15 +1,13 @@
-# Source and destination file names.
+# Source and destination file names
 test_source = "cyrillic.txt"
 test_destination = "xetex-cyrillic.tex"
 
-# Keyword parameters passed to publish_file.
+# Keyword parameters passed to publish_file()
 writer_name = "xetex"
-
-# Settings
-settings_overrides['language_code'] = 'ru'
-# Override the automatic addition of "unicode" option for "russian"
-# language to work around a problem with cyrillic in PDF-bookmarks in
-# hyperref versions < v6.79g 2009/11/20 
-settings_overrides['hyperref_options'] = 'unicode=false'
-# use "smartquotes" transition:
-settings_overrides['smart_quotes'] = True
+settings_overrides = {
+    'language_code': 'ru',
+    # use "smartquotes" transition:
+    'smart_quotes': True,
+    'legacy_column_widths': True,
+    'use_latex_citations': False,
+    }

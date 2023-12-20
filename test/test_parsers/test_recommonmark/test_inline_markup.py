@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf8 -*-
 # :Copyright: © 2020 Günter Milde.
 # :License: Released under the terms of the `2-Clause BSD license`_, in short:
 #
@@ -14,17 +13,32 @@ Tests for inline markup in CommonMark parsers
 Cf. the `CommonMark Specification <https://spec.commonmark.org/>`__
 """
 
-from __future__ import absolute_import
+from pathlib import Path
+import sys
+import unittest
 
 if __name__ == '__main__':
-    import __init__
-from test_parsers import DocutilsTestSupport
+    # prepend the "docutils root" to the Python library path
+    # so we import the local `docutils` package.
+    sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
+
+from docutils.frontend import get_default_settings
+from docutils.parsers.recommonmark_wrapper import Parser
+from docutils.utils import new_document
 
 
-def suite():
-    s = DocutilsTestSupport.RecommonmarkParserTestSuite()
-    s.generateTests(totest)
-    return s
+class RecommonmarkParserTestCase(unittest.TestCase):
+    def test_parser(self):
+        parser = Parser()
+        settings = get_default_settings(Parser)
+        for name, cases in totest.items():
+            for casenum, (case_input, case_expected) in enumerate(cases):
+                with self.subTest(id=f'totest[{name!r}][{casenum}]'):
+                    document = new_document('test data', settings.copy())
+                    parser.parse(case_input, document)
+                    output = document.pformat()
+                    self.assertEqual(output, case_expected)
+
 
 totest = {}
 
@@ -42,10 +56,10 @@ _also emphasis_
         <emphasis>
             also emphasis
 """],
-[u"""\
+["""\
 Partially*emphasised*word.
 """,
-u"""\
+"""\
 <document source="test data">
     <paragraph>
         Partially
@@ -192,10 +206,10 @@ Inline `literals` are called `code spans` in CommonMark.
         <literal classes="code">
             literal\\
 """],
-[u"""\
+["""\
 l'``literal`` and l\u2019``literal`` with apostrophe
 """,
-u"""\
+"""\
 <document source="test data">
     <paragraph>
         l'
@@ -206,12 +220,12 @@ u"""\
             literal
          with apostrophe
 """],
-[u"""\
+["""\
 quoted '``literal``', quoted "``literal``",
 quoted \u2018``literal``\u2019, quoted \u201c``literal``\u201d,
 quoted \xab``literal``\xbb
 """,
-u"""\
+"""\
 <document source="test data">
     <paragraph>
         quoted '
@@ -233,12 +247,12 @@ u"""\
             literal
         \xbb
 """],
-[u"""\
+["""\
 ``'literal'`` with quotes, ``"literal"`` with quotes,
 ``\u2018literal\u2019`` with quotes, ``\u201cliteral\u201d`` with quotes,
 ``\xabliteral\xbb`` with quotes
 """,
-u"""\
+"""\
 <document source="test data">
     <paragraph>
         <literal classes="code">
@@ -266,7 +280,7 @@ No warning for `standalone TeX quotes' or other *unbalanced markup**.
 <document source="test data">
     <paragraph>
         <literal classes="code">
-            literal
+            literal \n\
         no literal
     <paragraph>
         No warning for `standalone TeX quotes\' or other \n\
@@ -326,20 +340,21 @@ totest['references'] = [
         <reference name="ref" refuri="/uri">
             ref
 """],
-["""\
-Inline image ![foo *bar*][foobar]
-in a paragraph.
-
-[FOOBAR]: train.jpg "train & tracks"
-""",
-"""\
-<document source="test data">
-    <paragraph>
-        Inline image \n\
-        <image alt="foo " title="train & tracks" uri="train.jpg">
-        \n\
-        in a paragraph.
-"""],
+# Fails with recommonmark 0.6.0:
+# ["""\
+# Inline image ![foo *bar*]
+# in a paragraph.
+#
+# [foo *bar*]: train.jpg "train & tracks"
+# """,
+# """\
+# <document source="test data">
+#     <paragraph>
+#         Inline image \n\
+#         <image alt="foo " title="train & tracks" uri="train.jpg">
+#         \n\
+#         in a paragraph.
+# """],
 ["""\
 [phrase reference]
 
@@ -351,12 +366,12 @@ in a paragraph.
         <reference name="phrase reference" refuri="/uri">
             phrase reference
 """],
-[u"""\
+["""\
 No whitespace required around a[phrase reference].
 
 [phrase reference]: /uri
 """,
-u"""\
+"""\
 <document source="test data">
     <paragraph>
         No whitespace required around a
@@ -373,20 +388,20 @@ across lines]
 """\
 <document source="test data">
     <paragraph>
-        <reference name="phrase referenceacross lines" refuri="/uri">
+        <reference name="phrase reference across lines" refuri="/uri">
             phrase reference
             across lines
 """],
 ]
 
-totest['appended_URIs'] = [
+totest['appended_uris'] = [
 ["""\
 [anonymous reference](http://example.com)
 """,
 """\
 <document source="test data">
     <paragraph>
-        <reference name="anonymous reference" refuri="http://example.com">
+        <reference refuri="http://example.com">
             anonymous reference
 """],
 ["""\
@@ -399,16 +414,17 @@ Inline image ![a train](train.jpg) more text.
         <image alt="a train" uri="train.jpg">
          more text.
 """],
-["""\
-Inline image ![foo](/url "title") more text.
-""",
-"""\
-<document source="test data">
-    <paragraph>
-        Inline image \n\
-        <image alt="foo" title="title" uri="/url">
-         more text.
-"""],
+# recommonmark 0.6.0 drops the "title"
+# ["""\
+# Inline image ![foo](/url "title") more text.
+# """,
+# """\
+# <document source="test data">
+#     <paragraph>
+#         Inline image \n\
+#         <image alt="foo" title="title" uri="/url">
+#          more text.
+# """],
 ["""\
 [URI must follow immediately]
 (http://example.com)
@@ -434,7 +450,7 @@ Relative URIs' reference text can't be omitted:
 """],
 ]
 
-totest['standalone hyperlink'] = [
+totest['standalone_hyperlink'] = [
 ["""\
 CommonMark calls standalone hyperlinks
 like <http://example.com> "autolinks".
@@ -444,13 +460,13 @@ like <http://example.com> "autolinks".
     <paragraph>
         CommonMark calls standalone hyperlinks
         like \n\
-        <reference name="http://example.com" refuri="http://example.com">
+        <reference refuri="http://example.com">
             http://example.com
          "autolinks".
 """],
 ]
 
-totest['raw HTML'] = [
+totest['raw_html'] = [
 ["""\
 foo <a href="uri"> bar
 """,
@@ -481,21 +497,25 @@ comment - with hyphen -->
 """],
 ["""\
 Hard line breaks are not supported by Docutils.
-Not the soft line break preceded by two or more spaces,  \n\
-nor the more visible alternative,\\
-a backslash before the line ending.
+"recommonmark 0.6.0" converts both, invisible  \n\
+(two or more trailing spaces) nor visible\\
+(trailing backslash) to raw HTML.
 """,
 """\
 <document source="test data">
     <paragraph>
         Hard line breaks are not supported by Docutils.
-        Not the soft line break preceded by two or more spaces,\
-nor the more visible alternative,\
-a backslash before the line ending.
+        "recommonmark 0.6.0" converts both, invisible
+        <raw format="html" xml:space="preserve">
+            <br />
+        (two or more trailing spaces) nor visible
+        <raw format="html" xml:space="preserve">
+            <br />
+        (trailing backslash) to raw HTML.
 """],
 ]
 
-totest['markup recognition rules'] = [
+totest['markup_recognition_rules'] = [
 [r"""
 Character-level m*a***r**`k`_u_p
 works except for underline.
@@ -517,5 +537,4 @@ works except for underline.
 
 
 if __name__ == '__main__':
-    import unittest
-    unittest.main(defaultTest='suite')
+    unittest.main()

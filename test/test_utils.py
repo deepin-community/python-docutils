@@ -1,7 +1,6 @@
-#! /usr/bin/env python
-# -*- coding: utf-8 -*-
+#! /usr/bin/env python3
 
-# $Id: test_utils.py 8529 2020-07-18 14:43:20Z milde $
+# $Id: test_utils.py 9323 2023-01-17 17:20:12Z milde $
 # Author: David Goodger <goodger@python.org>
 # Copyright: This module has been placed in the public domain.
 
@@ -9,17 +8,21 @@
 Test module for utils/__init__.py.
 """
 
+from io import StringIO
 import os
+from pathlib import Path
 import sys
 import unittest
 
-from DocutilsTestSupport import docutils, utils, nodes
+if __name__ == '__main__':
+    # prepend the "docutils root" to the Python library path
+    # so we import the local `docutils` package.
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-if sys.version_info >= (3, 0):
-    from io import StringIO
-    unicode = str
-else:
-    from StringIO import StringIO
+import docutils
+from docutils import utils, nodes
+
+TEST_ROOT = Path(__file__).parent  # ./test/ from the docutils root
 
 
 class ReporterTests(unittest.TestCase):
@@ -39,7 +42,7 @@ class ReporterTests(unittest.TestCase):
         debug output
 """)
         self.assertEqual(self.stream.getvalue(),
-                          'test data:: (DEBUG/0) debug output\n')
+                         'test data:: (DEBUG/0) debug output\n')
 
     def test_level1(self):
         sw = self.reporter.system_message(1, 'a little reminder')
@@ -58,7 +61,7 @@ class ReporterTests(unittest.TestCase):
         a warning
 """)
         self.assertEqual(self.stream.getvalue(),
-                          'test data:: (WARNING/2) a warning\n')
+                         'test data:: (WARNING/2) a warning\n')
 
     def test_level3(self):
         sw = self.reporter.system_message(3, 'an error')
@@ -68,18 +71,18 @@ class ReporterTests(unittest.TestCase):
         an error
 """)
         self.assertEqual(self.stream.getvalue(),
-                          'test data:: (ERROR/3) an error\n')
+                         'test data:: (ERROR/3) an error\n')
 
     def test_level4(self):
-        self.assertRaises(utils.SystemMessage, self.reporter.system_message, 4,
-                          'a severe error, raises an exception')
+        with self.assertRaises(utils.SystemMessage):
+            self.reporter.system_message(
+                4, 'a severe error, raises an exception')
         self.assertEqual(self.stream.getvalue(), 'test data:: (SEVERE/4) '
-                          'a severe error, raises an exception\n')
-
+                         'a severe error, raises an exception\n')
 
     def test_unicode_message(self):
-        sw = self.reporter.system_message(0, u'mesidʒ')
-        self.assertEqual(sw.pformat(), u"""\
+        sw = self.reporter.system_message(0, 'mesidʒ')
+        self.assertEqual(sw.pformat(), """\
 <system_message level="0" source="test data" type="DEBUG">
     <paragraph>
         mesidʒ
@@ -90,14 +93,15 @@ class ReporterTests(unittest.TestCase):
         unicode(<exception instance>) uses __str__
         and hence fails with unicode message"""
         try:
-            raise Exception(u'mesidʒ')
+            raise Exception('mesidʒ')
         except Exception as err:
             sw = self.reporter.system_message(0, err)
-            self.assertEqual(sw.pformat(), u"""\
+            self.assertEqual(sw.pformat(), """\
 <system_message level="0" source="test data" type="DEBUG">
     <paragraph>
         mesidʒ
 """)
+
 
 class QuietReporterTests(unittest.TestCase):
 
@@ -154,25 +158,23 @@ class QuietReporterTests(unittest.TestCase):
 class NameValueTests(unittest.TestCase):
 
     def test_extract_name_value(self):
-        self.assertRaises(utils.NameValueError, utils.extract_name_value,
-                          'hello')
-        self.assertRaises(utils.NameValueError, utils.extract_name_value,
-                          'hello')
-        self.assertRaises(utils.NameValueError, utils.extract_name_value,
-                          '=hello')
-        self.assertRaises(utils.NameValueError, utils.extract_name_value,
-                          'hello=')
-        self.assertRaises(utils.NameValueError, utils.extract_name_value,
-                          'hello="')
-        self.assertRaises(utils.NameValueError, utils.extract_name_value,
-                          'hello="something')
-        self.assertRaises(utils.NameValueError, utils.extract_name_value,
-                          'hello="something"else')
+        with self.assertRaises(utils.NameValueError):
+            utils.extract_name_value('hello')
+        with self.assertRaises(utils.NameValueError):
+            utils.extract_name_value('=hello')
+        with self.assertRaises(utils.NameValueError):
+            utils.extract_name_value('hello=')
+        with self.assertRaises(utils.NameValueError):
+            utils.extract_name_value('hello="')
+        with self.assertRaises(utils.NameValueError):
+            utils.extract_name_value('hello="something')
+        with self.assertRaises(utils.NameValueError):
+            utils.extract_name_value('hello="something"else')
         output = utils.extract_name_value(
               """att1=val1 att2=val2 att3="value number '3'" att4=val4""")
         self.assertEqual(output, [('att1', 'val1'), ('att2', 'val2'),
-                                   ('att3', "value number '3'"),
-                                   ('att4', 'val4')])
+                                  ('att3', "value number '3'"),
+                                  ('att4', 'val4')])
 
 
 class ExtensionOptionTests(unittest.TestCase):
@@ -186,11 +188,11 @@ class ExtensionOptionTests(unittest.TestCase):
               utils.assemble_option_dict(input, self.optionspec),
               {'a': 1, 'bbb': 2.0, 'cdef': ('hol%s' % chr(224))})
         input = utils.extract_name_value('a=1 b=2.0 c=hol%s' % chr(224))
-        self.assertRaises(KeyError, utils.assemble_option_dict,
-                          input, self.optionspec)
+        with self.assertRaises(KeyError):
+            utils.assemble_option_dict(input, self.optionspec)
         input = utils.extract_name_value('a=1 bbb=two cdef=hol%s' % chr(224))
-        self.assertRaises(ValueError, utils.assemble_option_dict,
-                          input, self.optionspec)
+        with self.assertRaises(ValueError):
+            utils.assemble_option_dict(input, self.optionspec)
 
     def test_extract_extension_options(self):
         field_list = nodes.field_list()
@@ -202,40 +204,37 @@ class ExtensionOptionTests(unittest.TestCase):
               nodes.field_body('', nodes.paragraph('', '2.0')))
         field_list += nodes.field(
               '', nodes.field_name('', 'cdef'),
-              nodes.field_body('', nodes.paragraph('', u'hol\u00e0')))
+              nodes.field_body('', nodes.paragraph('', 'hol\u00e0')))
         field_list += nodes.field(
               '', nodes.field_name('', 'empty'), nodes.field_body())
         self.assertEqual(
               utils.extract_extension_options(field_list, self.optionspec),
               {'a': 1, 'bbb': 2.0,
-               'cdef': u'hol\u00e0',
+               'cdef': 'hol\u00e0',
                'empty': None})
-        self.assertRaises(KeyError, utils.extract_extension_options,
-                          field_list, {})
+        with self.assertRaises(KeyError):
+            utils.extract_extension_options(field_list, {})
         field_list += nodes.field(
               '', nodes.field_name('', 'cdef'),
               nodes.field_body('', nodes.paragraph('', 'one'),
                                nodes.paragraph('', 'two')))
-        self.assertRaises(utils.BadOptionDataError,
-                          utils.extract_extension_options,
-                          field_list, self.optionspec)
+        with self.assertRaises(utils.BadOptionDataError):
+            utils.extract_extension_options(field_list, self.optionspec)
         field_list[-1] = nodes.field(
               '', nodes.field_name('', 'cdef bad'),
               nodes.field_body('', nodes.paragraph('', 'no arguments')))
-        self.assertRaises(utils.BadOptionError,
-                          utils.extract_extension_options,
-                          field_list, self.optionspec)
+        with self.assertRaises(utils.BadOptionError):
+            utils.extract_extension_options(field_list, self.optionspec)
         field_list[-1] = nodes.field(
               '', nodes.field_name('', 'cdef'),
               nodes.field_body('', nodes.paragraph('', 'duplicate')))
-        self.assertRaises(utils.DuplicateOptionError,
-                          utils.extract_extension_options,
-                          field_list, self.optionspec)
+        with self.assertRaises(utils.DuplicateOptionError):
+            utils.extract_extension_options(field_list, self.optionspec)
         field_list[-2] = nodes.field(
               '', nodes.field_name('', 'unkown'),
               nodes.field_body('', nodes.paragraph('', 'unknown')))
-        self.assertRaises(KeyError, utils.extract_extension_options,
-                          field_list, self.optionspec)
+        with self.assertRaises(KeyError):
+            utils.extract_extension_options(field_list, self.optionspec)
 
 
 class HelperFunctionTests(unittest.TestCase):
@@ -275,32 +274,55 @@ class HelperFunctionTests(unittest.TestCase):
                          ['grc-ibycus-x-altquot', 'grc-ibycus',
                           'grc-x-altquot', 'grc'])
 
+    def test_xml_declaration(self):
+        # default is no encoding declaration
+        self.assertEqual(utils.xml_declaration(), '<?xml version="1.0"?>\n')
+        # if an encoding is passed, declare it
+        self.assertEqual(utils.xml_declaration('ISO-8859-2'),
+                         '<?xml version="1.0" encoding="ISO-8859-2"?>\n')
+        # ignore pseudo encoding name "unicode" introduced by
+        # `docutils.io.Output.encode()`
+        self.assertEqual(utils.xml_declaration('Unicode'),
+                         '<?xml version="1.0"?>\n')
+        # ... non-regarding case
+        self.assertEqual(utils.xml_declaration('UNICODE'),
+                         '<?xml version="1.0"?>\n')
+        # allow %s for later interpolation
+        # (used for part 'html_prolog', cf. docs/api/publisher.html)
+        self.assertEqual(utils.xml_declaration('%s'),
+                         '<?xml version="1.0" encoding="%s"?>\n')
+
     def test_column_width(self):
-        self.assertEqual(utils.column_width(u'de'), 2)
-        self.assertEqual(utils.column_width(u'dâ'), 2) # pre-composed
-        self.assertEqual(utils.column_width(u'dâ'), 2) # combining
+        self.assertEqual(utils.column_width('de'), 2)
+        self.assertEqual(utils.column_width('dâ'), 2)  # pre-composed
+        self.assertEqual(utils.column_width('dâ'), 2)  # combining
 
     def test_decode_path(self):
-        strpath = utils.decode_path('späm')
-        unipath = utils.decode_path(u'späm')
+        try:
+            bytes_filename = 'späm'.encode(sys.getfilesystemencoding())
+        except UnicodeEncodeError:
+            bytes_filename = b'spam'
+        bytespath = utils.decode_path(bytes_filename)
+        unipath = utils.decode_path('späm')
         defaultpath = utils.decode_path(None)
-        self.assertEqual(strpath, u'späm')
-        self.assertEqual(unipath, u'späm')
-        self.assertEqual(defaultpath, u'')
-        self.assertTrue(isinstance(strpath, nodes.reprunicode))
-        self.assertTrue(isinstance(unipath, unicode))
-        self.assertTrue(isinstance(defaultpath, unicode))
+        if bytes_filename != b'spam':  # skip if ä cannot be encoded
+            self.assertEqual(bytespath, 'späm')
+        self.assertEqual(unipath, 'späm')
+        self.assertEqual(defaultpath, '')
+        self.assertTrue(isinstance(bytespath, str))
+        self.assertTrue(isinstance(unipath, str))
+        self.assertTrue(isinstance(defaultpath, str))
         self.assertRaises(ValueError, utils.decode_path, 13)
 
     def test_relative_path(self):
         # Build and return a path to `target`, relative to `source`:
         # Use '/' as path sep in result.
         self.assertEqual(utils.relative_path('spam', 'spam'), '')
-        source = os.path.join('h\xE4m', 'spam', 'fileA')
-        target = os.path.join('h\xE4m', 'spam', 'fileB')
+        source = os.path.join('häm', 'spam', 'fileA')
+        target = os.path.join('häm', 'spam', 'fileB')
         self.assertEqual(utils.relative_path(source, target), 'fileB')
-        source = os.path.join('h\xE4m', 'spam', 'fileA')
-        target = os.path.join('h\xE4m', 'fileB')
+        source = os.path.join('häm', 'spam', 'fileA')
+        target = os.path.join('häm', 'fileB')
         self.assertEqual(utils.relative_path(source, target), '../fileB')
         # if source is None, default to the cwd:
         target = os.path.join('eggs', 'fileB')
@@ -312,30 +334,33 @@ class HelperFunctionTests(unittest.TestCase):
         # self.assertEqual(utils.relative_path(source, target),
         #                  os.path.abspath('fileB'))
         # Correctly process unicode instances:
-        self.assertEqual(utils.relative_path(u'spam', u'spam'), u'')
-        source = os.path.join(u'h\xE4m', u'spam', u'fileA')
-        target = os.path.join(u'h\xE4m', u'spam', u'fileB')
-        self.assertEqual(utils.relative_path(source, target), u'fileB')
-        source = os.path.join(u'h\xE4m', u'spam', u'fileA')
-        target = os.path.join(u'h\xE4m', u'fileB')
-        self.assertEqual(utils.relative_path(source, target), u'../fileB')
+        self.assertEqual(utils.relative_path('spam', 'spam'), '')
+        source = os.path.join('häm', 'spam', 'fileA')
+        target = os.path.join('häm', 'spam', 'fileB')
+        self.assertEqual(utils.relative_path(source, target), 'fileB')
+        source = os.path.join('häm', 'spam', 'fileA')
+        target = os.path.join('häm', 'fileB')
+        self.assertEqual(utils.relative_path(source, target), '../fileB')
         # if source is None, default to the cwd:
-        target = os.path.join(u'eggs', u'fileB')
-        self.assertEqual(utils.relative_path(None, target), u'eggs/fileB')
+        target = os.path.join('eggs', 'fileB')
+        self.assertEqual(utils.relative_path(None, target), 'eggs/fileB')
 
     def test_find_file_in_dirs(self):
         # Search for file `path` in the sequence of directories `dirs`.
         # Return the first expansion that matches an existing file.
-        dirs = ('nonex', '.', '..')
-        found = utils.find_file_in_dirs('HISTORY.txt', dirs)
-        # returns
-        # '..\\HISTORY.txt' on windows
-        # '../HISTORY.txt' on other platforms
-        # 'HISTORY.txt' if not called from docutils directory.
-        self.assertTrue(found.startswith('..'), 'HISTORY.txt not found in "..".')
+        dirs = (os.path.join(TEST_ROOT, 'nonex'),
+                TEST_ROOT,
+                os.path.join(TEST_ROOT, '..'))
+        result = utils.find_file_in_dirs('alltests.py', dirs)
+        expected = os.path.join(TEST_ROOT, 'alltests.py').replace('\\', '/')
+        self.assertEqual(result, expected)
+        result = utils.find_file_in_dirs('HISTORY.txt', dirs)
+        expected = (TEST_ROOT / '..' / 'HISTORY.txt').as_posix()
+        self.assertEqual(result, expected)
+        # normalize for second check
+        self.assertTrue(os.path.relpath(result, TEST_ROOT).startswith('..'),
+                        'HISTORY.txt not found in "..".')
         # Return `path` if the file exists in the cwd or if there is no match
-        self.assertEqual(utils.find_file_in_dirs('alltests.py', dirs),
-                         'alltests.py')
         self.assertEqual(utils.find_file_in_dirs('gibts/nicht.txt', dirs),
                          'gibts/nicht.txt')
 
@@ -354,7 +379,37 @@ class HelperFunctionTests(unittest.TestCase):
         self.assertEqual(unescaped, self.unescaped)
         restored = utils.unescape(self.nulled, restore_backslashes=True)
         self.assertEqual(restored, self.escaped)
-  
+
+
+class StylesheetFunctionTests(unittest.TestCase):
+
+    stylesheet_dirs = [TEST_ROOT, os.path.join(TEST_ROOT, 'data')]
+
+    def test_get_stylesheet_list_stylesheet_path(self):
+        # look for stylesheets in stylesheet_dirs
+        self.stylesheet = None
+        self.stylesheet_path = 'ham.css, missing.css'
+
+        ham_css = os.path.join(TEST_ROOT, 'data', 'ham.css').replace('\\', '/')
+        self.assertEqual(utils.get_stylesheet_list(self),
+                         [ham_css, 'missing.css'])
+
+    def test_get_stylesheet_list_stylesheet(self):
+        # use stylesheet paths verbatim
+        self.stylesheet = 'ham.css, missing.css'
+        self.stylesheet_path = None
+
+        self.assertEqual(utils.get_stylesheet_list(self),
+                         ['ham.css', 'missing.css'])
+
+    def test_get_stylesheet_list_conflict(self):
+        # settings "stylesheet_path" and "stylesheet"
+        # must not be used together
+        self.stylesheet = 'ham.css, missing.css'
+        self.stylesheet_path = 'man.css, miss2.css'
+        with self.assertRaises(AssertionError):
+            utils.get_stylesheet_list(self)
+
 
 if __name__ == '__main__':
     unittest.main()

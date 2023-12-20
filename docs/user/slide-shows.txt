@@ -5,7 +5,7 @@
 =================================
 
 :Authors: David Goodger & Chris Liechti
-:Date:    $Date: 2006-03-30 16:29:59 +0200 (Do, 30. Mär 2006) $
+:Date:    $Date: 2022-06-15 13:31:09 +0200 (Mi, 15. Jun 2022) $
 
 .. This document has been placed in the public domain.
 
@@ -18,7 +18,7 @@
    of the s5_html.py writer and the rst2s5.py front end.
 
    To view this document as a slide show see
-   http://docutils.sf.net/docs/user/slide-shows.s5.html (or `your
+   https://docutils.sourceforge.io/docs/user/slide-shows.s5.html (or `your
    local copy <slide-shows.s5.html>`__).
 
 .. contents::
@@ -54,8 +54,8 @@
    There is no support for the "header" directive in the themes
    included with Docutils.
 
-.. _Docutils: http://docutils.sourceforge.net/
-.. _reStructuredText: http://docutils.sourceforge.net/rst.html
+.. _Docutils: https://docutils.sourceforge.io/
+.. _reStructuredText: https://docutils.sourceforge.io/rst.html
 .. _S5: http://meyerweb.com/eric/tools/s5/
 .. _Firefox: http://www.mozilla.com/firefox/
 .. |bullet| unicode:: U+02022
@@ -80,7 +80,7 @@ Introduction
    installed.  See the `Docutils README`__ file for installation
    instructions.
 
-   __ http://docutils.sourceforge.net/README.html
+   __ https://docutils.sourceforge.io/README.html
 
 * reStructuredText
 
@@ -474,19 +474,14 @@ Themes
 
   .. container:: handout
 
-     Themes from the `S5 tutorial`__ can be used.  These themes are in
-     the public domain and may be redistributed freely.
-
-     __ http://meyerweb.com/eric/tools/s5/s5blank.zip
-
      Sites with other S5 themes:
 
      * http://meyerweb.com/eric/tools/s5/themes/
      * http://mozilla.wikicities.com/wiki/Firefox_S5:Designs
      * http://lachy.id.au/dev/mozilla/firefox/s5/
      * http://www.openlight.com/Python-S5-Theme.tar.gz
-
-     S5 is becoming more popular every day.  Do a web search for "S5
+     
+     Do a web search for "S5
      theme" and you're bound to find plenty of choices.
 
 * "``--theme``" option.
@@ -645,12 +640,6 @@ stylesheets, JavaScript, and graphics:
      code also manages the fallback to Opera Show if you're using
      the Opera web browser.
 
-     Two files are included to support PNG transparency (alpha
-     channels) in Internet Explorer:
-
-     - iepngfix.htc
-     - blank.gif
-
 
 Making a Custom Theme
 =====================
@@ -665,7 +654,7 @@ Making a Custom Theme
 
 2. Copy ``ui/<base-theme>`` to ``ui/<new-theme>``.
 
-3. Edit the styles.
+3. Edit the styles (save in UTF-8 encoding).
 
    .. class:: handout
 
@@ -697,7 +686,7 @@ Making a Custom Theme
 
    Resources:
 
-   * W3C's `Learning CSS <http://www.w3.org/Style/CSS/learning>`__
+   * W3C's `Learning CSS <https://www.w3.org/Style/CSS/learning>`__
 
    * `Creating An S5 Theme <http://home.cogeco.ca/~ve3ll/s5themes.htm>`__
 
@@ -992,10 +981,10 @@ That's All, Folks!
 .. class:: huge
 
    Further information:
-   http://docutils.sf.net
+   https://docutils.sourceforge.io
 
    Docutils users' mailing list:
-   docutils-users@lists.sf.net
+   docutils-users@lists.sourceforge.net
 
    `Any questions?`
 

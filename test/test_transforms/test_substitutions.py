@@ -1,26 +1,47 @@
-#! /usr/bin/env python
+#! /usr/bin/env python3
 
-# $Id: test_substitutions.py 8481 2020-01-31 08:17:24Z milde $
+# $Id: test_substitutions.py 9277 2022-11-26 23:15:13Z milde $
 # Author: David Goodger <goodger@python.org>
 # Copyright: This module has been placed in the public domain.
 
 """
 Tests for docutils.transforms.references.Substitutions.
 """
-from __future__ import absolute_import
+
+from pathlib import Path
+import sys
+import unittest
 
 if __name__ == '__main__':
-    import __init__
-from test_transforms import DocutilsTestSupport
-from docutils.transforms.references import Substitutions
+    # prepend the "docutils root" to the Python library path
+    # so we import the local `docutils` package.
+    sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+
+from docutils.frontend import get_default_settings
 from docutils.parsers.rst import Parser
+from docutils.transforms.references import Substitutions
+from docutils.transforms.universal import TestMessages
+from docutils.utils import new_document
 
 
-def suite():
-    parser = Parser()
-    s = DocutilsTestSupport.TransformTestSuite(parser)
-    s.generateTests(totest)
-    return s
+class TransformTestCase(unittest.TestCase):
+    def test_transforms(self):
+        parser = Parser()
+        settings = get_default_settings(Parser)
+        settings.warning_stream = ''
+        for name, (transforms, cases) in totest.items():
+            for casenum, (case_input, case_expected) in enumerate(cases):
+                with self.subTest(id=f'totest[{name!r}][{casenum}]'):
+                    document = new_document('test data', settings.copy())
+                    parser.parse(case_input, document)
+                    # Don't do a ``populate_from_components()`` because that
+                    # would enable the Transformer's default transforms.
+                    document.transformer.add_transforms(transforms)
+                    document.transformer.add_transform(TestMessages)
+                    document.transformer.apply_transforms()
+                    output = document.pformat()
+                    self.assertEqual(output, case_expected)
+
 
 totest = {}
 
@@ -46,14 +67,14 @@ Here's an |unknown| substitution.
 <document source="test data">
     <paragraph>
         Here's an \n\
-        <problematic ids="id2" refid="id1">
+        <problematic ids="problematic-1" refid="system-message-1">
             |unknown|
          substitution.
-    <system_message backrefs="id2" ids="id1" level="3" line="1" source="test data" type="ERROR">
+    <system_message backrefs="problematic-1" ids="system-message-1" level="3" line="1" source="test data" type="ERROR">
         <paragraph>
             Undefined substitution referenced: "unknown".
 """],
-[u"""\
+["""\
 Substitutions support case differences:
 
 .. |eacute| replace:: \u00E9
@@ -61,7 +82,7 @@ Substitutions support case differences:
 
 |Eacute|\\t\\ |eacute|, and even |EACUTE|.
 """,
-u"""\
+"""\
 <document source="test data">
     <paragraph>
         Substitutions support case differences:
@@ -77,7 +98,7 @@ u"""\
         \u00C9
         .
 """],
-[u"""\
+["""\
 Indirect substitution definitions with multiple references:
 
 |substitute| my coke for gin
@@ -87,7 +108,7 @@ at least I'll get my washing done
 .. |substitute| replace:: |replace|
 .. |replace| replace:: swap
 """,
-u"""\
+"""\
 <document source="test data">
     <paragraph>
         Indirect substitution definitions with multiple references:
@@ -113,7 +134,7 @@ Regular expression |.| will match any character
 
 .. Note:: Note that |.| matches *exactly* one character
 """,
-u"""\
+"""\
 <document source="test data">
     <substitution_definition names="l">
         \xab
@@ -205,30 +226,48 @@ Use |sub| and |indirect1| and |sub| again (and |sub| one more time).
             .. |sub| replace:: |indirect1|
     <paragraph>
         Use \n\
-        <problematic ids="id8" refid="id7">
+        <problematic ids="problematic-4" refid="system-message-4">
             |Sub|
          and \n\
-        <problematic ids="id2" refid="id1">
+        <problematic ids="problematic-1" refid="system-message-1">
             |indirect1|
          and \n\
-        <problematic ids="id4" refid="id3">
+        <problematic ids="problematic-2" refid="system-message-2">
             |sub|
          again (and \n\
-        <problematic ids="id6" refid="id5">
+        <problematic ids="problematic-3" refid="system-message-3">
             |sub|
          one more time).
-    <system_message backrefs="id2" ids="id1" level="3" line="5" source="test data" type="ERROR">
+    <system_message backrefs="problematic-1" ids="system-message-1" level="3" line="5" source="test data" type="ERROR">
         <paragraph>
             Circular substitution definition referenced: "indirect1".
-    <system_message backrefs="id4" ids="id3" level="3" line="5" source="test data" type="ERROR">
+    <system_message backrefs="problematic-2" ids="system-message-2" level="3" line="5" source="test data" type="ERROR">
         <paragraph>
             Circular substitution definition referenced: "sub".
-    <system_message backrefs="id6" ids="id5" level="3" line="5" source="test data" type="ERROR">
+    <system_message backrefs="problematic-3" ids="system-message-3" level="3" line="5" source="test data" type="ERROR">
         <paragraph>
             Circular substitution definition referenced: "sub".
-    <system_message backrefs="id8" ids="id7" level="3" line="5" source="test data" type="ERROR">
+    <system_message backrefs="problematic-4" ids="system-message-4" level="3" line="5" source="test data" type="ERROR">
         <paragraph>
             Circular substitution definition referenced: "Sub".
+"""],
+["""\
+Substitution reference with |reference-in-content|.
+
+.. |reference-in-content| replace:: text and hyperlink-reference_
+""",
+"""\
+<document source="test data">
+    <paragraph>
+        Substitution reference with \n\
+        text and \n\
+        <reference name="hyperlink-reference" refname="hyperlink-reference">
+            hyperlink-reference
+        .
+    <substitution_definition names="reference-in-content">
+        text and \n\
+        <reference name="hyperlink-reference" refname="hyperlink-reference">
+            hyperlink-reference
 """],
 ])
 
@@ -243,7 +282,7 @@ space (|nbsp|), a backwards-not-equals (|bne|), and a captial omega (|Omega|).
 .. |bne| unicode:: U0003D U020E5
 .. |Omega| unicode:: U+003A9
 """,
-u"""\
+"""\
 <document source="test data">
     <paragraph>
         Insert an em-dash (
@@ -280,7 +319,7 @@ Copyright |copy| 2003, |BogusMegaCorp (TM)|.
 .. |BogusMegaCorp (TM)| unicode:: BogusMegaCorp U+2122
    .. with trademark sign
 """,
-u"""\
+"""\
 <document source="test data">
     <paragraph>
         Testing comments and extra text.
@@ -308,7 +347,7 @@ Some substitutions |TM| only need |rarrow| trimming on one side.
 .. |rarrow| unicode:: U+2192
    :rtrim:
 """,
-u"""\
+"""\
 <document source="test data">
     <paragraph>
         Insert an em-dash
@@ -347,9 +386,9 @@ Make sure this substitution definition is not registered: |target|
             .. |target| replace:: _`target`
     <paragraph>
         Make sure this substitution definition is not registered: \n\
-        <problematic ids="id2" refid="id1">
+        <problematic ids="problematic-1" refid="system-message-1">
             |target|
-    <system_message backrefs="id2" ids="id1" level="3" line="5" source="test data" type="ERROR">
+    <system_message backrefs="problematic-1" ids="system-message-1" level="3" line="5" source="test data" type="ERROR">
         <paragraph>
             Undefined substitution referenced: "target".
 """],
@@ -357,5 +396,4 @@ Make sure this substitution definition is not registered: |target|
 
 
 if __name__ == '__main__':
-    import unittest
-    unittest.main(defaultTest='suite')
+    unittest.main()

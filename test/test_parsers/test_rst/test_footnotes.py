@@ -1,23 +1,40 @@
-#! /usr/bin/env python
+#! /usr/bin/env python3
 
-# $Id: test_footnotes.py 8481 2020-01-31 08:17:24Z milde $
+# $Id: test_footnotes.py 9277 2022-11-26 23:15:13Z milde $
 # Author: David Goodger <goodger@python.org>
 # Copyright: This module has been placed in the public domain.
 
 """
 Tests for states.py.
 """
-from __future__ import absolute_import
+
+from pathlib import Path
+import sys
+import unittest
 
 if __name__ == '__main__':
-    import __init__
-from test_parsers import DocutilsTestSupport
+    # prepend the "docutils root" to the Python library path
+    # so we import the local `docutils` package.
+    sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
+
+from docutils.frontend import get_default_settings
+from docutils.parsers.rst import Parser
+from docutils.utils import new_document
 
 
-def suite():
-    s = DocutilsTestSupport.ParserTestSuite()
-    s.generateTests(totest)
-    return s
+class ParserTestCase(unittest.TestCase):
+    def test_parser(self):
+        parser = Parser()
+        settings = get_default_settings(Parser)
+        settings.warning_stream = ''
+        for name, cases in totest.items():
+            for casenum, (case_input, case_expected) in enumerate(cases):
+                with self.subTest(id=f'totest[{name!r}][{casenum}]'):
+                    document = new_document('test data', settings.copy())
+                    parser.parse(case_input, document)
+                    output = document.pformat()
+                    self.assertEqual(output, case_expected)
+
 
 totest = {}
 
@@ -27,7 +44,7 @@ totest['footnotes'] = [
 """,
 """\
 <document source="test data">
-    <footnote ids="id1" names="1">
+    <footnote ids="footnote-1" names="1">
         <label>
             1
         <paragraph>
@@ -39,7 +56,7 @@ totest['footnotes'] = [
 """,
 """\
 <document source="test data">
-    <footnote ids="id1" names="1">
+    <footnote ids="footnote-1" names="1">
         <label>
             1
         <paragraph>
@@ -55,13 +72,13 @@ totest['footnotes'] = [
 """,
 """\
 <document source="test data">
-    <footnote ids="id1" names="1">
+    <footnote ids="footnote-1" names="1">
         <label>
             1
         <paragraph>
             This is a footnote
             on multiple lines with more space.
-    <footnote ids="id2" names="2">
+    <footnote ids="footnote-2" names="2">
         <label>
             2
         <paragraph>
@@ -75,7 +92,7 @@ totest['footnotes'] = [
 """,
 """\
 <document source="test data">
-    <footnote ids="id1" names="1">
+    <footnote ids="footnote-1" names="1">
         <label>
             1
         <paragraph>
@@ -89,7 +106,7 @@ That was an empty footnote.
 """,
 """\
 <document source="test data">
-    <footnote ids="id1" names="1">
+    <footnote ids="footnote-1" names="1">
         <label>
             1
     <paragraph>
@@ -101,7 +118,7 @@ No blank line.
 """,
 """\
 <document source="test data">
-    <footnote ids="id1" names="1">
+    <footnote ids="footnote-1" names="1">
         <label>
             1
     <system_message level="2" line="2" source="test data" type="WARNING">
@@ -126,21 +143,21 @@ totest['auto_numbered_footnotes'] = [
 """\
 <document source="test data">
     <paragraph>
-        <footnote_reference auto="1" ids="id1">
+        <footnote_reference auto="1" ids="footnote-reference-1">
          is the first auto-numbered footnote reference.
-        <footnote_reference auto="1" ids="id2">
+        <footnote_reference auto="1" ids="footnote-reference-2">
          is the second auto-numbered footnote reference.
-    <footnote auto="1" ids="id3">
+    <footnote auto="1" ids="footnote-1">
         <paragraph>
             Auto-numbered footnote 1.
-    <footnote auto="1" ids="id4">
+    <footnote auto="1" ids="footnote-2">
         <paragraph>
             Auto-numbered footnote 2.
-    <footnote auto="1" ids="id5">
+    <footnote auto="1" ids="footnote-3">
         <paragraph>
             Auto-numbered footnote 3.
     <paragraph>
-        <footnote_reference auto="1" ids="id6">
+        <footnote_reference auto="1" ids="footnote-reference-3">
          is the third auto-numbered footnote reference.
 """],
 ["""\
@@ -160,7 +177,7 @@ the footnotes: first_, second_, third_.
 """\
 <document source="test data">
     <paragraph>
-        <footnote_reference auto="1" ids="id1" refname="third">
+        <footnote_reference auto="1" ids="footnote-reference-1" refname="third">
          is a reference to the third auto-numbered footnote.
     <footnote auto="1" ids="first" names="first">
         <paragraph>
@@ -172,11 +189,11 @@ the footnotes: first_, second_, third_.
         <paragraph>
             Third auto-numbered footnote.
     <paragraph>
-        <footnote_reference auto="1" ids="id2" refname="second">
+        <footnote_reference auto="1" ids="footnote-reference-2" refname="second">
          is a reference to the second auto-numbered footnote.
-        <footnote_reference auto="1" ids="id3" refname="first">
+        <footnote_reference auto="1" ids="footnote-reference-3" refname="first">
          is a reference to the first auto-numbered footnote.
-        <footnote_reference auto="1" ids="id4" refname="third">
+        <footnote_reference auto="1" ids="footnote-reference-4" refname="third">
          is another reference to the third auto-numbered footnote.
     <paragraph>
         Here are some internal cross-references to the targets generated by
@@ -210,25 +227,25 @@ Mixed anonymous and labelled auto-numbered footnotes:
     <paragraph>
         Mixed anonymous and labelled auto-numbered footnotes:
     <paragraph>
-        <footnote_reference auto="1" ids="id1" refname="four">
+        <footnote_reference auto="1" ids="footnote-reference-1" refname="four">
          should be 4, \n\
-        <footnote_reference auto="1" ids="id2">
+        <footnote_reference auto="1" ids="footnote-reference-2">
          should be 1,
-        <footnote_reference auto="1" ids="id3">
+        <footnote_reference auto="1" ids="footnote-reference-3">
          should be 3, \n\
-        <footnote_reference auto="1" ids="id4">
+        <footnote_reference auto="1" ids="footnote-reference-4">
          is one too many,
-        <footnote_reference auto="1" ids="id5" refname="two">
+        <footnote_reference auto="1" ids="footnote-reference-5" refname="two">
          should be 2, and \n\
-        <footnote_reference auto="1" ids="id6" refname="six">
+        <footnote_reference auto="1" ids="footnote-reference-6" refname="six">
          doesn't exist.
-    <footnote auto="1" ids="id7">
+    <footnote auto="1" ids="footnote-1">
         <paragraph>
             Auto-numbered footnote 1.
     <footnote auto="1" ids="two" names="two">
         <paragraph>
             Auto-numbered footnote 2.
-    <footnote auto="1" ids="id8">
+    <footnote auto="1" ids="footnote-2">
         <paragraph>
             Auto-numbered footnote 3.
     <footnote auto="1" ids="four" names="four">
@@ -237,8 +254,8 @@ Mixed anonymous and labelled auto-numbered footnotes:
     <footnote auto="1" dupnames="five" ids="five">
         <paragraph>
             Auto-numbered footnote 5.
-    <footnote auto="1" dupnames="five" ids="id9">
-        <system_message backrefs="id9" level="2" line="12" source="test data" type="WARNING">
+    <footnote auto="1" dupnames="five" ids="five-1">
+        <system_message backrefs="five-1" level="2" line="12" source="test data" type="WARNING">
             <paragraph>
                 Duplicate explicit target name: "five".
         <paragraph>
@@ -267,36 +284,36 @@ and labelled auto-numbered footnotes:
         Mixed manually-numbered, anonymous auto-numbered,
         and labelled auto-numbered footnotes:
     <paragraph>
-        <footnote_reference auto="1" ids="id1" refname="four">
+        <footnote_reference auto="1" ids="footnote-reference-1" refname="four">
          should be 4, \n\
-        <footnote_reference auto="1" ids="id2">
+        <footnote_reference auto="1" ids="footnote-reference-2">
          should be 2,
-        <footnote_reference ids="id3" refname="1">
+        <footnote_reference ids="footnote-reference-3" refname="1">
             1
          is 1, \n\
-        <footnote_reference ids="id4" refname="3">
+        <footnote_reference ids="footnote-reference-4" refname="3">
             3
          is 3,
-        <footnote_reference auto="1" ids="id5">
+        <footnote_reference auto="1" ids="footnote-reference-5">
          should be 6, \n\
-        <footnote_reference auto="1" ids="id6">
+        <footnote_reference auto="1" ids="footnote-reference-6">
          is one too many,
-        <footnote_reference auto="1" ids="id7" refname="five">
+        <footnote_reference auto="1" ids="footnote-reference-7" refname="five">
          should be 5, and \n\
-        <footnote_reference auto="1" ids="id8" refname="six">
+        <footnote_reference auto="1" ids="footnote-reference-8" refname="six">
          doesn't exist.
-    <footnote ids="id9" names="1">
+    <footnote ids="footnote-1" names="1">
         <label>
             1
         <paragraph>
             Manually-numbered footnote 1.
-    <footnote auto="1" ids="id10">
+    <footnote auto="1" ids="footnote-2">
         <paragraph>
             Auto-numbered footnote 2.
     <footnote auto="1" ids="four" names="four">
         <paragraph>
             Auto-numbered footnote 4.
-    <footnote ids="id11" names="3">
+    <footnote ids="footnote-3" names="3">
         <label>
             3
         <paragraph>
@@ -304,13 +321,13 @@ and labelled auto-numbered footnotes:
     <footnote auto="1" dupnames="five" ids="five">
         <paragraph>
             Auto-numbered footnote 5.
-    <footnote auto="1" dupnames="five" ids="id12">
-        <system_message backrefs="id12" level="2" line="14" source="test data" type="WARNING">
+    <footnote auto="1" dupnames="five" ids="five-1">
+        <system_message backrefs="five-1" level="2" line="14" source="test data" type="WARNING">
             <paragraph>
                 Duplicate explicit target name: "five".
         <paragraph>
             Auto-numbered footnote 5 again (duplicate).
-    <footnote auto="1" ids="id13">
+    <footnote auto="1" ids="footnote-4">
         <paragraph>
             Auto-numbered footnote 6.
 """],
@@ -322,7 +339,7 @@ totest['auto_symbol_footnotes'] = [
 """,
 """\
 <document source="test data">
-    <footnote auto="*" ids="id1">
+    <footnote auto="*" ids="footnote-1">
         <paragraph>
             This is an auto-symbol footnote.
 """],
@@ -330,5 +347,4 @@ totest['auto_symbol_footnotes'] = [
 
 
 if __name__ == '__main__':
-    import unittest
-    unittest.main(defaultTest='suite')
+    unittest.main()

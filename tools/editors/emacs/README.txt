@@ -4,7 +4,7 @@
  Emacs Support Files
 =====================
 
-:Date: $Date: 2008-11-26 19:07:47 +0100 (Mi, 26. Nov 2008) $
+:Date: $Date: 2022-01-29 23:26:10 +0100 (Sa, 29. Jän 2022) $
 
 This directory contains the following Emacs lisp package files:
 
@@ -15,7 +15,7 @@ This directory contains the following Emacs lisp package files:
   * Table-of-contents mode and insertion (M. Blais);
   * Font-lock syntax highlighting (S. Merten);
   * Some handy editing functions (D. Goodger).
-  * Some functions for converting rest documents from within emacs (M. Blais).  
+  * Some functions for converting rest documents from within emacs (M. Blais).
 
 * `<tests/>`_ subdirectory: automated tests for some of the features in rst.el.
   Please make sure the tests pass if you change the LISP code.  Just type "make"
@@ -27,4 +27,4 @@ To install the package, put a copy of the package file in a directory on your
 For setup and usage details, see `Emacs Support for reStructuredText
 <../../../docs/user/emacs.html>`_.
 
-.. _reStructuredText: http://docutils.sourceforge.net/rst.html
+.. _reStructuredText: https://docutils.sourceforge.io/rst.html

@@ -1,25 +1,53 @@
-#! /usr/bin/env python
+#! /usr/bin/env python3
 
-# $Id: test_code.py 8598 2021-01-03 21:05:04Z milde $
+# $Id: test_code.py 9355 2023-04-17 20:27:15Z milde $
 # Author: Guenter Milde
 # Copyright: This module has been placed in the public domain.
 
 """
 Test the 'code' directive in parsers/rst/directives/body.py.
 """
-from __future__ import absolute_import
+
+from pathlib import Path
+import re
+import sys
+import unittest
 
 if __name__ == '__main__':
-    import __init__
-from test_parsers import DocutilsTestSupport
+    # prepend the "docutils root" to the Python library path
+    # so we import the local `docutils` package.
+    sys.path.insert(0, str(Path(__file__).resolve().parents[4]))
+
+from docutils.frontend import get_default_settings
+from docutils.parsers.rst import Parser
+from docutils.utils import new_document
 from docutils.utils.code_analyzer import with_pygments
 
-def suite():
-    s = DocutilsTestSupport.ParserTestSuite()
-    if not with_pygments:
-        del(totest['code-parsing'])
-    s.generateTests(totest)
-    return s
+if with_pygments:
+    import pygments
+    _pv = re.match(r'^([0-9]+)\.([0-9]*)', pygments.__version__)
+    PYGMENTS_2_14_PLUS = (int(_pv[1]), int(_pv[2])) >= (2, 14)
+else:
+    PYGMENTS_2_14_PLUS = None
+
+
+class ParserTestCase(unittest.TestCase):
+    def test_parser(self):
+        if not with_pygments:
+            del totest['code_parsing']
+
+        parser = Parser()
+        settings = get_default_settings(Parser)
+        settings.warning_stream = ''
+        settings.report_level = 5
+        for name, cases in totest.items():
+            for casenum, (case_input, case_expected) in enumerate(cases):
+                with self.subTest(id=f'totest[{name!r}][{casenum}]'):
+                    document = new_document('test data', settings.copy())
+                    parser.parse(case_input, document)
+                    output = document.pformat()
+                    self.assertEqual(output, case_expected)
+
 
 totest = {}
 
@@ -96,7 +124,7 @@ totest['code'] = [
 """],
 ]
 
-totest['code-parsing'] = [
+totest['code_parsing'] = [
 ["""\
 .. code:: python3
   :class: testclass
@@ -133,6 +161,60 @@ totest['code-parsing'] = [
       print(8/2)
 """,
 """\
+<document source="test data">
+    <literal_block classes="code python3 testclass" ids="my-function" names="my_function" xml:space="preserve">
+        <inline classes="ln">
+             7 \n\
+        <inline classes="keyword">
+            def
+         \n\
+        <inline classes="name function">
+            my_function
+        <inline classes="punctuation">
+            ():
+        <inline classes="whitespace">
+            \n\
+        <inline classes="ln">
+             8 \n\
+        <inline classes="whitespace">
+                \n\
+        <inline classes="literal string doc">
+            \'\'\'Test the lexer.
+        <inline classes="ln">
+             9 \n\
+        <inline classes="literal string doc">
+                \'\'\'
+        <inline classes="whitespace">
+            \n\
+        <inline classes="ln">
+            10 \n\
+        <inline classes="whitespace">
+            \n\
+        <inline classes="ln">
+            11 \n\
+        <inline classes="whitespace">
+            \n\
+        <inline classes="comment single">
+            # and now for something completely different
+        <inline classes="whitespace">
+            \n\
+        <inline classes="ln">
+            12 \n\
+        <inline classes="whitespace">
+            \n\
+        <inline classes="name builtin">
+            print
+        <inline classes="punctuation">
+            (
+        <inline classes="literal number integer">
+            8
+        <inline classes="operator">
+            /
+        <inline classes="literal number integer">
+            2
+        <inline classes="punctuation">
+            )
+""" if PYGMENTS_2_14_PLUS else """\
 <document source="test data">
     <literal_block classes="code python3 testclass" ids="my-function" names="my_function" xml:space="preserve">
         <inline classes="ln">
@@ -199,7 +281,8 @@ totest['code-parsing'] = [
             }
          \n\
         <inline classes="comment">
-            % emphasize"""],
+            % emphasize
+"""],
 ["""\
 .. code:: rst
   :number-lines:
@@ -250,5 +333,4 @@ Place the language name in a class argument to avoid the no-lexer warning:
 
 
 if __name__ == '__main__':
-    import unittest
-    unittest.main(defaultTest='suite')
+    unittest.main()

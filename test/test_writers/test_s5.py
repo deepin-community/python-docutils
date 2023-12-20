@@ -1,38 +1,65 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
-# $Id: test_s5.py 8481 2020-01-31 08:17:24Z milde $
+# $Id: test_s5.py 9369 2023-05-02 23:04:27Z milde $
 # Author: David Goodger <goodger@python.org>
 # Copyright: This module has been placed in the public domain.
 
 """
 Tests for the S5/HTML writer.
 """
-from __future__ import absolute_import
 
 import os
 import platform
+from pathlib import Path
+import sys
+import unittest
 
 if __name__ == '__main__':
-    import __init__
-from test_writers import DocutilsTestSupport
+    # prepend the "docutils root" to the Python library path
+    # so we import the local `docutils` package.
+    sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+
+import docutils
+from docutils.core import publish_string
 
 
-def suite():
-    settings = {'stylesheet_path': '/test.css',
-                'embed_stylesheet': 0,}
-    s = DocutilsTestSupport.PublishTestSuite('s5', suite_settings=settings)
-    s.generateTests(totest_1)
-    settings['hidden_controls'] = 0
-    settings['view_mode'] = 'outline'
-    s.generateTests(totest_2)
-    return s
+class WriterPublishTestCase(unittest.TestCase):
+    def test_publish(self):
+        writer_name = 's5'
+        settings = {
+            '_disable_config': True,
+            'strict_visitor': True,
+            'stylesheet_path': '/test.css',
+            'embed_stylesheet': False,
+        }
+        for name, cases in totest_1.items():
+            for casenum, (case_input, case_expected) in enumerate(cases):
+                with self.subTest(id=f'totest_1[{name!r}][{casenum}]'):
+                    output = publish_string(
+                        source=case_input,
+                        writer_name=writer_name,
+                        settings_overrides=settings.copy()
+                        ).decode()
+                    self.assertEqual(output, case_expected)
 
-interpolations = {
-        'version': DocutilsTestSupport.docutils.__version__,
-        'drive': '', }
+        settings['hidden_controls'] = False
+        settings['view_mode'] = 'outline'
+        for name, cases in totest_2.items():
+            for casenum, (case_input, case_expected) in enumerate(cases):
+                with self.subTest(id=f'totest_2[{name!r}][{casenum}]'):
+                    output = publish_string(
+                        source=case_input,
+                        writer_name=writer_name,
+                        settings_overrides=settings.copy()
+                        ).decode()
+                    self.assertEqual(output, case_expected)
+
 
 if platform.system() == "Windows":
-    interpolations['drive'] = "C:"
+    drive_prefix = os.path.splitdrive(os.getcwd())[0]
+else:
+    drive_prefix = ""
+
 
 totest_1 = {}
 totest_2 = {}
@@ -50,16 +77,16 @@ First Slide
 
 Slide text.
 """,
-"""\
-<?xml version="1.0" encoding="utf-8" ?>
+f"""\
+<?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-<meta name="generator" content="Docutils %(version)s: http://docutils.sourceforge.net/" />
+<meta name="generator" content="Docutils {docutils.__version__}: https://docutils.sourceforge.io/" />
 <meta name="version" content="S5 1.1" />
 <title>Show Title</title>
-<link rel="stylesheet" href="%(drive)s/test.css" type="text/css" />
+<link rel="stylesheet" href="{drive_prefix}/test.css" type="text/css" />
 <!-- configuration parameters -->
 <meta name="defaultView" content="slideshow" />
 <meta name="controlVis" content="hidden" />
@@ -75,7 +102,7 @@ Slide text.
       type="text/css" media="projection" id="operaFix" />
 
 <style type="text/css">
-#currentSlide {display: none;}
+#currentSlide {{display: none;}}
 </style>
 </head>
 <body>
@@ -104,7 +131,7 @@ Slide text.
 </div>
 </body>
 </html>
-""" % interpolations]
+"""]
 ]
 
 totest_2['settings'] = [
@@ -115,16 +142,16 @@ totest_2['settings'] = [
 
 We're just checking the settings
 """,
-"""\
-<?xml version="1.0" encoding="utf-8" ?>
+f"""\
+<?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-<meta name="generator" content="Docutils %(version)s: http://docutils.sourceforge.net/" />
+<meta name="generator" content="Docutils {docutils.__version__}: https://docutils.sourceforge.io/" />
 <meta name="version" content="S5 1.1" />
 <title>Bogus Slide Show</title>
-<link rel="stylesheet" href="%(drive)s/test.css" type="text/css" />
+<link rel="stylesheet" href="{drive_prefix}/test.css" type="text/css" />
 <!-- configuration parameters -->
 <meta name="defaultView" content="outline" />
 <meta name="controlVis" content="visible" />
@@ -140,7 +167,7 @@ We're just checking the settings
       type="text/css" media="projection" id="operaFix" />
 
 <style type="text/css">
-#currentSlide {display: none;}
+#currentSlide {{display: none;}}
 </style>
 </head>
 <body>
@@ -164,9 +191,8 @@ We're just checking the settings
 </div>
 </body>
 </html>
-""" % interpolations]
+"""]
 ]
 
 if __name__ == '__main__':
-    import unittest
-    unittest.main(defaultTest='suite')
+    unittest.main()

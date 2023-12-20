@@ -1,5 +1,5 @@
-#! /usr/bin/env python
-# $Id: test_pickle.py 7539 2012-11-26 13:50:06Z milde $
+#! /usr/bin/env python3
+# $Id: test_pickle.py 9277 2022-11-26 23:15:13Z milde $
 # Author: David Goodger <goodger@python.org>
 # Copyright: This module has been placed in the public domain.
 
@@ -7,9 +7,16 @@
 Tests of document tree pickling.
 """
 
-import unittest
-import DocutilsTestSupport              # must be imported before docutils
+from pathlib import Path
 import pickle
+import sys
+import unittest
+
+if __name__ == '__main__':
+    # prepend the "docutils root" to the Python library path
+    # so we import the local `docutils` package.
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+
 from docutils import core
 
 

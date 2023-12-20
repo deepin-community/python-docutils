@@ -1,26 +1,47 @@
-#! /usr/bin/env python
+#! /usr/bin/env python3
 
-# $Id: test_peps.py 8481 2020-01-31 08:17:24Z milde $
+# $Id: test_peps.py 9277 2022-11-26 23:15:13Z milde $
 # Author: David Goodger <goodger@python.org>
 # Copyright: This module has been placed in the public domain.
 
 """
 Tests for docutils.transforms.peps.
 """
-from __future__ import absolute_import
+
+from pathlib import Path
+import sys
+import unittest
 
 if __name__ == '__main__':
-    import __init__
-from test_transforms import DocutilsTestSupport
-from docutils.transforms.peps import TargetNotes
+    # prepend the "docutils root" to the Python library path
+    # so we import the local `docutils` package.
+    sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+
+from docutils.frontend import get_default_settings
 from docutils.parsers.rst import Parser
+from docutils.transforms.peps import TargetNotes
+from docutils.transforms.universal import TestMessages
+from docutils.utils import new_document
 
 
-def suite():
-    parser = Parser()
-    s = DocutilsTestSupport.TransformTestSuite(parser)
-    s.generateTests(totest)
-    return s
+class TransformTestCase(unittest.TestCase):
+    def test_transforms(self):
+        parser = Parser()
+        settings = get_default_settings(Parser)
+        settings.warning_stream = ''
+        for name, (transforms, cases) in totest.items():
+            for casenum, (case_input, case_expected) in enumerate(cases):
+                with self.subTest(id=f'totest[{name!r}][{casenum}]'):
+                    document = new_document('test data', settings.copy())
+                    parser.parse(case_input, document)
+                    # Don't do a ``populate_from_components()`` because that
+                    # would enable the Transformer's default transforms.
+                    document.transformer.add_transforms(transforms)
+                    document.transformer.add_transform(TestMessages)
+                    document.transformer.apply_transforms()
+                    output = document.pformat()
+                    self.assertEqual(output, case_expected)
+
 
 totest = {}
 
@@ -48,14 +69,14 @@ A "References" section should be generated.
         <reference name="reference" refname="reference">
             reference
          \n\
-        <footnote_reference auto="1" ids="id3" refname="TARGET_NOTE: id2">
+        <footnote_reference auto="1" ids="footnote-reference-1" refname="TARGET_NOTE: footnote-1">
         .
         A "References" section should be generated.
     <target ids="reference" names="reference" refuri="http://www.example.org">
-    <section ids="id1">
+    <section ids="section-1">
         <title>
             References
-        <footnote auto="1" ids="id2" names="TARGET_NOTE:\\ id2">
+        <footnote auto="1" ids="footnote-1" names="TARGET_NOTE:\\ footnote-1">
             <paragraph>
                 <reference refuri="http://www.example.org">
                     http://www.example.org
@@ -63,7 +84,5 @@ A "References" section should be generated.
 ])
 
 
-
 if __name__ == '__main__':
-    import unittest
-    unittest.main(defaultTest='suite')
+    unittest.main()

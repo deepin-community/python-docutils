@@ -1,10 +1,12 @@
+.. include:: ../../header2.txt
+
 =============================
  reStructuredText Directives
 =============================
 :Author: David Goodger
 :Contact: docutils-develop@lists.sourceforge.net
-:Revision: $Revision: 8633 $
-:Date: $Date: 2021-03-09 13:54:13 +0100 (Di, 09. Mär 2021) $
+:Revision: $Revision: 9385 $
+:Date: $Date: 2023-05-13 16:39:18 +0200 (Sa, 13. Mai 2023) $
 :Copyright: This document has been placed in the public domain.
 
 .. contents::
@@ -49,16 +51,14 @@ reStructuredText Directives`_.
  Admonitions
 -------------
 
-.. From Webster's Revised Unabridged Dictionary (1913) [web1913]:
-   Admonition
-      Gentle or friendly reproof; counseling against a fault or
-      error; expression of authoritative advice; friendly caution
-      or warning.
+Admonitions ("safety messages" or "hazard statements") can appear anywhere
+an ordinary body element can.  They contain arbitrary body elements.
+Typically, an admonition is rendered as an offset block in a document,
+sometimes outlined or shaded.
 
-      Syn: {Admonition}, {Reprehension}, {Reproof}.
+Docutils defines a `generic admonition`_ as well as a set of
+`specific admonitions`_.
 
-      Usage: Admonition is prospective, and relates to moral delinquencies;
-             its object is to prevent further transgression.
 
 .. _attention:
 .. _caution:
@@ -74,18 +74,23 @@ Specific Admonitions
 ====================
 
 :Directive Types: "attention", "caution", "danger", "error", "hint",
-                  "important", "note", "tip", "warning", "admonition"
-:Doctree Elements: attention, caution, danger, error, hint, important,
-                   note, tip, warning, admonition_, title
+                  "important", "note", "tip", "warning"
+:Doctree Elements: `attention <../doctree.html#attention>`__,
+                   `caution <../doctree.html#caution>`__                        ,
+                   `danger <../doctree.html#danger>`__,
+                   `error <../doctree.html#error>`__,
+                   `hint <../doctree.html#hint>`__,
+                   `important <../doctree.html#important>`__,
+                   `note <../doctree.html#note>`__,
+                   `tip <../doctree.html#tip>`__,
+                   `warning <../doctree.html#warning>`__
+
 :Directive Arguments: None.
-:Directive Options: `:class:`_, `:name:`_
+:Directive Options: class_, name_
 :Directive Content: Interpreted as body elements.
 
-Admonitions are specially marked "topics" that can appear anywhere an
-ordinary body element can.  They contain arbitrary body elements.
-Typically, an admonition is rendered as an offset block in a document,
-sometimes outlined or shaded, with a title matching the admonition
-type.  For example::
+Specific admontions are rendered with a title matching the admonition type.
+For example::
 
     .. DANGER::
        Beware killer rabbits!
@@ -97,18 +102,6 @@ This directive might be rendered something like this::
     |                        |
     | Beware killer rabbits! |
     +------------------------+
-
-The following admonition directives have been implemented:
-
-- attention
-- caution
-- danger
-- error
-- hint
-- important
-- note
-- tip
-- warning
 
 Any text immediately following the directive indicator (on the same
 line and/or indented on following lines) is interpreted as a directive
@@ -124,22 +117,24 @@ bullet list consisting of two list items::
        - It includes this bullet list.
 
 
+.. _admonition:
+
 Generic Admonition
 ==================
 
 :Directive Type: "admonition"
-:Doctree Elements: admonition_, title
+:Doctree Elements: `admonition <../doctree.html#admonition>`__,
+                   `title <../doctree.html#title>`__
 :Directive Arguments: One, required (admonition title)
-:Directive Options: Possible, see below.
+:Directive Options: class_, name_
 :Directive Content: Interpreted as body elements.
 
 This is a generic, titled admonition.  The title may be anything the
 author desires.
 
 The author-supplied title is also used as a `"classes"`_ attribute value
-after being converted into a valid identifier form (down-cased;
-non-alphanumeric characters converted to single hyphens; "admonition-"
-prefixed).  For example, this admonition::
+after `identifier normalization`_ and adding the prefix "admonition-".
+For example, this admonition::
 
     .. admonition:: And, by the way...
 
@@ -154,29 +149,64 @@ becomes the following document tree (pseudo-XML)::
             <paragraph>
                 You can make up your own admonition too.
 
-The `common options`_ are recognized:
-
-``class`` : text
-    Overrides the computed `"classes"`_ attribute value.
-
-``name`` : text
-  Add `text` to the `"names"`_ attribute of the admonition element.
+The class_ option overrides the generated `"classes"`_ attribute value.
 
 
 --------
  Images
 --------
 
-There are two image directives: "image" and "figure".
+There are two image directives: image_ and figure_.
+
+.. attention::
+
+  It is up to the author to ensure compatibility of the image data format
+  with the output format or user agent (LaTeX engine, `HTML browser`__).
+  The following, non exhaustive table provides an overview:
+
+  =========== ====== ====== ===== ===== ===== ===== ===== ===== ===== =====
+  ..          vector image  raster image                  moving image [#]_
+  ----------- ------------- ----------------------------- -----------------
+  ..          SVG    PDF    PNG   JPG   GIF   APNG  AVIF  WebM  MP4   OGG
+  =========== ====== ====== ===== ===== ===== ===== ===== ===== ===== =====
+  HTML4_      ✓ [#]_        ✓     ✓     ✓     (✓)   (✓)
+
+  HTML5_      ✓             ✓     ✓     ✓     ✓     ✓     ✓     ✓     ✓
+
+  LaTeX_ [#]_        ✓      ✓     ✓
+
+  ODT_        ✓      ✓      ✓     ✓     ✓
+  =========== ====== ====== ===== ===== ===== ===== ===== ===== ===== =====
+
+  .. [#] The `html5 writer`_ uses the ``<video>`` tag if the image URI
+         ends with an extension matching one of the listed video formats
+         (since Docutils 0.17).
+
+  .. [#] The html4 writer uses an ``<object>`` tag for SVG images
+         for better compatibility with older browsers.
+
+  .. [#] When compiling with ``pdflatex``, ``xelatex``, or ``lualatex``.
+         The original ``latex`` engine supports only the EPS image format.
+         Some build systems, e.g. rubber_ support additional formats
+         via on-the-fly image conversion.
+
+__ https://developer.mozilla.org/en-US/docs/Web/Media/Formats/Image_types
+.. _HTML4:
+.. _html4 writer: ../../user/html.html#html4css1
+.. _HTML5:
+.. _html5 writer: ../../user/html.html#html5-polyglot
+.. _LaTeX: ../../user/latex.html#image-inclusion
+.. _ODT: ../../user/odt.html
+.. _rubber: https://github.com/petrhosek/rubber
 
 
 Image
 =====
 
 :Directive Type: "image"
-:Doctree Element: image_
-:Directive Arguments: One, required (image URI).
-:Directive Options: Possible.
+:Doctree Element: `image <../doctree.html#image>`__
+:Directive Arguments: One, required (image URI_).
+:Directive Options: Possible (see below).
 :Directive Content: None.
 
 An "image" is a simple picture::
@@ -206,18 +236,18 @@ _`image options`.  For example::
 
 The following options are recognized:
 
-``alt`` : text
+``alt`` : text_
     Alternate text: a short description of the image, displayed by
     applications that cannot display images, or spoken by applications
     for visually impaired users.
 
-``height`` : `length`_
+``height`` : length_
     The desired height of the image.
     Used to reserve space or scale the image vertically.  When the "scale"
     option is also specified, they are combined.  For example, a height of
     200px and a scale of 50 is equivalent to a height of 100px with no scale.
 
-``width`` : `length`_ or `percentage`_ of the current line width
+``width`` : length_ or percentage_ of the current line width
     The width of the image.
     Used to reserve space or scale the image horizontally.  As with "height"
     above, when the "scale" option is also specified, they are combined.
@@ -227,7 +257,7 @@ The following options are recognized:
     no scaling.
 
     If no "height" or "width" options are specified, the `Python
-    Imaging Library`_ (PIL/Pillow_) may be used to determine them, if
+    Imaging Library` (PIL/Pillow_) may be used to determine them, if
     it is installed and the image file is available.
 
 ``align`` : "top", "middle", "bottom", "left", "center", or "right"
@@ -242,12 +272,12 @@ The following options are recognized:
     text flow around it.  The specific behavior depends upon the
     browser or rendering software used.
 
-``target`` : text (URI or reference name)
+``target`` : URI_ or `reference name`_
     Makes the image into a hyperlink reference ("clickable").  The
     option argument may be a URI (relative or absolute), or a
     `reference name`_ with underscore suffix (e.g. ```a name`_``).
 
-and the common options `:class:`_ and `:name:`_.
+and the common options class_ and name_.
 
 
 Figure
@@ -255,8 +285,8 @@ Figure
 
 :Directive Type: "figure"
 :Doctree Elements: figure_, image_, caption_, legend_
-:Directive Arguments: One, required (image URI).
-:Directive Options: Possible.
+:Directive Arguments: One, required (image URI_).
+:Directive Options: Possible (see below).
 :Directive Content: Interpreted as the figure caption and an optional
                     legend.
 
@@ -329,12 +359,11 @@ In addition, the following options are recognized:
         |wrap at this width.        |
         +---------------------------+
 
-``figclass`` : text
+``figclass`` : space separated list of `class names`_
     Set a `"classes"`_ attribute value on the figure element.  See the
-    class_ directive below.
+    `class directive`_ below.
 
 .. _Python Imaging Library:
-    https://en.wikipedia.org/wiki/Python_Imaging_Library
 .. _Pillow: https://pypi.org/project/Pillow/
 
 
@@ -348,7 +377,7 @@ Topic
 :Directive Type: "topic"
 :Doctree Element: topic_
 :Directive Arguments: One, required (topic title).
-:Directive Options: `:class:`_, `:name:`_
+:Directive Options: class_, name_
 :Directive Content: Interpreted as the topic body.
 
 A topic is like a block quote with a title, or a self-contained
@@ -401,10 +430,10 @@ interpreted as body elements.  For example::
 
 The following options are recognized:
 
-``subtitle`` : text
+``subtitle`` : text_
     The sidebar's subtitle.
 
-and the common options `:class:`_ and `:name:`_.
+and the common options class_ and name_.
 
 
 Line Block
@@ -420,7 +449,7 @@ Line Block
 :Directive Type: "line-block"
 :Doctree Element: line_block_
 :Directive Arguments: None.
-:Directive Options: `:class:`_, `:name:`_
+:Directive Options: class_, name_
 :Directive Content: Becomes the body of the line block.
 
 The "line-block" directive constructs an element where line breaks and
@@ -445,7 +474,6 @@ example, here's a classic::
             Love, Ewan.
 
 
-
 .. _parsed-literal:
 
 Parsed Literal Block
@@ -454,7 +482,7 @@ Parsed Literal Block
 :Directive Type: "parsed-literal"
 :Doctree Element: literal_block_
 :Directive Arguments: None.
-:Directive Options: `:class:`_, `:name:`_
+:Directive Options: class_, name_
 :Directive Content: Becomes the body of the literal block.
 
 Unlike an ordinary literal block, the "parsed-literal" directive
@@ -480,6 +508,7 @@ For example, all the element names in this content model are links::
          (docinfo_, transition_?)?,
          `%structure.model;`_ )
 
+
 Code
 ====
 
@@ -490,8 +519,6 @@ Code
 :Directive Content: Becomes the body of the literal block.
 :Configuration Setting: syntax_highlight_.
 
-(New in Docutils 0.9)
-
 The "code" directive constructs a literal block. If the code language is
 specified, the content is parsed by the Pygments_ syntax highlighter and
 tokens are stored in nested `inline elements`_ with class arguments
@@ -500,28 +527,28 @@ a style-sheet (e.g. one `generated by Pygments`__, see the
 `sandbox/stylesheets`__ for examples).
 
 The parsing can be turned off with the syntax_highlight_ configuration
-setting and command line option or by specifying the language as `:class:`_
+setting and command line option or by specifying the language as class_
 option instead of directive argument. This also avoids warnings
 when Pygments_ is not installed or the language is not in the
 `supported languages and markup formats`_.
 
 For inline code, use the `"code" role`_.
 
-__ http://pygments.org/docs/cmdline/#generating-styles
-__ http://docutils.sourceforge.net/sandbox/stylesheets/
-.. _Pygments: http://pygments.org/
+__ https://pygments.org/docs/cmdline/#generating-styles
+__ https://docutils.sourceforge.io/sandbox/stylesheets/
+.. _Pygments: https://pygments.org/
 .. _syntax_highlight: ../../user/config.html#syntax-highlight
-.. _supported languages and markup formats: http://pygments.org/languages/
+.. _supported languages and markup formats: https://pygments.org/languages/
 .. _"code" role: roles.html#code
 
 
 The following options are recognized:
 
-``number-lines`` : [start line number]
+``number-lines`` : integer_ (start line number, optional)
     Precede every line with a line number.
-    The optional argument is the number of the first line (defaut 1).
+    The optional argument is the number of the first line (default 1).
 
-and the common options `:class:`_ and `:name:`_.
+and the common options class_ and name_.
 
 Example::
   The content of the following directive ::
@@ -541,18 +568,15 @@ Math
 :Directive Type: "math"
 :Doctree Element: math_block_
 :Directive Arguments: None.
-:Directive Options: `:class:`_, `:name:`_
+:Directive Options: class_, name_
 :Directive Content: Becomes the body of the math block.
                     (Content blocks separated by a blank line are put in
                     adjacent math blocks.)
 :Configuration Setting: math_output_
 
-(New in Docutils 0.8)
-
 The "math" directive inserts blocks with mathematical content
 (display formulas, equations) into the document. The input format is
-*LaTeX math syntax*\ [#math-syntax]_ with support for Unicode
-symbols, for example::
+`LaTeX math syntax`_ with support for Unicode symbols, for example::
 
   .. math::
 
@@ -563,17 +587,14 @@ required for many output formats.  For HTML, the `math_output`_
 configuration setting (or the corresponding ``--math-output``
 command line option) select between alternative output formats with
 different subsets of supported elements. If a writer does not
-support math typesetting at all, the content is inserted verbatim.
-
-.. [#math-syntax] The supported LaTeX commands include AMS extensions
-   (see, e.g., the `Short Math Guide`_).
-
+support math typesetting, the content is inserted verbatim.
 
 For inline formulas, use the `"math" role`_.
 
-.. _Short Math Guide: http://tug.ctan.org/info/short-math-guide/short-math-guide.pdf
+.. _LaTeX math syntax: ../../ref/rst/mathematics.html
 .. _"math" role: roles.html#math
 .. _math_output: ../../user/config.html#math-output
+
 
 Rubric
 ======
@@ -581,7 +602,7 @@ Rubric
 :Directive Type: "rubric"
 :Doctree Element: rubric_
 :Directive Arguments: One, required (rubric text).
-:Directive Options: `:class:`_, `:name:`_
+:Directive Options: class_, name_
 :Directive Content: None.
 
 ..
@@ -661,16 +682,16 @@ The "pull-quote" directive produces a "pull-quote"-class block quote.
 See Epigraph_ above for an analogous example.
 
 
+.. compound:
+
 Compound Paragraph
 ==================
 
 :Directive Type: "compound"
-:Doctree Element: compound_
+:Doctree Element: `compound <../doctree.html#compound>`__
 :Directive Arguments: None.
-:Directive Options: `:class:`_, `:name:`_
+:Directive Options: class_, name_
 :Directive Content: Interpreted as body elements.
-
-(New in Docutils 0.3.6)
 
 The "compound" directive is used to create a compound paragraph, which
 is a single logical paragraph containing multiple physical body
@@ -717,10 +738,8 @@ Container
 :Directive Type: "container"
 :Doctree Element: `container <container element_>`__
 :Directive Arguments: One or more, optional (class names).
-:Directive Options: `:name:`_
+:Directive Options: name_
 :Directive Content: Interpreted as body elements.
-
-(New in Docutils 0.3.10)
 
 The "container" directive surrounds its contents (arbitrary body
 elements) with a generic block-level "container" element.  Combined
@@ -742,28 +761,27 @@ element.  It may be used to group a sequence of elements for user- or
 application-specific purposes.
 
 
-
 --------
  Tables
 --------
 
-Formal tables need more structure than the reStructuredText syntax
-supplies.  Tables may be given titles with the table_ directive.
+Formal tables need more structure than the reStructuredText `table syntax`_
+supplies.  Tables may be given titles with the "table_" directive.
 Sometimes reStructuredText tables are inconvenient to write, or table
-data in a standard format is readily available.  The csv-table_
-directive supports CSV data.
+data in a standard format is readily available.  The "csv-table_"
+directive supports CSV [#CSV]_ data.
+
+.. _table syntax: restructuredtext.html#tables
 
 
 Table
 =====
 
 :Directive Type: "table"
-:Doctree Element: table_
+:Doctree Element: `table <../doctree.html#table>`__
 :Directive Arguments: One, optional (table title).
 :Directive Options: Possible (see below).
-:Directive Content: A normal reStructuredText table.
-
-(New in Docutils 0.3.1)
+:Directive Content: A normal `reStructuredText table`_.
 
 The "table" directive is used to associate a
 title with a table or specify options, e.g.::
@@ -781,26 +799,37 @@ title with a table or specify options, e.g.::
 The following options are recognized:
 
 ``align`` : "left", "center", or "right"
-    The horizontal alignment of the table.
-    (New in Docutils 0.13)
+    The horizontal alignment of the table (new in Docutils 0.13).
 
-``widths`` : "auto", "grid" or a list of integers
-    A comma- or space-separated list of column widths.
-    The default is the width of the input columns (in characters).
-
-    The special values "auto" or "grid" may be used by writers to decide
-    whether to delegate the determination of column widths to the backend
-    (LaTeX, the HTML browser, ...).
-    See also the `table_style`_ configuration option.
-
-``width`` : `length`_ or `percentage`_ of the current line width
-    Forces the width of the table to the specified length or percentage
+``width`` : length_ or percentage_
+    Sets the width of the table to the specified length or percentage
     of the line width.  If omitted, the renderer determines the width
-    of the table based on its contents.
+    of the table based on its contents or the column ``widths``.
 
-and the common options `:class:`_ and `:name:`_.
+    .. _column-widths:
 
+``widths`` : "auto", "grid", or a `list of integers`_
+    Explicitly set column widths.
+    Specifies relative widths if used with the ``width`` option.
+    Overrides a `table_style`_ setting or class value "colwidths-auto".
+    The default depends on the `table_style`_ configuration setting.
+
+    *"auto"* delegates the determination of column widths to the backend
+    (LaTeX, the HTML browser, ...).
+    Default for the `html5 writer`_
+
+    *"grid"* determines column widths from the widths of the input columns
+    (in characters).
+    Default for most writers.
+
+    A *list of integers* is used instead of the input column widths.
+    Implies *"grid"*.
+
+Plus the common options class_ and name_.
+
+.. _reStructuredText table: restructuredtext.html#tables
 .. _table_style: ../../user/config.html#table-style
+
 
 .. _csv-table:
 
@@ -811,21 +840,27 @@ CSV Table
 :Doctree Element: table_
 :Directive Arguments: One, optional (table title).
 :Directive Options: Possible (see below).
-:Directive Content: A CSV (comma-separated values) table.
+:Directive Content: A CSV (comma-separated values) table
+                    or (with the `file`_ or `url`_ options) None
 
 .. WARNING::
 
-   The "csv-table" directive's ":file:" and ":url:" options represent
-   a potential security holes.  They can be disabled with the
+   The "csv-table" directive's `file`_ and `url`_ options represent
+   potential security holes.  They can be disabled with the
    "file_insertion_enabled_" runtime setting.
 
-(New in Docutils 0.3.4)
-
 The "csv-table" directive is used to create a table from CSV
-(comma-separated values) data.  CSV is a common data format generated
-by spreadsheet applications and commercial databases.  The data may be
-internal (an integral part of the document) or external (a separate
-file).
+(comma-separated values) [#CSV]_ data. The data may be internal
+(an integral part of the document) or external (a separate file).
+
+* Block markup and inline markup within cells is supported.  Line ends
+  are recognized within quoted cells.
+
+* There is no support for checking that the number of columns in each
+  row is the same. The directive automatically adds empty entries at
+  the end of short rows.
+
+  .. Add "strict" option to verify input?
 
 Example::
 
@@ -834,101 +869,100 @@ Example::
        :widths: 15, 10, 30
 
        "Albatross", 2.99, "On a stick!"
-       "Crunchy Frog", 1.49, "If we took the bones out, it wouldn't be
-       crunchy, now would it?"
+       "Crunchy Frog", 1.49, "If we took the bones out,
+       it wouldn't be crunchy, now would it?"
        "Gannet Ripple", 1.99, "On a stick!"
-
-Block markup and inline markup within cells is supported.  Line ends
-are recognized within cells.
-
-Working limitations:
-
-* There is no support for checking that the number of columns in each
-  row is the same.  However, this directive supports CSV generators
-  that do not insert "empty" entries at the end of short rows, by
-  automatically adding empty entries.
-
-  .. Add "strict" option to verify input?
-
-.. [#whitespace-delim] Whitespace delimiters are supported only for external
-   CSV files.
-
-.. [#ASCII-char] With Python 2, the valuess for the ``delimiter``,
-   ``quote``, and ``escape`` options must be ASCII characters. (The csv
-   module does not support Unicode and all non-ASCII characters are
-   encoded as multi-byte utf-8 string). This limitation does not exist
-   under Python 3.
 
 The following options are recognized:
 
-``widths`` : integer [, integer...] or "auto"
-    A comma- or space-separated list of relative column widths.  The
-    default is equal-width columns (100%/#columns).
+``align`` : "left", "center", or "right"
+    The horizontal alignment of the table. (New in Docutils 0.13)
 
-    The special value "auto" may be used by writers to decide
-    whether to delegate the determination of column widths to the backend
-    (LaTeX, the HTML browser, ...).
+    .. _delimiter:
 
-``width`` : `length`_ or `percentage`_ of the current line width
-    Forces the width of the table to the specified length or percentage
-    of the line width.  If omitted, the renderer determines the width
-    of the table based on its contents.
+``delim`` : character_, "tab", or "space"
+    The character used to separate data fields.
+    The special values "tab" and "space" are converted to the respective
+    whitespace characters. [#tab-expansion]_
+    Defaults to ``,`` (comma).
 
-``header-rows`` : integer
-    The number of rows of CSV data to use in the table header.
-    Defaults to 0.
+``encoding`` : encoding_
+    The text encoding of the external CSV data (file or URL).
+    Defaults to the document's `input_encoding`_.
 
-``stub-columns`` : integer
-    The number of table columns to use as stubs (row titles, on the
-    left).  Defaults to 0.
+``escape`` : character_
+    A character used to escape the delimiter_ or quote_ characters from
+    the CSV parser. The default is no escape character -- fields may
+    contain delimiter or newline characers if they are quoted, two quote
+    characters stand for a literal one, e.g., ``"He said, ""Hi!"""``.
 
-``header`` : CSV data
+    .. Caution:: Setting ``escape`` to ``\`` (backslash) interferes with
+       the reStructuredText `escaping mechanism`_ (applied after CSV
+       parsing). You will need two backslashes to escape reStructuredText
+       markup and four backslashes for a literal one.
+
+    .. _`file`:
+
+``file`` : path_
+    The local filesystem path to a CSV data file.
+
+``header`` : text_ (CSV data)
     Supplemental data for the table header, added independently of and
     before any ``header-rows`` from the main CSV data.  Must use the
     same CSV format as the main CSV data.
 
-``file`` : string (newlines removed)
-    The local filesystem path to a CSV data file.
+    .. Important:: Currently, the header option uses a hard-coded CSV
+       dialect with the backslash as escape character (interfering with
+       the reStructuredText `escaping mechanism`_). This will change to
+       the documented behaviour in Docutils 0.21.
 
-``url`` : string (whitespace removed)
-    An Internet URL reference to a CSV data file.
+``header-rows`` : integer_
+    The number of rows of CSV data to use in the table header.
+    Defaults to 0.
 
-``encoding`` : name of text encoding
-    The text encoding of the external CSV data (file or URL).
-    Defaults to the document's encoding (if specified).
-
-``delim`` : char | "tab" | "space" [#whitespace-delim]_
-    A one-character string\ [#ASCII-char]_ used to separate fields.
-    Defaults to ``,`` (comma).  May be specified as a Unicode code
-    point; see the unicode_ directive for syntax details.
-
-``quote`` : char
-    A one-character string\ [#ASCII-char]_ used to quote elements
-    containing the delimiter or which start with the quote
-    character.  Defaults to ``"`` (quote).  May be specified as a
-    Unicode code point; see the unicode_ directive for syntax
-    details.
-
-``keepspace`` : flag
+``keepspace`` : flag_
     Treat whitespace immediately following the delimiter as
     significant.  The default is to ignore such whitespace.
 
-``escape`` : char
-    A one-character\ [#ASCII-char]_ string used to escape the
-    delimiter or quote characters.  May be specified as a Unicode
-    code point; see the unicode_ directive for syntax details.  Used
-    when the delimiter is used in an unquoted field, or when quote
-    characters are used within a field.  The default is to double-up
-    the character, e.g. "He said, ""Hi!"""
+    .. _quote:
 
-    .. Add another possible value, "double", to explicitly indicate
-       the default case?
+``quote`` : character_
+    The character used to quote fields containing special characters,
+    such as the delimiter_, quote, or new-line characters.
+    Defaults to ``"`` (quote).
 
-``align`` : "left", "center", or "right"
-    The horizontal alignment of the table.
-    (New in Docutils 0.13)
+``stub-columns`` : integer_
+    The number of table columns to use as stubs (row titles, on the left).
+    Defaults to 0.
 
-and the common options `:class:`_ and `:name:`_.
+    .. _`url`:
+
+``url`` : URI_
+    An Internet URI reference to a CSV data file.
+
+``widths`` : `list of integers`_ or "auto"
+    A list of relative column widths.
+    The default is equal-width columns (100%/#columns).
+
+    "auto" delegates the determination of column widths to the backend
+    (LaTeX, the HTML browser, ...).
+
+``width`` : length_ or percentage_
+    Sets the width of the table to the specified length or percentage
+    of the line width.  If omitted, the renderer determines the width
+    of the table based on its contents or the column ``widths``.
+
+and the common options class_ and name_.
+
+.. [#CSV] CSV (comma separated values) is a common data format generated
+   by spreadsheet applications and commercial databases. Despite the
+   "comma" in its name, the field delimiter_ may be any Unicode character.
+
+.. [#tab-expansion] Note, that tabs can be used as separator only in
+   external files because hard tabs the directive content are
+   `converted to spaces`__ before it reaches the CVS reader.
+
+   __ restructuredtext.html#whitespace
 
 
 List Table
@@ -940,8 +974,8 @@ List Table
 :Directive Options: Possible (see below).
 :Directive Content: A uniform two-level bullet list.
 
-(New in Docutils 0.3.8.  This is an initial implementation; `further
-ideas`__ may be implemented in the future.)
+(This is an initial implementation; `further ideas`__ may be implemented
+in the future.)
 
 __ ../../dev/rst/alternatives.html#list-driven-tables
 
@@ -971,32 +1005,36 @@ Example::
 
 The following options are recognized:
 
-``widths`` : integer [integer...] or "auto"
-    A comma- or space-separated list of relative column widths.  The
-    default is equal-width columns (100%/#columns).
-
-    The special value "auto" may be used by writers to decide
-    whether to delegate the determination of column widths to the backend
-    (LaTeX, the HTML browser, ...).
-
-``width`` : `length`_ or `percentage`_ of the current line width
-    Forces the width of the table to the specified length or percentage
-    of the line width.  If omitted, the renderer determines the width
-    of the table based on its contents.
-
-``header-rows`` : integer
-    The number of rows of list data to use in the table header.
-    Defaults to 0.
-
-``stub-columns`` : integer
-    The number of table columns to use as stubs (row titles, on the
-    left).  Defaults to 0.
 
 ``align`` : "left", "center", or "right"
     The horizontal alignment of the table.
     (New in Docutils 0.13)
 
-and the common options `:class:`_ and `:name:`_.
+``header-rows`` : integer_
+    The number of rows of list data to use in the table header.
+    Defaults to 0.
+
+``stub-columns`` : integer_
+    The number of table columns to use as stubs (row titles, on the
+    left).  Defaults to 0.
+
+    .. _table width:
+
+``width`` : length_ or percentage_
+    Sets the width of the table to the specified length or percentage
+    of the line width.  If omitted, the renderer determines the width
+    of the table based on its contents or the column ``widths``.
+
+    .. _column widths:
+
+``widths`` : `list of integers`_ or "auto"
+    A list of relative column widths.
+    The default is equal-width columns (100%/#columns).
+
+    "auto" delegates the determination of column widths to the backend
+    (LaTeX, the HTML browser, ...).
+
+and the common options class_ and name_.
 
 
 ----------------
@@ -1011,7 +1049,7 @@ Table of Contents
 :Directive Type: "contents"
 :Doctree Elements: pending_, topic_
 :Directive Arguments: One, optional: title.
-:Directive Options: Possible.
+:Directive Options: Possible (see below).
 :Directive Content: None.
 
 The "contents" directive generates a table of contents (TOC) in a
@@ -1047,22 +1085,22 @@ on the same line as the directive marker::
 
 The following options are recognized:
 
-``depth`` : integer
+``depth`` : integer_
     The number of section levels that are collected in the table of
     contents.  The default is unlimited depth.
 
-``local`` : flag (empty)
+``local`` : flag_
     Generate a local table of contents.  Entries will only include
     subsections of the section in which the directive is given.  If no
     explicit title is given, the table of contents will not be titled.
 
 ``backlinks`` : "entry" or "top" or "none"
     Generate links from section headers back to the table of contents
-    entries, the table of contents itself, or generate no backlinks.
+    entries, the table of contents itself, or generate no back-links.
 
-``class`` : text
+``class`` : text_ (list of `class names`_)
     Set a `"classes"`_ attribute value on the topic element.  See the
-    class_ directive below.
+    `class directive`_ below.
 
 
 .. _sectnum:
@@ -1074,7 +1112,7 @@ Automatic Section Numbering
 :Directive Type: "sectnum" or "section-numbering" (synonyms)
 :Doctree Elements: pending_, generated_
 :Directive Arguments: None.
-:Directive Options: Possible.
+:Directive Options: Possible (see below).
 :Directive Content: None.
 :Configuration Setting: sectnum_xform_
 
@@ -1097,22 +1135,22 @@ attribute set to "1".
 
 The following options are recognized:
 
-``depth`` : integer
+``depth`` : integer_
     The number of section levels that are numbered by this directive.
     The default is unlimited depth.
 
-``prefix`` : string
+``prefix`` : text_
     An arbitrary string that is prefixed to the automatically
     generated section numbers.  It may be something like "3.2.", which
     will produce "3.2.1", "3.2.2", "3.2.2.1", and so on.  Note that
     any separating punctuation (in the example, a period, ".") must be
     explicitly provided.  The default is no prefix.
 
-``suffix`` : string
+``suffix`` : text_
     An arbitrary string that is appended to the automatically
     generated section numbers.  The default is no suffix.
 
-``start`` : integer
+``start`` : integer_
     The value that will be used for the first section number.
     Combined with ``prefix``, this may be used to force the right
     numbering for a document split over several source files.  The
@@ -1132,8 +1170,6 @@ Document Header & Footer
 :Directive Arguments: None.
 :Directive Options: None.
 :Directive Content: Interpreted as body elements.
-
-(New in Docutils 0.3.8)
 
 The "header" and "footer" directives create document decorations,
 useful for page navigation, notes, time/datestamp, etc.  For example::
@@ -1166,7 +1202,7 @@ processing system.  For example, if certain runtime settings are
 enabled, the document footer is populated with processing information
 such as a datestamp, a link to `the Docutils website`_, etc.
 
-.. _the Docutils website: http://docutils.sourceforge.net
+.. _the Docutils website: https://docutils.sourceforge.io
 
 
 ------------
@@ -1181,8 +1217,8 @@ Target Footnotes
 :Directive Type: "target-notes"
 :Doctree Elements: pending_, footnote_, footnote_reference_
 :Directive Arguments: None.
-:Directive Options: `:class:`_, `:name:`_
-:Directive Options: Possible.
+:Directive Options: class_, name_
+:Directive Options: Possible (see below).
 :Directive Content: None.
 
 The "target-notes" directive creates a footnote for each external
@@ -1219,17 +1255,16 @@ Citations
 
 @@@
 
+.. ---------------
+    HTML-Specific
+   ---------------
 
----------------
- HTML-Specific
----------------
+   Imagemap
+   ========
 
-Imagemap
-========
+   **NOT IMPLEMENTED YET**
 
-**NOT IMPLEMENTED YET**
-
-Non-standard element: imagemap.
+   Non-standard element: imagemap.
 
 
 -----------------------------------------
@@ -1243,6 +1278,7 @@ and in the standalone context.
 
 .. _substitution definitions:
 .. _substitution definition: restructuredtext.html#substitution-definitions
+
 
 .. _replace:
 
@@ -1272,7 +1308,7 @@ the "replace" directive::
     I recommend you try |Python|_.
 
     .. |Python| replace:: Python, *the* best language around
-    .. _Python: http://www.python.org/
+    .. _Python: https://www.python.org/
 
 
 .. _unicode:
@@ -1284,7 +1320,7 @@ Unicode Character Codes
 :Doctree Element: Text
 :Directive Arguments: One or more, required (Unicode character codes,
                       optional text, and comments).
-:Directive Options: Possible.
+:Directive Options: Possible (see below).
 :Directive Content: None.
 
 The "unicode" directive converts Unicode character codes (numerical
@@ -1292,6 +1328,8 @@ values) to characters, and may be used in `substitution definitions`_
 only.
 
 The arguments, separated by spaces, can be:
+
+.. _character code:
 
 * **character codes** as
 
@@ -1331,13 +1369,13 @@ results in:
 
 The following options are recognized:
 
-``ltrim`` : flag
+``ltrim`` : flag_
     Whitespace to the left of the substitution reference is removed.
 
-``rtrim`` : flag
+``rtrim`` : flag_
     Whitespace to the right of the substitution reference is removed.
 
-``trim`` : flag
+``trim`` : flag_
     Equivalent to ``ltrim`` plus ``rtrim``; whitespace on both sides
     of the substitution reference is removed.
 
@@ -1356,7 +1394,7 @@ into the document as text.  This directive may be used in substitution
 definitions only.
 
 The optional directive content is interpreted as the desired date
-format, using the same codes as Python's time.strftime function.  The
+format, using the same codes as Python's `time.strftime()`__ function.  The
 default format is "%Y-%m-%d" (ISO 8601 date), but time fields can also
 be used.  Examples::
 
@@ -1366,6 +1404,8 @@ be used.  Examples::
     Today's date is |date|.
 
     This document was generated on |date| at |time|.
+
+__ https://docs.python.org/3/library/time.html#time.strftime
 
 
 ---------------
@@ -1380,8 +1420,8 @@ Including an External Document Fragment
 :Directive Type: "include"
 :Doctree Elements: Depend on data being included
                    (literal_block_ with ``code`` or ``literal`` option).
-:Directive Arguments: One, required (path to the file to include).
-:Directive Options: Possible.
+:Directive Arguments: One, required (path_ to the file to include).
+:Directive Options: Possible (see below).
 :Directive Content: None.
 :Configuration Setting: file_insertion_enabled_
 
@@ -1430,70 +1470,70 @@ __ definitions.html
 
 The following options are recognized:
 
-``start-line`` : integer
+``start-line`` : integer_
     Only the content starting from this line will be included.
     (As usual in Python, the first line has index 0 and negative values
     count from the end.)
 
-``end-line`` : integer
+``end-line`` : integer_
     Only the content up to (but excluding) this line will be included.
 
-``start-after`` : text to find in the external data file
-    Only the content after the first occurrence of the specified text
+``start-after`` : text_
+    Only the content after the first occurrence of the specified *text*
+    in the external data file will be included.
+
+``end-before`` : text_
+    Only the content before the first occurrence of the specified *text*
+    in the external data file (but after any ``start-after`` text)
     will be included.
 
-``end-before`` : text to find in the external data file
-    Only the content before the first occurrence of the specified text
-    (but after any ``after`` text) will be included.
-
-``parser`` :  parser name
+``parser`` : text_ (parser name)
     Parse the included content with the specified parser.
     (New in Docutils 0.17)
 
-``literal`` : flag (empty)
+``literal`` : flag_
     The entire included text is inserted into the document as a single
     literal block.
 
-``code`` : formal language (optional)
+``code`` : text_ (formal language, optional)
     The argument and the included content are passed to
     the code_ directive (useful for program listings).
-    (New in Docutils 0.9)
 
-``number-lines`` : [start line number]
-    Precede every code line with a line number.
-    The optional argument is the number of the first line (defaut 1).
+``number-lines`` : integer_ (start line number, optional)
+    Precede every included line with a line number.
+    The optional argument is the number of the first line (default 1).
     Works only with ``code`` or ``literal``.
-    (New in Docutils 0.9)
 
-``encoding`` : name of text encoding
-    The text encoding of the external data file.  Defaults to the
-    document's input_encoding_.
+``encoding`` : encoding_
+    The text encoding of the external file.
+    Defaults to the document's input_encoding_.
 
     .. _input_encoding: ../../user/config.html#input-encoding
 
-``tab-width`` :  integer
+``tab-width`` : integer_
     Number of spaces for hard tab expansion.
     A negative value prevents expansion of hard tabs. Defaults to the
     tab_width_ configuration setting.
 
     .. _tab_width: ../../user/config.html#tab-width
 
-With ``code`` or ``literal`` the common options `:class:`_ and
-`:name:`_ are recognized as well.
+With ``code`` or ``literal`` the common options class_ and
+name_ are recognized as well.
 
 Combining ``start/end-line`` and ``start-after/end-before`` is possible. The
 text markers will be searched in the specified lines (further limiting the
 included content).
 
-.. _raw-directive:
+
+.. _raw:
 
 Raw Data Pass-Through
 =====================
 
 :Directive Type: "raw"
-:Doctree Element: raw_
+:Doctree Element: `raw <../doctree.html#raw>`__
 :Directive Arguments: One or more, required (output format types).
-:Directive Options: Possible.
+:Directive Options: Possible (see below).
 :Directive Content: Stored verbatim, uninterpreted.  None (empty) if a
                     "file" or "url" option given.
 :Configuration Setting: raw_enabled_
@@ -1501,8 +1541,9 @@ Raw Data Pass-Through
 .. WARNING::
 
    The "raw" directive represents a potential security hole.  It can
-   be disabled with the "raw_enabled_" or "file_insertion_enabled_"
-   runtime settings.
+   be disabled with the "raw_enabled_" runtime setting.
+   Insertion of external files can be disabled with the
+   "file_insertion_enabled_" runtime setting.
 
    .. _raw_enabled: ../../user/config.html#raw-enabled
 
@@ -1528,7 +1569,7 @@ is up to the Writer.  A Writer may ignore any raw output not matching
 its format.
 
 For example, the following input would be passed untouched by an HTML
-Writer::
+writer::
 
     .. raw:: html
 
@@ -1553,20 +1594,22 @@ Inline equivalents of the "raw" directive can be defined via
 
 The following options are recognized:
 
-``file`` : string (newlines removed)
+``file`` : path_
     The local filesystem path of a raw data file to be included.
 
-``url`` : string (whitespace removed)
-    An Internet URL reference to a raw data file to be included.
+``url`` : URI_
+    An Internet URI reference to a raw data file to be included.
 
-``encoding`` : name of text encoding
-    The text encoding of the external raw data (file or URL).
-    Defaults to the document's encoding (if specified).
+``encoding`` : encoding_
+    The text encoding of the external raw data (with ``file`` or ``url``).
+    Defaults to the main document's `input_encoding`_ (if specified).
+
+and the common option class_.
 
 .. _"raw" role: roles.html#raw
 
 
-.. _classes:
+.. _class directive:
 
 Class
 =====
@@ -1685,7 +1728,7 @@ For example ``"Rot.Gelb&Grün:+2008"`` becomes ``"rot-gelb-grun-2008"`` and
           hyphens ("-"), underscores ("_"), colons (":"), and periods
           (".").
 
-          -- http://www.w3.org/TR/html401/types.html#type-name
+          -- https://www.w3.org/TR/html401/types.html#type-name
 
     - The `CSS1 spec`_ defines identifiers based on the "name" token
       ("flex" tokenizer notation below; "latin1" and "escape" 8-bit
@@ -1714,8 +1757,9 @@ For example ``"Rot.Gelb&Grün:+2008"`` becomes ``"rot-gelb-grun-2008"`` and
        __ https://www.w3.org/TR/CSS22/syndata.html
        __ https://www.w3.org/TR/css-syntax-3/#typedef-ident-token
 
-    .. _HTML 4.01 spec: http://www.w3.org/TR/html401/
-    .. _CSS1 spec: http://www.w3.org/TR/REC-CSS1
+    .. _HTML 4.01 spec: https://www.w3.org/TR/html401/
+    .. _CSS1 spec: https://www.w3.org/TR/REC-CSS1
+
 
 .. _role:
 
@@ -1728,8 +1772,6 @@ Custom Interpreted Text Roles
                       (base role name, in parentheses).
 :Directive Options: Possible (depends on base role).
 :Directive Content: depends on base role.
-
-(New in Docutils 0.3.2)
 
 The "role" directive dynamically creates a custom `interpreted text
 role`_ and registers it with the parser.  This means that after
@@ -1801,12 +1843,12 @@ This is the parsed result::
 The following option is recognized by the "role" directive for most
 base roles:
 
-``class`` : text
+``class`` : space separated list of `class names`_
     Set the `"classes"`_ attribute value on the element produced
     (``inline``, or element associated with a base class) when the
     custom interpreted text role is used.  If no directive options are
     specified, a "class" option with the directive argument (role
-    name) as the value is implied.  See the class_ directive above.
+    name) as the value is implied.  See the `class directive`_ above.
 
 Specific base roles may support other options and/or directive
 content.  See the `reStructuredText Interpreted Text Roles`_ document
@@ -1825,8 +1867,6 @@ Setting the Default Interpreted Text Role
 :Directive Arguments: One, optional (new default role name).
 :Directive Options: None.
 :Directive Content: None.
-
-(New in Docutils 0.3.10)
 
 The "default-role" directive sets the default interpreted text role,
 the role that is used for interpreted text without an explicit role.
@@ -1858,11 +1898,13 @@ initial default interpreted text role of the standard reStructuredText
 parser is "title-reference".
 
 
+.. _meta:
+
 Metadata
 ========
 
 :Directive Type: "meta"
-:Doctree Element: pending_, meta (non-standard)
+:Doctree Element: `meta <../doctree.html#meta>`__
 :Directive Arguments: None.
 :Directive Options: None.
 :Directive Content: Must contain a flat field list.
@@ -1875,7 +1917,7 @@ content is silently dropped by the writer.
 
 .. note:: Data from some `bibliographic fields`_ is automatically
    extracted and stored as metadata, too. However, Bibliographic
-   Fields are also visible in the document's screen rendering or
+   Fields are also displayed in the document's screen rendering or
    printout.
 
    For an "invisible" *document title*, see the `metadata document
@@ -1921,34 +1963,38 @@ HTML equivalent::
     <meta http-equiv="Content-Type"
          content="text/html; charset=ISO-8859-1">
 
-
 .. [#] "Metadata" is data about data, in this case data about the
    document. Metadata is, e.g., used to describe and classify web
    pages in the World Wide Web, in a form that is easy for search
    engines to extract and collate.
 
-
 .. _HTML meta elements:
    https://html.spec.whatwg.org/multipage/semantics.html#the-meta-element
 .. _ODT file properties:
    https://en.wikipedia.org/wiki/OpenDocument_technical_specification#Metadata
-.. _hyperref: http://ctan.org/pkg/hyperref
+.. _hyperref: https://ctan.org/pkg/hyperref
 .. _bibliographic fields: restructuredtext.html#bibliographic-fields
 
+
+.. _title:
 
 Metadata Document Title
 =======================
 
 :Directive Type: "title"
-:Doctree Element: None.
+:Doctree Element: Sets the document's `title attribute`_.
 :Directive Arguments: One, required (the title text).
 :Directive Options: None.
 :Directive Content: None.
 
 The "title" directive specifies the document title as metadata, which
-does not become part of the document body.  It overrides a
-document-supplied title.  For example, in HTML output the metadata
-document title appears in the title bar of the browser window.
+does not become part of the document body. It overrides the
+document-supplied `document title`_ and the `"title" configuration
+setting`_. For example, in HTML output the metadata document title
+appears in the title bar of the browser window.
+
+.. _document title: restructuredtext.html#document-title
+.. _"title" configuration setting: ../../user/config.html#title
 
 
 Restructuredtext-Test-Directive
@@ -1966,6 +2012,7 @@ level-1 (info) system message showing the directive data, possibly
 followed by a literal block containing the rest of the directive
 block.
 
+
 --------------
 Common Options
 --------------
@@ -1974,12 +2021,15 @@ Most of the directives that generate doctree elements support the following
 options:
 
 .. _class-option:
+.. _class:
 
-_`:class:` : text
+``class`` : space separated list of `class names`_
     Set a `"classes"`_ attribute value on the doctree element generated by
-    the directive. See also the class_ directive.
+    the directive. See also the `class directive`_.
 
-_`:name:` : text
+    .. _name:
+
+``name`` : text_
     Add `text` to the `"names"`_ attribute of the doctree element generated
     by the directive. This allows `hyperlink references`_ to the element
     using `text` as `reference name`_.
@@ -1996,43 +2046,101 @@ _`:name:` : text
 
       .. image:: bild.png
 
-    (New in Docutils 0.8.)
+
+-------------------------
+Common Option Value Types
+-------------------------
+
+*"keyword"*
+  recognized keywords.
+  Used without quotes in the reStructuredText source.
+
+  .. _character:
+
+*character*
+  single character.
+  May be specified as literal character or as Unicode `character code`_
+  (cf. the unicode_ directive).
+
+  .. _encoding:
+
+*encoding*
+  text encoding name.
+  Docutils looks it up in the list of registered codecs_
+  (see also `Standard Encodings`_).
+
+  .. _flag:
+
+*flag*
+  no value.
+
+  .. _integer:
+
+*integer*
+  integer number.
+  A _`list of integers` may be comma- or whitespace-separated.
+
+  .. _length:
+
+*length*
+  number followed by one of the supported `length units`_.
+
+  .. _path:
+
+*path*
+  local filesystem path. Newlines are removed.
+
+  .. _text:
+
+*text*
+  free text (with possible restrictions in parentheses).
+
+  .. _URI:
+
+*URI*
+  `Uniform Resource Identifier`_.
+  Whitespace is removed, cf. `External hyperlink targets`_.
 
 
-.. _reference name:
-.. _reference names: restructuredtext.html#reference-names
-.. _hyperlink target: restructuredtext.html#hyperlink-targets
-.. _hyperlink references: restructuredtext.html#hyperlink-references
-.. _class names: ../doctree.html#classnames-type
-.. _"classes": ../doctree.html#classes
-.. _identifier keys: ../doctree.html#ids-type
-.. _"ids": ../doctree.html#ids
-.. _"names": ../doctree.html#names
-.. _admonition: ../doctree.html#admonition
+.. _codecs: https://docs.python.org/3/library/codecs.html
+.. _Standard Encodings:
+    https://docs.python.org/3/library/codecs.html#standard-encodings
+.. _Uniform Resource Identifier:
+    https://en.wikipedia.org/wiki/Uniform_Resource_Identifier
+
 .. _block_quote: ../doctree.html#block-quote
 .. _caption: ../doctree.html#caption
-.. _compound: ../doctree.html#compound
+.. _class names: ../doctree.html#classname
+.. _"classes":
+.. _classes: ../doctree.html#classes
 .. _container element: ../doctree.html#container
 .. _decoration: ../doctree.html#decoration
+.. _escaping mechanism: restructuredtext.html#escaping-mechanism
+.. _external hyperlink targets:
+    restructuredtext.html#external-hyperlink-targets
 .. _figure: ../doctree.html#figure
 .. _footnote: ../doctree.html#footnote
 .. _footnote_reference: ../doctree.html#footnote-reference
 .. _generated: ../doctree.html#generated
-.. _image: ../doctree.html#image
+.. _hyperlink references: restructuredtext.html#hyperlink-references
+.. _hyperlink target: restructuredtext.html#hyperlink-targets
+.. _identifier keys: ../doctree.html#ids-type
+.. _"ids": ../doctree.html#ids
 .. _inline elements: ../doctree.html#inline-elements
 .. _interpreted text role: roles.html
-.. _literal_block: ../doctree.html#literal-block
 .. _legend: ../doctree.html#legend
-.. _length: restructuredtext.html#length-units
+.. _length units: restructuredtext.html#length-units
 .. _line_block: ../doctree.html#line-block
+.. _literal_block: ../doctree.html#literal-block
 .. _math_block: ../doctree.html#math-block
+.. _"names": ../doctree.html#names
 .. _pending: ../doctree.html#pending
 .. _percentage: restructuredtext.html#percentage-units
-.. _raw: ../doctree.html#raw
+.. _reference name:
+.. _reference names: restructuredtext.html#reference-names
 .. _rubric: ../doctree.html#rubric
 .. _sidebar: ../doctree.html#sidebar
-.. _table: ../doctree.html#table
-.. _title: ../doctree.html#title
+.. _title attribute: ../doctree.html#title-attribute
 .. _topic: ../doctree.html#topic
 
 

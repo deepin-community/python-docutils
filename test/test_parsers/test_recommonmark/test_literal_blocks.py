@@ -1,6 +1,5 @@
 #! /usr/bin/env python3
-# -*- coding: utf-8 -*-
-# $Id: test_literal_blocks.py 8585 2020-12-01 11:38:25Z milde $
+# $Id: test_literal_blocks.py 9301 2022-12-02 17:13:54Z milde $
 # :Copyright: © 2020 Günter Milde.
 # :License: Released under the terms of the `2-Clause BSD license`_, in short:
 #
@@ -14,17 +13,33 @@
 Tests for literal blocks in CommonMark parsers
 Cf. the `CommonMark Specification <https://spec.commonmark.org/>`__
 """
-from __future__ import absolute_import
+
+from pathlib import Path
+import sys
+import unittest
 
 if __name__ == '__main__':
-    import __init__
-from test_parsers import DocutilsTestSupport
+    # prepend the "docutils root" to the Python library path
+    # so we import the local `docutils` package.
+    sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
+
+from docutils.frontend import get_default_settings
+from docutils.parsers.recommonmark_wrapper import Parser
+from docutils.utils import new_document
 
 
-def suite():
-    s = DocutilsTestSupport.RecommonmarkParserTestSuite()
-    s.generateTests(totest)
-    return s
+class RecommonmarkParserTestCase(unittest.TestCase):
+    def test_parser(self):
+        parser = Parser()
+        settings = get_default_settings(Parser)
+        for name, cases in totest.items():
+            for casenum, (case_input, case_expected) in enumerate(cases):
+                with self.subTest(id=f'totest[{name!r}][{casenum}]'):
+                    document = new_document('test data', settings.copy())
+                    parser.parse(case_input, document)
+                    output = document.pformat()
+                    self.assertEqual(output, case_expected)
+
 
 totest = {}
 
@@ -142,7 +157,7 @@ A paragraph:
 
       A wonky literal block.
     Literal line 2.
-  
+
       Literal line 3.
 """,
 """\
@@ -158,18 +173,18 @@ A paragraph:
 ["""\
 A paragraph:
 ~~~
-  A fenced literal block.
+  A fenced code block.
 Literal line 2.
 
   Literal line 3.
-~~~  
+~~~
 """,
 """\
 <document source="test data">
     <paragraph>
         A paragraph:
     <literal_block classes="code" xml:space="preserve">
-          A fenced literal block.
+          A fenced code block.
         Literal line 2.
         \n\
           Literal line 3.
@@ -189,10 +204,22 @@ with *info string*.
         A literal block (fenced code block)
         with *info string*.
 """],
+["""\
+~~~eval_rst
+Evaluating embedded rST blocks requires the AutoStructify component
+in recommonmark. Otherwise this is just a code block
+with class ``eval_rst``.
+~~~
+""",
+"""\
+<document source="test data">
+    <literal_block classes="code eval_rst" xml:space="preserve">
+        Evaluating embedded rST blocks requires the AutoStructify component
+        in recommonmark. Otherwise this is just a code block
+        with class ``eval_rst``.
+"""],
 ]
 
 
-
 if __name__ == '__main__':
-    import unittest
-    unittest.main(defaultTest='suite')
+    unittest.main()

@@ -1,26 +1,44 @@
-#! /usr/bin/env python
+#! /usr/bin/env python3
 
-# $Id: test_interpreted.py 8495 2020-03-03 20:32:40Z milde $
+# $Id: test_interpreted.py 9277 2022-11-26 23:15:13Z milde $
 # Author: David Goodger <goodger@python.org>
 # Copyright: This module has been placed in the public domain.
 
 """
 Tests for interpreted text in docutils/parsers/rst/states.py.
 """
-from __future__ import absolute_import
+
+from pathlib import Path
+import sys
+import unittest
 
 if __name__ == '__main__':
-    import __init__
-from test_parsers import DocutilsTestSupport
+    # prepend the "docutils root" to the Python library path
+    # so we import the local `docutils` package.
+    sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
+
+from docutils.frontend import get_default_settings
+from docutils.parsers.rst import Parser
+from docutils.utils import new_document
 from docutils.utils.code_analyzer import with_pygments
 
 
-def suite():
-    s = DocutilsTestSupport.ParserTestSuite()
-    if not with_pygments:
-        del(totest['code-parsing'])
-    s.generateTests(totest)
-    return s
+class ParserTestCase(unittest.TestCase):
+    def test_parser(self):
+        if not with_pygments:
+            del totest['code_parsing']
+
+        parser = Parser()
+        settings = get_default_settings(Parser)
+        settings.warning_stream = ''
+        for name, cases in totest.items():
+            for casenum, (case_input, case_expected) in enumerate(cases):
+                with self.subTest(id=f'totest[{name!r}][{casenum}]'):
+                    document = new_document('test data', settings.copy())
+                    parser.parse(case_input, document)
+                    output = document.pformat()
+                    self.assertEqual(output, case_expected)
+
 
 totest = {}
 
@@ -105,10 +123,10 @@ totest['basics'] = [
 """\
 <document source="test data">
     <paragraph>
-        <problematic ids="id2" refid="id1">
+        <problematic ids="problematic-1" refid="system-message-1">
             `
         interpreted without closing backquote
-    <system_message backrefs="id2" ids="id1" level="2" line="1" source="test data" type="WARNING">
+    <system_message backrefs="problematic-1" ids="system-message-1" level="2" line="1" source="test data" type="WARNING">
         <paragraph>
             Inline interpreted text or phrase reference start-string without end-string.
 """],
@@ -164,10 +182,10 @@ totest['basics'] = [
 <document source="test data">
     <paragraph>
         :title:
-        <problematic ids="id2" refid="id1">
+        <problematic ids="problematic-1" refid="system-message-1">
             `
          ` (trailing unquoted space)
-    <system_message backrefs="id2" ids="id1" level="2" line="1" source="test data" type="WARNING">
+    <system_message backrefs="problematic-1" ids="system-message-1" level="2" line="1" source="test data" type="WARNING">
         <paragraph>
             Inline interpreted text or phrase reference start-string without end-string.
 """],
@@ -236,7 +254,7 @@ Code role for inline code snippets:
 """],
 ]
 
-totest['code-parsing'] = [
+totest['code_parsing'] = [
 ["""\
 .. role:: tex(code)
    :language: latex
@@ -302,7 +320,7 @@ totest['references'] = [
 """\
 <document source="test data">
     <paragraph>
-        <reference refuri="http://www.python.org/dev/peps/pep-0000">
+        <reference refuri="https://peps.python.org/pep-0000">
             PEP 0
 """],
 ["""\
@@ -311,9 +329,9 @@ totest['references'] = [
 """\
 <document source="test data">
     <paragraph>
-        <problematic ids="id2" refid="id1">
+        <problematic ids="problematic-1" refid="system-message-1">
             :PEP:`-1`
-    <system_message backrefs="id2" ids="id1" level="3" line="1" source="test data" type="ERROR">
+    <system_message backrefs="problematic-1" ids="system-message-1" level="3" line="1" source="test data" type="ERROR">
         <paragraph>
             PEP number must be a number from 0 to 9999; "-1" is invalid.
 """],
@@ -323,7 +341,7 @@ totest['references'] = [
 """\
 <document source="test data">
     <paragraph>
-        <reference refuri="http://tools.ietf.org/html/rfc2822.html">
+        <reference refuri="https://tools.ietf.org/html/rfc2822.html">
             RFC 2822
 """],
 ["""\
@@ -332,9 +350,9 @@ totest['references'] = [
 """\
 <document source="test data">
     <paragraph>
-        <problematic ids="id2" refid="id1">
+        <problematic ids="problematic-1" refid="system-message-1">
             :RFC:`0`
-    <system_message backrefs="id2" ids="id1" level="3" line="1" source="test data" type="ERROR">
+    <system_message backrefs="problematic-1" ids="system-message-1" level="3" line="1" source="test data" type="ERROR">
         <paragraph>
             RFC number must be a number greater than or equal to 1; "0" is invalid.
 """],
@@ -344,7 +362,7 @@ totest['references'] = [
 """\
 <document source="test data">
     <paragraph>
-        <reference refuri="http://tools.ietf.org/html/rfc2822.html#section1">
+        <reference refuri="https://tools.ietf.org/html/rfc2822.html#section1">
             RFC 2822
 """],
 ]
@@ -356,13 +374,13 @@ totest['unknown_roles'] = [
 """\
 <document source="test data">
     <paragraph>
-        <problematic ids="id2" refid="id1">
+        <problematic ids="problematic-1" refid="system-message-1">
             :role:`interpreted`
     <system_message level="1" line="1" source="test data" type="INFO">
         <paragraph>
             No role entry for "role" in module "docutils.parsers.rst.languages.en".
             Trying "role" as canonical role name.
-    <system_message backrefs="id2" ids="id1" level="3" line="1" source="test data" type="ERROR">
+    <system_message backrefs="problematic-1" ids="system-message-1" level="3" line="1" source="test data" type="ERROR">
         <paragraph>
             Unknown interpreted text role "role".
 """],
@@ -372,13 +390,13 @@ totest['unknown_roles'] = [
 """\
 <document source="test data">
     <paragraph>
-        <problematic ids="id2" refid="id1">
+        <problematic ids="problematic-1" refid="system-message-1">
             `interpreted`:role:
     <system_message level="1" line="1" source="test data" type="INFO">
         <paragraph>
             No role entry for "role" in module "docutils.parsers.rst.languages.en".
             Trying "role" as canonical role name.
-    <system_message backrefs="id2" ids="id1" level="3" line="1" source="test data" type="ERROR">
+    <system_message backrefs="problematic-1" ids="system-message-1" level="3" line="1" source="test data" type="ERROR">
         <paragraph>
             Unknown interpreted text role "role".
 """],
@@ -388,9 +406,9 @@ totest['unknown_roles'] = [
 """\
 <document source="test data">
     <paragraph>
-        <problematic ids="id2" refid="id1">
+        <problematic ids="problematic-1" refid="system-message-1">
             :role:`interpreted`:role:
-    <system_message backrefs="id2" ids="id1" level="2" line="1" source="test data" type="WARNING">
+    <system_message backrefs="problematic-1" ids="system-message-1" level="2" line="1" source="test data" type="WARNING">
         <paragraph>
             Multiple roles in interpreted text (both prefix and suffix present; only one allowed).
 """],
@@ -400,13 +418,13 @@ totest['unknown_roles'] = [
 """\
 <document source="test data">
     <paragraph>
-        <problematic ids="id2" refid="id1">
+        <problematic ids="problematic-1" refid="system-message-1">
             :very.long-role_name:`interpreted`
     <system_message level="1" line="1" source="test data" type="INFO">
         <paragraph>
             No role entry for "very.long-role_name" in module "docutils.parsers.rst.languages.en".
             Trying "very.long-role_name" as canonical role name.
-    <system_message backrefs="id2" ids="id1" level="3" line="1" source="test data" type="ERROR">
+    <system_message backrefs="problematic-1" ids="system-message-1" level="3" line="1" source="test data" type="ERROR">
         <paragraph>
             Unknown interpreted text role "very.long-role_name".
 """],
@@ -416,13 +434,13 @@ totest['unknown_roles'] = [
 """\
 <document source="test data">
     <paragraph>
-        <problematic ids="id2" refid="id1">
+        <problematic ids="problematic-1" refid="system-message-1">
             :restructuredtext-unimplemented-role:`interpreted`
     <system_message level="1" line="1" source="test data" type="INFO">
         <paragraph>
             No role entry for "restructuredtext-unimplemented-role" in module "docutils.parsers.rst.languages.en".
             Trying "restructuredtext-unimplemented-role" as canonical role name.
-    <system_message backrefs="id2" ids="id1" level="3" line="1" source="test data" type="ERROR">
+    <system_message backrefs="problematic-1" ids="system-message-1" level="3" line="1" source="test data" type="ERROR">
         <paragraph>
             Interpreted text role "restructuredtext-unimplemented-role" not implemented.
 """],
@@ -430,5 +448,4 @@ totest['unknown_roles'] = [
 
 
 if __name__ == '__main__':
-    import unittest
-    unittest.main(defaultTest='suite')
+    unittest.main()

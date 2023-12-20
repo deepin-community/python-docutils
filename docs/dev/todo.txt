@@ -1,3 +1,5 @@
+.. include:: ../header.txt
+
 ======================
  Docutils_ To Do List
 ======================
@@ -5,11 +7,11 @@
 :Author: David Goodger (with input from many); open to all Docutils
          developers
 :Contact: docutils-develop@lists.sourceforge.net
-:Date: $Date: 2021-03-05 22:14:40 +0100 (Fr, 05. Mär 2021) $
-:Revision: $Revision: 8631 $
+:Date: $Date: 2022-11-02 23:39:16 +0100 (Mi, 02. Nov 2022) $
+:Revision: $Revision: 9201 $
 :Copyright: This document has been placed in the public domain.
 
-.. _Docutils: http://docutils.sourceforge.net/
+.. _Docutils: https://docutils.sourceforge.io/
 
 .. contents::
 
@@ -19,17 +21,7 @@ the priority.  Items in question form (containing "?") are ideas which
 require more thought and debate; they are potential to-do's.
 
 Many of these items are awaiting champions.  If you see something
-you'd like to tackle, please do!  If there's something you'd like to
-see done but are unable to implement it yourself, please consider
-donating to Docutils: |donate|
-
-.. |donate| image:: http://images.sourceforge.net/images/project-support.jpg
-   :target: http://sourceforge.net/donate/index.php?group_id=38414
-   :align: middle
-   :width: 88
-   :height: 32
-   :alt: Support the Docutils project!
-
+you'd like to tackle, please do!
 Please see also the Bugs_ document for a list of bugs in Docutils.
 
 .. _bugs: ../../BUGS.html
@@ -64,33 +56,82 @@ Many of these are now handled by Sphinx_
 * Plugin support.
 
 * Suitability for `Python module documentation
-  <http://docutils.sf.net/sandbox/README.html#documenting-python>`_.
+  <https://docutils.sourceforge.io/sandbox/README.html#documenting-python>`_.
 
-.. _Sphinx: http://sphinx.pocoo.org/
+.. _Sphinx: http://www.sphinx-doc.org/
+
+Repository
+==========
+
+Move to a Git repository.
+
+* This is a long standing `feature request`__
+  (with pointers to Sphinx issues and discussion).
+
+  __ https://sourceforge.net/p/docutils/feature-requests/58/
+
+* From a `post by David Goodger`__
+
+    An absolute requirement, for me, is that such a change be complete.
+    We can't lose any data or have to refer to the old system as an
+    "archive". So all the SVN history, all branches, and the full sandbox
+    need to be converted at the same time.
+
+  __ https://sourceforge.net/p/docutils/mailman/message/31878077/
+
+Convert with reposurgeon_?
+
+  If you are doing a full import rather than gatewaying, reposurgeon is
+  probably what you want. It has been tested against a lot of large, old,
+  nasty repositories and is thus known to be robust in the presence of
+  repository malformations (a property regularly checked by a test suite
+  that is a rogue's gallery of Subversion botches).
+
+  -- `Git Wiki`__
+
+The comprehensive `Reposurgeon documentation`_ comes with
+`a guide to repository conversion`__
+as well as info about `reading Subversion repositories`__.
+Converting from an SVN dump file is faster than from a checkout.
+
+.. _reposurgeon: http://www.catb.org/esr/reposurgeon/
+.. _reposurgeon documentation:
+    http://www.catb.org/esr/reposurgeon/repository-editing.html
+__ https://git.wiki.kernel.org/index.php/
+   Interfaces,_frontends,_and_tools#Subversion
+__ http://www.catb.org/esr/reposurgeon/repository-editing.html#conversion   
+__ http://www.catb.org/esr/reposurgeon/repository-editing.html
+   #_reading_subversion_repositories   
+
+
+Adam Turner wrote a conversion Makefile and ``.lift`` scripts that
+downloads the repo from SF with rsync, converts it to a SVN mirror and
+finally to Git, splitting sandbox, prest, and web from docutils.
+
+
+Sourceforge supports multiple Git repositories per project, so we can
+switch the version control system independent of the decision on an
+eventual switch of the host.
+Cf. https://sourceforge.net/p/forge/documentation/Git/
+
 
 General
 =======
 
-* Encoding of command line arguments can only be guessed:
+Miscellaneous
+-------------
 
-  * try UTF-8/strict first, then try the locale's encoding with
-    strict error handling, then ASCII/replace?
+Code cleanup and modernization:
+  Use flake8_? See also the configuration in `<../../tox.ini>`__.
 
-    UTF-8 is almost 100% safe to try first; false positives are rare,
-    The locale's encoding with strict error handling may be a
-    reasonable compromise, but any error would indicate that the
-    locale's encoding is inappropriate.  The only safe fallback is
-    ASCII/replace.
+  Check and solve issue from  :PEP:`290` - Code Migration and Modernization.
+  (Covers issues up to Python 2.4, is there an equivalent for more recent
+  modernizations?)
 
-  * Do not decode argv before option parsing but individual string
-    values?
+  Ensure `backwards compatibility`_!
 
-    +1  Allows for separate command-line vs. filesystem encodings,
-        respectively to keep file names encoded.
-    +1  Allows to configure command-line encoding in a config file,
-    -1  More complicated.
-
-  Cf. <http://thread.gmane.org/gmane.text.docutils.user/2890/focus=2957>.
+  .. _flake8: https://pypi.org/project/flake8/
+  .. _backwards compatibility: policies.html#backwards-compatibility-policy
 
 * Improve handling on Windows:
 
@@ -181,7 +222,7 @@ General
     for language-dependent features.
 
     Make this the default for output (as opposed to input)?
-    Throw an error with a helpfull message, e.g.
+    Throw an error with a helpful message, e.g.
 
       Default "contents" title for language %s missing, please specify
       an explicit title.
@@ -210,7 +251,7 @@ General
 
 * Perhaps the ``Component.supports`` method should deal with
   individual features ("meta" etc.) instead of formats ("html" etc.)?
-  Currently, only the `<meta> node`_ requires the framework.
+  Currently, it is not used at all.
 
   Do we need it at all?  Or rather let the writers just ignore some
   nodes (like we already do for "class" values)?
@@ -337,7 +378,7 @@ General
 
 * Add testing for Docutils' front end tools?
 
-* Publisher: "Ordinary setup" shouldn't requre specific ordering; at
+* Publisher: "Ordinary setup" shouldn't require specific ordering; at
   the very least, there ought to be error checking higher up in the
   call chain.  [Aahz]
 
@@ -426,7 +467,7 @@ General
      http://thread.gmane.org/gmane.text.docutils.user/1112
 
 * Add a "disable_transforms" setting? Would allow for easy syntax
-  checking. Where ("null" writer, generic, parser(s), docutils-cli.py)?
+  checking. Where ("null" writer, generic, parser(s))?
   Cf. the `2004-02-18 "rest checking and source path"`_ thread.
 
 * Add a generic meta-stylesheet mechanism?  An external file could
@@ -525,7 +566,7 @@ General
   For example, top/bottom/side navigation bars for web pages.  Generic
   decorations?
 
-  Seems like a bad idea as long as it isn't independent from the ouput
+  Seems like a bad idea as long as it isn't independent from the output
   format (for example, navigation bars are only useful for web pages).
 
 * docutils_update: Check for a ``Makefile`` in a directory, and run
@@ -579,16 +620,17 @@ No such mechanism exists in HTML.
       .. figure:: image.png
          :name: figure name
 
-  Improve the mapping of "phrase references" to IDs/labels with
-  Literal transcription (i.e. ü -> ue, ß -> ss, å -> aa) instead of just
-  stripping the accents and other non-ASCII chars.
-  Use http://pypi.python.org/pypi/Unidecode?
+  Improve the mapping of "phrase references" to IDs/labels with Literal
+  transcription (i.e. ü -> ue, ß -> ss, å -> aa) instead of just
+  stripping the accents and other non-ASCII chars. See also the feature
+  request `allow more characters when transforming "names" to "ids"`__.
 
   A "table" directive has been implemented, supporting table titles.
 
   Perhaps the name could derive from the title/caption?
 
   .. _reference names: ../ref/rst/restructuredtext.html#reference-names
+  __ https://sourceforge.net/p/docutils/feature-requests/66/
 
 * We need syntax for object references.  Cf. `OpenOffice.org XML`_
   "reference fields":
@@ -624,18 +666,6 @@ See also the `Modified rst2html
 <http://www.loria.fr/~rougier/coding/article/rst2html.py>`__
 by Nicolas Rougier for a sample implementation.
 
-<meta> node
------------
-
-Up to 0.17, <meta> nodes are non-standard (not part of the Docutils
-document tree specification).
-
-The "Filter" transform removes "meta" nodes from the doctree unless the
-output format is "html" (rsp. "html", "latex", or "odt" since 0.17).
-
-Suggestion:
-  Make "meta" a generic directive and <meta> nodes standard nodes that
-  are kept in the doctree. Allow writers to ignore <meta> nodes.
 
 Documentation
 =============
@@ -655,8 +685,6 @@ User Docs
 
 Developer Docs
 --------------
-
-* Complete `Docutils Runtime Settings <../api/runtime-settings.html>`_.
 
 * Improve the internal module documentation (docstrings in the code).
   Specific deficiencies listed below.
@@ -765,7 +793,7 @@ Miscellaneous ideas:
 
 * Should standalone strings also become (module/class) docstrings?
   Under what conditions?  We want to prevent arbitrary strings from
-  becomming docstrings of prior attribute assignments etc.  Assume
+  becoming docstrings of prior attribute assignments etc.  Assume
   that there must be no blank lines between attributes and attribute
   docstrings?  (Use lineno of NEWLINE token.)
 
@@ -929,7 +957,7 @@ Misc
 
 * Support generic hyperlink references to _`targets in other
   documents`?  Not in an HTML-centric way, though (it's trivial to say
-  ``http://www.example.com/doc#name``, and useless in non-HTML
+  ``https://www.example.org/doc#name``, and useless in non-HTML
   contexts).  XLink/XPointer?  ``.. baseref::``?  See Doc-SIG
   2001-08-10.
 
@@ -983,7 +1011,7 @@ Misc
   Appendix E ("Recommendations for Delimiting URI in Context") of `RFC
   2396`_.
 
-  .. _RFC 2396: http://www.rfc-editor.org/rfc/rfc2396.txt
+  .. _RFC 2396: https://www.rfc-editor.org/rfc/rfc2396.txt
 
 * Use the vertical spacing of the source text to determine the
   corresponding vertical spacing of the output?
@@ -1114,7 +1142,7 @@ Misc
   grid tables inside XML comments.
 
   .. _feature request [6]:
-      http://sourceforge.net/p/docutils/feature-requests/6
+      https://sourceforge.net/p/docutils/feature-requests/6
   .. _list-table: ../ref/rst/directives.html#list-table
 
 
@@ -1131,7 +1159,7 @@ Misc
 
     Currently, `document.reporter` uses a state machine instance to
     determine the "source" and "line" info from
-    `statemachine.input_lines` if not given explicitely. Except for
+    `statemachine.input_lines` if not given explicitly. Except for
     special cases, the "line" argument is not needed because,
     `document.statemachine` keeps record of the current line number.
 
@@ -1143,7 +1171,7 @@ Misc
     too?  Add a set_info method?  To what?)
 
     The "source" (and line number in the source) can either be added
-    explicitely to the elements or determined from the “raw” line
+    explicitly to the elements or determined from the “raw” line
     number by `document.statemachine.get_source_and_line`.
 
   - Some line numbers in elements are not being set properly
@@ -1380,13 +1408,13 @@ Use a directive option to specify an alternative input format, e.g. (but not
 limited to):
 
 MathML_
-  Not for hand-written code but maybe usefull when pasted in (or included
+  Not for hand-written code but maybe useful when pasted in (or included
   from a file)
 
   For an overview of MathML implementations and tests, see, e.g.,
   the `mathweb wiki`_ or the `ConTeXT MathML page`_.
 
-  .. _MathML: http://www.w3.org/TR/MathML2/
+  .. _MathML: https://www.w3.org/TR/MathML2/
   .. _mathweb wiki: http://www.mathweb.org/wiki/MathML
   .. _ConTeXT MathML page: http://wiki.contextgarden.net/MathML
 
@@ -1420,7 +1448,7 @@ ASCIIMath_
   .. _ASCIIMath tutorial:
      http://www.wjagray.co.uk/maths/ASCIIMathTutorial.html
   .. _ASCIIMathML: http://pypi.python.org/pypi/asciimathml/
-  .. _ASCIIMathPython: http://sourceforge.net/projects/asciimathpython/
+  .. _ASCIIMathPython: https://github.com/paulhtremblay/asciimathml
   __ http://fletcherpenney.net/multimarkdown/
 
 `Unicode Nearly Plain Text Encoding of Mathematics`_
@@ -1432,7 +1460,7 @@ ASCIIMath_
    the Unicode Consortium.)
 
    .. _Unicode Nearly Plain Text Encoding of Mathematics:
-      http://www.unicode.org/notes/tn28/
+      https://www.unicode.org/notes/tn28/
 
 itex
   See `the culmination of a relevant discussion in 2003
@@ -1497,7 +1525,7 @@ MathML_
     * the Unicode-Char <-> LaTeX mappings database unimathsymbols_
 
   __ http://msevior.livejournal.com/26377.html
-  .. _MathML: http://www.w3.org/TR/MathML2/
+  .. _MathML: https://www.w3.org/TR/MathML2/
   .. _ttm: http://hutchinson.belmont.ma.us/tth/mml/
   .. _TeX4ht: http://www.tug.org/applications/tex4ht/mn.html
   .. _MathToWeb:  http://www.mathtoweb.com/
@@ -1526,12 +1554,14 @@ HTML/CSS
   * TtH_ (C)
   * Hevea_ (Objective Caml)
   * `MathJax for Node`_
+  * KaTeX_
 
   __ http://www.cs.tut.fi/~jkorpela/math/
   __ http://www.zipcon.net/~swhite/docs/math/math.html
   .. _elyxer: http://elyxer.nongnu.org/
   .. _TtH: ttp://hutchinson.belmont.ma.us/tth/index.html
   .. _Hevea: http://para.inria.fr/~maranget/hevea/
+  .. _KaTeX: https://katex.org
 
 images
   (PNG or SVG) like e.g. Wikipedia.
@@ -1668,7 +1698,7 @@ when used in a document.
     - Add support for inclusion by URL? ::
 
           .. include::
-             :url: http://www.example.org/inclusion.txt
+             :url: https://www.example.org/inclusion.txt
 
     - Strip blank lines from begin and end of a literal included file or
       file section. This would correspond to the way a literal block is
@@ -1726,7 +1756,7 @@ when used in a document.
       "language by class attribute" does not change parsing (localized
       directives etc.), only supporting writers.
 
-    .. _BCP 47: http://www.rfc-editor.org/rfc/bcp/bcp47.txt
+    .. _BCP 47: https://www.rfc-editor.org/rfc/bcp/bcp47.txt
 
 
   - _`misc.settings`: Set any(?) Docutils runtime setting from within
@@ -1789,7 +1819,7 @@ when used in a document.
 
     My first idea would be to add a set of conditional directives.
     Let's call them "writer-is" and "writer-is-not" for discussion
-    purposes (don't worry about implemention details).  We might
+    purposes (don't worry about implementation details).  We might
     have::
 
          .. writer-is:: text-only
@@ -2255,7 +2285,7 @@ Unimplemented Transforms
   The advantage of the current way of doing things is that parse-time
   system messages don't require a transform; they're already in the
   document.  This is valuable for testing (unit tests,
-  tools/quicktest.py).  So if we do decide to make a change, I think
+  tools/dev/quicktest.py).  So if we do decide to make a change, I think
   the insertion of parse-time system messages ought to remain as-is
   and the Messages transform ought to move all parse-time system
   messages (remove from their originally inserted positions, insert in
@@ -2266,22 +2296,6 @@ Unimplemented Transforms
 
 HTML Writer
 ===========
-
-* Make it easier to find out fragment names (#foo-bar) of ``_`inline
-  targets```.  Currently you have to either look at the source or
-  guess the fragment.
-
-  For example, we could add support for self-referencing targets
-  (i.e. inline targets would [unobtrusively] link to themselves, so
-  that you can just click them and then copy the address).  Or we
-  could add support for titles that display the fragment name (as in
-  <http://subversion.tigris.org/mailing-list-guidelines.html>; just
-  hover the paragraphs).
-
-  Either way it should be optional and deactivated by default.
-
-  This would be useful for documents like Docutils' bug list or to-do
-  list.
 
 * Make the _`list compacting` logic more generic: For example, allow
   for literal blocks or line blocks inside of compact list items.
@@ -2418,7 +2432,7 @@ Test and consider moving the better one into the docutils core.
 __ ../user/links.html#ePub
 .. _International Digital Publishing Forum: http://www.idpf.org/
 .. _electronic reading devices:
-   http://en.wikipedia.org/wiki/List_of_e-book_readers
+   https://en.wikipedia.org/wiki/List_of_e-book_readers
 
 
 LaTeX writer
@@ -2447,29 +2461,39 @@ Bug fixes
 
 * Paragraph following field-list or table in compound is indented.
 
-  This is a problem with the current DUfieldlist definition and with
-  the use of "longtable" for tables.
-  See `LaTeX constructs and packages instead of re-implementations`_ for
-  alternatives.
+  This is a problem with the current DUfieldlist definition and with the
+  use of "longtable" for tables. See `other LaTeX constructs and packages
+  instead of re-implementations`_ for alternatives.
 
 
 Generate clean and configurable LaTeX source
 ----------------------------------------------
 
-* Check the generated source with package `nag`.
+Which packages do we want to use?
+
++ base and "recommended" packages
+
+  (packages that should be in a "reasonably sized and reasonably modern
+  LaTeX installation like the `texlive-latex-recommended` Debian package,
+  say):
+
++ No "fancy" or "exotic" requirements.
+
++ pointers to advanced packages and their use in the `latex writer
+  documentation`_.
 
 Configurable placement of figure and table floats
 `````````````````````````````````````````````````
 
 * Special class argument to individually place figures?
 
-  Either:
+  Example::
 
-    placement-<optional arg>  -> \figure[<optional arg>]{...}
+    .. figure:: foo.pdf
+       :class: place-here-if-possible place-top place-bottom
 
-  e.g. ``.. class::  placement-htb``,
-
-  or more verbose:
+  would be written as ``\figure[htb]{...}`` with
+  the optional args:
 
   :H: place-here
   :h: place-here-if-possible
@@ -2477,120 +2501,78 @@ Configurable placement of figure and table floats
   :b: place-bottom
   :p: place-on-extra-page
 
-  e.g.: ``.. class:: place-here-if-possible place-top place-bottom``
+  Alternative: class value = "place-" + optional arg, e.g. ``:class:
+  place-htb``.
 
-  Maybe support both variants?
+Footnotes
+`````````
+
++ True footnotes with LaTeX auto-numbering (as option ``--latex-footnotes``)
+  (also for target-footnotes):
+  Write ``\footnote{<footnote content>}`` at the place of the
+  ``<footnote_reference>`` node.
+
++ Open questions:
+
+  - Load hyperref_ with option "hyperfootnotes" and/or
+    package footnotebackref_ or leave this to the user?
+
+  - Consider cases where LaTeX does not support footnotes
+    (inside tables__, headings__, caption, ...).
+    Use ftnxtra_, tabularx_, tabulary_, longtable_?
+
+    __ http://www.tex.ac.uk/cgi-bin/texfaq2html?label=footintab
+    __ http://www.tex.ac.uk/cgi-bin/texfaq2html?label=ftnsect
+
+  - Consider `multiple footnote refs to common footnote text`__.
+
+    KOMA-script classes and the KOMA scrextend_ package provide
+    ``\footref`` that can be used for additional references to a
+    ``\label``-ed footnote. Since 2021-05-01, ``\footref`` is provided
+    by the LaTeX core, too.
+
+    __ http://www.tex.ac.uk/cgi-bin/texfaq2html?label=multfoot
+
+  - Consider numbered vs. symbolic footnotes.
+
++ document customization (links to how-to and packages)
+
+.. Footnote packages at CTAN (www.ctan.org/pkg/<packagename>):
+
+   :footnote: provides a "savenotes" environment which collects all
+              footnotes and emits them at ``end{savenotes}``
+              (texlive-latex-recommended)
+
+   :ftnxtra_: fixes the issue of footnote inside \caption{},
+             tabular environment and \section{} like commands.
+
+   :footnotebackref_: bidirectional links to/from footnote mark to
+                      footnote text.
+
+.. Footnote Discussion:
+
+   `German tutorial
+   <http://www2.informatik.hu-berlin.de/~ahamann/studies/footnotes.pdf>`__
+
+   `wikibooks: footnote workarounds
+   <https://en.wikibooks.org/wiki/LaTeX/Footnotes_and_Margin_Notes#Common_problems_and_workarounds>`__
+
+.. _footnotebackref: https://www.ctan.org/pkg/footnotebackref
+.. _ftnxtra: https://www.ctan.org/pkg/ftnxtra
+.. _hyperref: https://www.ctan.org/pkg/hyperref
+.. _longtable: https://www.ctan.org/pkg/longtable
+.. _scrextend: https://www.ctan.org/pkg/longtable
+.. _tabularx: https://www.ctan.org/pkg/tabularx
 
 
-LaTeX constructs and packages instead of re-implementations
-```````````````````````````````````````````````````````````
+Other LaTeX constructs and packages instead of re-implementations
+`````````````````````````````````````````````````````````````````
 
-Which packages do we want to use?
+* Check the generated source with package `nag`.
 
-  + base and "recommended" packages
+* enumitem_ (texlive-latex-extra) for field-lists?
 
-    (packages that should be in a "reasonably sized and reasonably modern
-    LaTeX installation like the `texlive-latex-recommended` Debian package,
-    say):
-
-  + No "fancy" or "exotic" requirements.
-
-  + pointers to advanced packages and their use in the `latex writer
-    documentation`_.
-
-* footnotes
-
-  + True footnotes with LaTeX auto-numbering (as option ``--latex-footnotes``)
-    (also for target-footnotes):
-
-    - attach footnote text to footnote-symobol node
-    - write \footnote{<footnote text>}
-    - consider cases where LaTeX does not support footnotes
-      (inside tables, headings, ...)?
-    - consider multiple footnote refs to common footnote text.
-
-    .. Quote:
-
-     If the symbol you want is not one of the ones listed, you'll need to
-     redefine ``\@fnsymbol`` and add it, e.g. perhaps like::
-
-      \def\@fnsymbol#1{\ifcase#1\hbox{}\or *\or \dagger\or \ddagger\or
-      \mathchar "278\or \mathchar "27B\or \|\or **\or \dagger\dagger \or
-      \ddagger\ddagger \or \mathchar"27C \else\@ctrerr\fi\relax}
-
-     which would allow \symbolfootnote[10]{footnote} to have a club as its
-     mark.
-
-  + document customization (links to how-to and packages):
-
-  .. Footnote packages:
-
-     :footnote: texlive-latex-recommended % savenotes environment
-     :footmisc: texlive-latex-extra       % formatting options
-     :manyfoot: texlive-latex-extra
-     :bigfoot: texlive-latex-extra
-     :perpage: texlive-latex-extra
-     :ftnxtra: new on CTAN
-               fixes the issue of footnote inside \caption{},
-               tabular environment and \section{} like commands.
-
-
-     German tutorial:
-     http://www2.informatik.hu-berlin.de/~ahamann/studies/footnotes.pdf
-
-  .. Footnote FAQs:
-
-     `Footnotes whose texts are identical
-     <http://www.tex.ac.uk/cgi-bin/texfaq2html?label=repfootnote>`__
-
-     * label per hand or use footmisc
-
-     `More than one sequence of footnotes
-     <http://www.tex.ac.uk/cgi-bin/texfaq2html?label=multfoot>`__
-
-     * manyfoot, bigfoot
-
-     `Footnotes in tables
-     <http://www.tex.ac.uk/cgi-bin/texfaq2html?label=footintab>`__
-
-     * `tabularx` and longtable allow footnotes.
-     * `footnote` provides a "savenotes" environment which collects all
-       footnotes and emits them at ``end{savenotes}``
-
-     `Footnotes in LaTeX section headings
-     <http://www.tex.ac.uk/cgi-bin/texfaq2html?label=ftnsect>`__
-
-     * Take advantage of the fact that the mandatory argument doesn't
-       move if the optional argument is present::
-
-           \section[title] {title\footnote{title ftnt}}
-
-     * Use the footmisc package, with package option stable - this modifies
-       footnotes so that they softly and silently vanish away if used in a
-       moving argument.
-
-     * Use ftnxtra.
-
-     `Footnotes numbered per page
-     <http://www.tex.ac.uk/cgi-bin/texfaq2html?label=footnpp>`__
-
-     * perpage provides a general mechanism for resetting counters per page
-     * footmisc provides a package option perpage
-
-* use `eqlist` or `enumitem` (texlive-latex-extra) for field-lists?
-
-* ``--use-latex-when-possible`` »super option« that would set the
-  following::
-
-      --no-section-numbering
-      --use-latex-toc
-      --use-latex-docinfo
-      --use-latex-abstract
-      --use-latex-footnotes
-      --use-latex-citations
-
-   ? (My preference is to default to use-latex-* whenever possible [GM])
-
+.. _enumitem: https://www.ctan.org/pkg/enumitem
 
 Default layout
 --------------
@@ -2624,12 +2606,8 @@ Default layout
      -  \\ % subtitle%
      +  \\[0.5em] % subtitle%
 
-.. _PSNFSS documentation:
-   http://mirror.ctan.org/macros/latex/required/psnfss/psnfss2e.pdf
 .. _compound paragraph:
    ../ref/rst/directives.html#compound-paragraph
-.. _fixltx2e:
-   http://mirror.ctan.org/help/Catalogue/entries/fixltx2e.html
 
 Tables
 ``````
@@ -2642,8 +2620,7 @@ Tables
   + use tabularx column type ``X`` and let LaTeX decide width, or
   + use tabulary_?
 
-  .. _tabulary:
-     http://tug.ctan.org/cgi-bin/ctanPackageInformation.py?id=tabulary
+  .. _tabulary: https://www.ctan.org/pkg/tabulary
 
 * From comp.text.tex (13. 4. 2011):
 
@@ -2751,22 +2728,6 @@ that lists LaTeX counterparts for a wide range of Unicode characters.
 
 .. _bibstuff: http://code.google.com/p/bibstuff/
 
-Allow choice between utf8 (standard) and utf8x (extended) encodings
-```````````````````````````````````````````````````````````````````
-
-* Allow the user to select *utf8* or *utf8x* LaTeX encoding. (Docutil's
-  output encoding becomes LaTeX's input encoding.)
-
-The `ucs` package provides extended support for UTF-8 encoding in LaTeX
-via the `inputenc`-option ``utf8x``.  It is, however, a non-standard
-extension and no longer developed.
-
-Ideas:
-  a) Python has 4 names for the UTF-8 encoding (``utf_8, U8, UTF, utf8``)
-     give a special meaning to one of the aliases,
-
-  b) scan "stylesheets" and "latex-preamble" options and use ``utf8x``
-     if it contains ``ucs``
 
 XeTeX writer
 ````````````
@@ -2805,7 +2766,7 @@ but need to find a way to insert it as href argument.
 
 The following fails::
 
-    \href{http://www.w3.org/XML/Schema^^dev}{\fragileURLi}
+    \href{https://www.w3.org/XML/Schema^^dev}{\fragileURLi}
 
 Use %-replacement like http://nowhere/url_with%28parens%29 ?
 
@@ -2839,7 +2800,7 @@ This run will use the default stylesheet, a custom local stylesheet,
 and an external stylesheet:
 
     rstpep2html.py --add-stylesheet-path custom.css \
-        --add-stylesheet http://www.example.org/external.css ...
+        --add-stylesheet https://www.example.org/external.css ...
 
 This run will use only the second custom stylesheet:
 
@@ -2852,45 +2813,6 @@ This run will use only the second custom stylesheet:
 Front-End Tools
 ===============
 
-* What about if we don't know which Reader and/or Writer we are
-  going to use?  If the Reader/Writer is specified on the
-  command-line?
-
-  The dynamic_ front end ``tools/docutils-cli.py`` (new in 0.17) is an
-  implementation of concept d) below. It uses 2-stage argument parsing
-  via the `argparse` module's `partial parsing`_. It still needs some
-  polishing.
-
-  Perhaps have different types of front ends:
-
-  a) _`Fully qualified`: Reader and Writer are hard-coded into the
-     front end (e.g. ``pep2html [options]``, ``pysource2pdf
-     [options]``).
-
-  b) _`Partially qualified`: Reader is hard-coded, and the Writer is
-     specified a sub-command (e.g. ``pep2 html [options]``,
-     ``pysource2 pdf [options]``).  The Writer is known before option
-     processing happens, allowing the OptionParser to be built
-     dynamically.  Alternatively, the Writer could be hard-coded and
-     the Reader specified as a sub-command (e.g. ``htmlfrom pep
-     [options]``).
-
-  c) _`Unqualified`: Reader and Writer are specified as subcommands
-     (e.g. ``publish pep html [options]``, ``publish pysource pdf
-     [options]``).  A single front end would be sufficient, but
-     probably only useful for testing purposes.
-
-  d) _`Dynamic`: Reader and/or Writer are specified by options, with
-     defaults if unspecified (e.g. ``publish --writer manpage
-     [options]``).
-
-  Allow common options before subcommands, as in CVS?  Or group all
-  options together?  In the case of the `fully qualified`_
-  front ends, all the options will have to be grouped together
-  anyway, so there's no advantage (we can't use it to avoid
-  conflicts) to splitting common and component-specific options
-  apart.
-
 * Parameterize help text & defaults somehow?  Perhaps a callback?  Or
   initialize ``settings_spec`` in ``__init__`` or ``init_options``?
 
@@ -2901,12 +2823,22 @@ Front-End Tools
   directive should override the ``--no-section-numbering`` command
   line option then.
 
+* Implement the following suggestions from clig.dev?
+
+     Display output on success, but keep it brief.
+     provide a --quiet option to suppress all non-essential output.
+   
+     Consider chaining several args as input and use --output
+     (or redirection) for output.
+   
+     -- https://clig.dev/#help
+
 .. _partial parsing:
    https://docs.python.org/3/library/argparse.html#partial-parsing
 
-
 .. _configuration: ../user/config.html
-.. _transforms: ../ref/transforms.html
+.. _transforms: ../api/transforms.html
+
 
 
 ..

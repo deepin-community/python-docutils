@@ -1,23 +1,40 @@
-#! /usr/bin/env python
+#! /usr/bin/env python3
 
-# $Id: test_targets.py 8481 2020-01-31 08:17:24Z milde $
+# $Id: test_targets.py 9277 2022-11-26 23:15:13Z milde $
 # Author: David Goodger <goodger@python.org>
 # Copyright: This module has been placed in the public domain.
 
 """
 Tests for states.py.
 """
-from __future__ import absolute_import
+
+from pathlib import Path
+import sys
+import unittest
 
 if __name__ == '__main__':
-    import __init__
-from test_parsers import DocutilsTestSupport
+    # prepend the "docutils root" to the Python library path
+    # so we import the local `docutils` package.
+    sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
+
+from docutils.frontend import get_default_settings
+from docutils.parsers.rst import Parser
+from docutils.utils import new_document
 
 
-def suite():
-    s = DocutilsTestSupport.ParserTestSuite()
-    s.generateTests(totest)
-    return s
+class ParserTestCase(unittest.TestCase):
+    def test_parser(self):
+        parser = Parser()
+        settings = get_default_settings(Parser)
+        settings.warning_stream = ''
+        for name, cases in totest.items():
+            for casenum, (case_input, case_expected) in enumerate(cases):
+                with self.subTest(id=f'totest[{name!r}][{casenum}]'):
+                    document = new_document('test data', settings.copy())
+                    parser.parse(case_input, document)
+                    output = document.pformat()
+                    self.assertEqual(output, case_expected)
+
 
 totest = {}
 
@@ -179,10 +196,10 @@ Duplicate external targets (different URIs):
     <paragraph>
         Duplicate external targets (different URIs):
     <target dupnames="target" ids="target" refuri="first">
-    <system_message backrefs="id1" level="2" line="5" source="test data" type="WARNING">
+    <system_message backrefs="target-1" level="2" line="5" source="test data" type="WARNING">
         <paragraph>
             Duplicate explicit target name: "target".
-    <target dupnames="target" ids="id1" refuri="second">
+    <target dupnames="target" ids="target-1" refuri="second">
 """],
 ["""\
 Duplicate external targets (same URIs):
@@ -196,10 +213,10 @@ Duplicate external targets (same URIs):
     <paragraph>
         Duplicate external targets (same URIs):
     <target ids="target" names="target" refuri="first">
-    <system_message backrefs="id1" level="1" line="5" source="test data" type="INFO">
+    <system_message backrefs="target-1" level="1" line="5" source="test data" type="INFO">
         <paragraph>
             Duplicate explicit target name: "target".
-    <target dupnames="target" ids="id1" refuri="first">
+    <target dupnames="target" ids="target-1" refuri="first">
 """],
 ["""\
 Duplicate implicit targets.
@@ -223,10 +240,10 @@ Paragraph.
             Title
         <paragraph>
             Paragraph.
-    <section dupnames="title" ids="id1">
+    <section dupnames="title" ids="title-1">
         <title>
             Title
-        <system_message backrefs="id1" level="1" line="9" source="test data" type="INFO">
+        <system_message backrefs="title-1" level="1" line="9" source="test data" type="INFO">
             <paragraph>
                 Duplicate implicit target name: "title".
         <paragraph>
@@ -249,10 +266,10 @@ Paragraph.
     <section dupnames="title" ids="title">
         <title>
             Title
-        <system_message backrefs="id1" level="1" line="6" source="test data" type="INFO">
+        <system_message backrefs="title-1" level="1" line="6" source="test data" type="INFO">
             <paragraph>
                 Duplicate implicit target name: "title".
-        <target ids="id1" names="title">
+        <target ids="title-1" names="title">
         <paragraph>
             Paragraph.
 """],
@@ -272,8 +289,8 @@ Title
     <section dupnames="title" ids="title">
         <title>
             Title
-        <pending ids="id1" names="title">
-            <system_message backrefs="id1" level="1" line="4" source="test data" type="INFO">
+        <pending ids="title-1" names="title">
+            <system_message backrefs="title-1" level="1" line="4" source="test data" type="INFO">
                 <paragraph>
                     Duplicate implicit target name: "title".
             .. internal attributes:
@@ -302,16 +319,16 @@ Third.
     <target dupnames="title" ids="title">
     <paragraph>
         First.
-    <system_message backrefs="id1" level="2" line="7" source="test data" type="WARNING">
+    <system_message backrefs="title-1" level="2" line="7" source="test data" type="WARNING">
         <paragraph>
             Duplicate explicit target name: "title".
-    <target dupnames="title" ids="id1">
+    <target dupnames="title" ids="title-1">
     <paragraph>
         Second.
-    <system_message backrefs="id2" level="2" line="11" source="test data" type="WARNING">
+    <system_message backrefs="title-2" level="2" line="11" source="test data" type="WARNING">
         <paragraph>
             Duplicate explicit target name: "title".
-    <target dupnames="title" ids="id2">
+    <target dupnames="title" ids="title-2">
     <paragraph>
         Third.
 """],
@@ -333,9 +350,9 @@ First.
     <target dupnames="title" ids="title">
     <paragraph>
         First.
-    <rubric dupnames="title" ids="id1">
+    <rubric dupnames="title" ids="title-1">
         this is a title too
-        <system_message backrefs="id1" level="2" line="9" source="test data" type="WARNING">
+        <system_message backrefs="title-1" level="2" line="9" source="test data" type="WARNING">
             <paragraph>
                 Duplicate explicit target name: "title".
 """],
@@ -369,33 +386,33 @@ Explicit internal target.
             Target
         <paragraph>
             Implicit section header target.
-        <citation dupnames="target" ids="id1">
+        <citation dupnames="target" ids="target-1">
             <label>
                 TARGET
-            <system_message backrefs="id1" level="1" line="8" source="test data" type="INFO">
+            <system_message backrefs="target-1" level="1" line="8" source="test data" type="INFO">
                 <paragraph>
                     Duplicate implicit target name: "target".
             <paragraph>
                 Citation target.
-        <footnote auto="1" dupnames="target" ids="id2">
-            <system_message backrefs="id2" level="2" line="10" source="test data" type="WARNING">
+        <footnote auto="1" dupnames="target" ids="target-2">
+            <system_message backrefs="target-2" level="2" line="10" source="test data" type="WARNING">
                 <paragraph>
                     Duplicate explicit target name: "target".
             <paragraph>
                 Autonumber-labeled footnote target.
-        <system_message backrefs="id3" level="2" line="12" source="test data" type="WARNING">
+        <system_message backrefs="target-3" level="2" line="12" source="test data" type="WARNING">
             <paragraph>
                 Duplicate explicit target name: "target".
-        <target dupnames="target" ids="id3">
+        <target dupnames="target" ids="target-3">
         <paragraph>
             Explicit internal target.
-        <system_message backrefs="id4" level="2" line="16" source="test data" type="WARNING">
+        <system_message backrefs="target-4" level="2" line="16" source="test data" type="WARNING">
             <paragraph>
                 Duplicate explicit target name: "target".
-        <target dupnames="target" ids="id4" refuri="Explicit_external_target">
-        <rubric dupnames="target" ids="id5">
+        <target dupnames="target" ids="target-4" refuri="Explicit_external_target">
+        <rubric dupnames="target" ids="target-5">
             directive with target
-            <system_message backrefs="id5" level="2" line="4" source="test data" type="WARNING">
+            <system_message backrefs="target-5" level="2" line="4" source="test data" type="WARNING">
                 <paragraph>
                     Duplicate explicit target name: "target".
 """],
@@ -435,7 +452,7 @@ Anonymous external hyperlink target:
 <document source="test data">
     <paragraph>
         Anonymous external hyperlink target:
-    <target anonymous="1" ids="id1" refuri="http://w3c.org/">
+    <target anonymous="1" ids="target-1" refuri="http://w3c.org/">
 """],
 ["""\
 Anonymous external hyperlink target:
@@ -446,7 +463,7 @@ __ http://w3c.org/
 <document source="test data">
     <paragraph>
         Anonymous external hyperlink target:
-    <target anonymous="1" ids="id1" refuri="http://w3c.org/">
+    <target anonymous="1" ids="target-1" refuri="http://w3c.org/">
 """],
 ["""\
 Anonymous indirect hyperlink target:
@@ -457,7 +474,7 @@ Anonymous indirect hyperlink target:
 <document source="test data">
     <paragraph>
         Anonymous indirect hyperlink target:
-    <target anonymous="1" ids="id1" refname="reference">
+    <target anonymous="1" ids="target-1" refname="reference">
 """],
 ["""\
 Anonymous external hyperlink target, not indirect:
@@ -470,8 +487,8 @@ __ this URI ends with an underscore_
 <document source="test data">
     <paragraph>
         Anonymous external hyperlink target, not indirect:
-    <target anonymous="1" ids="id1" refuri="uri_">
-    <target anonymous="1" ids="id2" refuri="thisURIendswithanunderscore_">
+    <target anonymous="1" ids="target-1" refuri="uri_">
+    <target anonymous="1" ids="target-2" refuri="thisURIendswithanunderscore_">
 """],
 ["""\
 Anonymous indirect hyperlink targets:
@@ -484,8 +501,8 @@ __ `a very long
 <document source="test data">
     <paragraph>
         Anonymous indirect hyperlink targets:
-    <target anonymous="1" ids="id1" refname="reference">
-    <target anonymous="1" ids="id2" refname="a very long reference">
+    <target anonymous="1" ids="target-1" refname="reference">
+    <target anonymous="1" ids="target-2" refname="a very long reference">
 """],
 ["""\
 Mixed anonymous & named indirect hyperlink targets:
@@ -506,9 +523,9 @@ no blank line
 <document source="test data">
     <paragraph>
         Mixed anonymous & named indirect hyperlink targets:
-    <target anonymous="1" ids="id1" refname="reference">
-    <target anonymous="1" ids="id2" refname="reference">
-    <target anonymous="1" ids="id3" refname="reference">
+    <target anonymous="1" ids="target-1" refname="reference">
+    <target anonymous="1" ids="target-2" refname="reference">
+    <target anonymous="1" ids="target-3" refname="reference">
     <target ids="target1" names="target1" refname="reference">
     <system_message level="2" line="7" source="test data" type="WARNING">
         <paragraph>
@@ -516,9 +533,9 @@ no blank line
     <paragraph>
         no blank line
     <target ids="target2" names="target2" refname="reference">
-    <target anonymous="1" ids="id4" refname="reference">
-    <target anonymous="1" ids="id5" refname="reference">
-    <target anonymous="1" ids="id6" refname="reference">
+    <target anonymous="1" ids="target-4" refname="reference">
+    <target anonymous="1" ids="target-5" refname="reference">
+    <target anonymous="1" ids="target-6" refname="reference">
     <system_message level="2" line="13" source="test data" type="WARNING">
         <paragraph>
             Explicit markup ends without a blank line; unexpected unindent.
@@ -537,5 +554,4 @@ no blank line
 
 
 if __name__ == '__main__':
-    import unittest
-    unittest.main(defaultTest='suite')
+    unittest.main()

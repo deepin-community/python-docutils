@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf8 -*-
 # :Copyright: © 2020 Günter Milde.
 # :License: Released under the terms of the `2-Clause BSD license`_, in short:
 #
@@ -14,17 +13,33 @@ Test for section headings in CommonMark parsers.
 Cf. the `CommonMark Specification <https://spec.commonmark.org/>`__
 """
 
-from __future__ import absolute_import
+from pathlib import Path
+import sys
+import unittest
 
 if __name__ == '__main__':
-    import __init__
-from test_parsers import DocutilsTestSupport
+    # prepend the "docutils root" to the Python library path
+    # so we import the local `docutils` package.
+    sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 
 
-def suite():
-    s = DocutilsTestSupport.RecommonmarkParserTestSuite()
-    s.generateTests(totest)
-    return s
+from docutils.frontend import get_default_settings
+from docutils.parsers.recommonmark_wrapper import Parser
+from docutils.utils import new_document
+
+
+class RecommonmarkParserTestCase(unittest.TestCase):
+    def test_parser(self):
+        parser = Parser()
+        settings = get_default_settings(Parser)
+        for name, cases in totest.items():
+            for casenum, (case_input, case_expected) in enumerate(cases):
+                with self.subTest(id=f'totest[{name!r}][{casenum}]'):
+                    document = new_document('test data', settings.copy())
+                    parser.parse(case_input, document)
+                    output = document.pformat()
+                    self.assertEqual(output, case_expected)
+
 
 totest = {}
 
@@ -34,8 +49,7 @@ The Title
 =========
 Paragraph.
 """,
-"""\
-<document source="test data">
+r"""<document source="test data">
     <section ids="the-title" names="the\ title">
         <title>
             The Title
@@ -47,8 +61,7 @@ Another Section Title
 =====================
 Paragraph (no blank line required).
 """,
-"""\
-<document source="test data">
+r"""<document source="test data">
     <section ids="another-section-title" names="another\ section\ title">
         <title>
             Another Section Title
@@ -75,10 +88,10 @@ Paragraph.
 """],
 # ["""\
 # Test unexpected section titles.
-# 
+#
 # * Title
 #   =====
-#   
+#
 #   Paragraph.
 # """,
 # """\
@@ -123,26 +136,25 @@ Title 4
 -------
 Paragraph 4.
 """,
-"""\
-<document source="test data">
+r"""<document source="test data">
     <paragraph>
         Test return to existing, highest-level section (Title 3).
-    <section ids="title-1" names="title\\ 1">
+    <section ids="title-1" names="title\ 1">
         <title>
             Title 1
         <paragraph>
             Paragraph 1.
-        <section ids="title-2" names="title\\ 2">
+        <section ids="title-2" names="title\ 2">
             <title>
                 Title 2
             <paragraph>
                 Paragraph 2.
-    <section ids="title-3" names="title\\ 3">
+    <section ids="title-3" names="title\ 3">
         <title>
             Title 3
         <paragraph>
             Paragraph 3.
-        <section ids="title-4" names="title\\ 4">
+        <section ids="title-4" names="title\ 4">
             <title>
                 Title 4
             <paragraph>
@@ -161,45 +173,24 @@ Test bad subsection order.
 
 ### Title 5
 """,
-"""\
-<document source="test data">
+r"""<document source="test data">
     <paragraph>
         Test bad subsection order.
-    <section ids="title-1" names="title\\ 1">
+    <section ids="title-1" names="title\ 1">
         <title>
             Title 1
-        <system_message level="2" source="test data" type="WARNING">
-            <paragraph>
-                Title level inconsistent. Changing from 2 to 1.
-            <literal_block xml:space="preserve">
-                Title 1
-    <section ids="title-2" names="title\\ 2">
+    <section ids="title-2" names="title\ 2">
         <title>
             Title 2
-        <system_message level="2" source="test data" type="WARNING">
-            <paragraph>
-                Title level inconsistent. Changing from 2 to 1.
-            <literal_block xml:space="preserve">
-                Title 2
-    <section ids="title-3" names="title\\ 3">
+    <section ids="title-3" names="title\ 3">
         <title>
             Title 3
         <section ids="title-4" names="title\ 4">
             <title>
                 Title 4
-            <system_message level="2" source="test data" type="WARNING">
-                <paragraph>
-                    Title level inconsistent. Changing from 4 to 2.
-                <literal_block xml:space="preserve">
-                    Title 4
         <section ids="title-5" names="title\ 5">
             <title>
                 Title 5
-            <system_message level="2" source="test data" type="WARNING">
-                <paragraph>
-                    Title level inconsistent. Changing from 3 to 2.
-                <literal_block xml:space="preserve">
-                    Title 5
 """],
 ["""\
 Title containing *inline* ``markup``
@@ -264,5 +255,4 @@ Empty Section
 
 
 if __name__ == '__main__':
-    import unittest
-    unittest.main(defaultTest='suite')
+    unittest.main()

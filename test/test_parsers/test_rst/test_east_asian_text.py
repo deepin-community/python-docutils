@@ -1,48 +1,56 @@
-#! /usr/bin/env python
-# -*- coding: utf-8 -*-
-
-# $Id: test_east_asian_text.py 8481 2020-01-31 08:17:24Z milde $
+#! /usr/bin/env python3
+# $Id: test_east_asian_text.py 9277 2022-11-26 23:15:13Z milde $
 # Author: David Goodger <goodger@python.org>
 # Copyright: This module has been placed in the public domain.
 
 """
 Tests for East Asian text with double-width characters.
 """
-from __future__ import absolute_import
+
+from pathlib import Path
+import sys
+import unittest
 
 if __name__ == '__main__':
-    import __init__
-from test_parsers import DocutilsTestSupport
+    # prepend the "docutils root" to the Python library path
+    # so we import the local `docutils` package.
+    sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 
-import unicodedata
-
-try:
-    east_asian_width = unicodedata.east_asian_width
-except AttributeError:
-    east_asian_width = None
+from docutils.frontend import get_default_settings
+from docutils.parsers.rst import Parser
+from docutils.utils import new_document
 
 
-def suite():
-    s = DocutilsTestSupport.ParserTestSuite()
-    s.generateTests(totest)
-    return s
+class ParserTestCase(unittest.TestCase):
+    def test_parser(self):
+        parser = Parser()
+        settings = get_default_settings(Parser)
+        settings.warning_stream = ''
+        for name, cases in totest.items():
+            for casenum, (case_input, case_expected) in enumerate(cases):
+                with self.subTest(id=f'totest[{name!r}][{casenum}]'):
+                    document = new_document('test data', settings.copy())
+                    parser.parse(case_input, document)
+                    output = document.pformat()
+                    self.assertEqual(output, case_expected)
+
 
 totest = {}
 
-totest['double-width'] = [
-[u"""\
+totest['double_width'] = [
+["""\
 タイトル1
 =========
 
 タイトル2
 ========
 """,
-u"""\
+"""\
 <document source="test data">
-    <section ids="id1" names="タイトル1">
+    <section ids="section-1" names="タイトル1">
         <title>
             タイトル1
-    <section ids="id2" names="タイトル2">
+    <section ids="section-2" names="タイトル2">
         <title>
             タイトル2
         <system_message level="2" line="5" source="test data" type="WARNING">
@@ -52,7 +60,7 @@ u"""\
                 タイトル2
                 ========
 """],
-[u"""
+["""
 +-----------------------+
 | * ヒョウ:ダイ1ギョウ  |
 | * ダイ2ギョウ         |
@@ -61,7 +69,7 @@ u"""\
 | * ダイ2ギョウ         |
 +-----------------------+
 """,
-u"""\
+"""\
 <document source="test data">
     <table>
         <tgroup cols="1">
@@ -82,7 +90,7 @@ u"""\
                             * ダイ1ギョウ
                             * ダイ2ギョウ
 """],
-[u"""\
+["""\
 Complex spanning pattern (no edge knows all rows/cols):
 
 +--------+---------------------+
@@ -93,7 +101,7 @@ Complex spanning pattern (no edge knows all rows/cols):
 | 南西・南セル          | セル |
 +-----------------------+------+
 """,
-u"""\
+"""\
 <document source="test data">
     <paragraph>
         Complex spanning pattern (no edge knows all rows/cols):
@@ -125,7 +133,7 @@ u"""\
                         <paragraph>
                             南西・南セル
 """],
-[u"""\
+["""\
 =========  =========
 ダイ1ラン  ダイ2ラン
 =========  =========
@@ -134,7 +142,7 @@ u"""\
 ダイ1ラン ダイ2ラン
 ========  =========
 """,
-u"""\
+"""\
 <document source="test data">
     <table>
         <tgroup cols="2">
@@ -157,7 +165,7 @@ u"""\
             ダイ1ラン ダイ2ラン
             ========  =========
 """],
-[u"""\
+["""\
 Some ambiguous-width characters:
 
 = ===================================
@@ -167,12 +175,12 @@ Some ambiguous-width characters:
 » right pointing guillemet
 – en-dash
 — em-dash
-‘ single turned comma quotation mark 
-’ single comma quotation mark 
-‚ low single comma quotation mark 
-“ double turned comma quotation mark 
-” double comma quotation mark 
-„ low double comma quotation mark 
+‘ single turned comma quotation mark
+’ single comma quotation mark
+‚ low single comma quotation mark
+“ double turned comma quotation mark
+” double comma quotation mark
+„ low double comma quotation mark
 † dagger
 ‡ double dagger
 … ellipsis
@@ -311,13 +319,12 @@ b"""\
 """.decode('raw_unicode_escape')],
 ]
 '''
-[u"""\
+["""\
 """,
-u"""\
+"""\
 """],
 '''
 
 
 if __name__ == '__main__':
-    import unittest
-    unittest.main(defaultTest='suite')
+    unittest.main()

@@ -3,9 +3,11 @@
 export PYTHONWARNINGS=d
 export PYTHONHASHSEED=random
 
-export PYBUILD_TEST_ARGS={interpreter} test/alltests.py --verbose && {interpreter} $(CURDIR)/tools/test/test_buildhtml.py --verbose
+export PYBUILD_TEST_ARGS=SOURCE_DATE_EPOCH= {interpreter} test/alltests.py --verbose && \
+	PYTHONWARNINGS=ignore::DeprecationWarning {interpreter} $(CURDIR)/tools/test/test_buildhtml.py --verbose
 
 scripts = \
+	docutils \
 	rst-buildhtml \
 	rst2html \
 	rst2html4 \
@@ -32,7 +34,7 @@ override_dh_auto_build:
 	# Remove convenience copy of the roman module
 	rm -f docutils/utils/roman.py
 	# Check if move-data-to-usr-share.diff is up-to-date
-	if grep -r __file__ --include='*.py' docutils/ | grep -vw _datadir; then \
+	if grep -r __file__ --include='*.py' docutils/ | grep -vw '_datadir'; then \
 		echo "Error: Some uses of __file__ are not guarded by _datadir()." \
 			"Is move-data-to-usr-share.diff up-to-date?"; \
 		exit 1; \
@@ -63,31 +65,36 @@ override_dh_auto_install:
 	find debian/tmp/usr/lib/python3*/dist-packages/docutils/ -type f '!' -name '*.py' -delete
 	find debian/tmp/usr/share/docutils/ \( -name '*.py' -o -name '*.py[co]' \) -delete
 	find debian/tmp/ -type d -empty -delete
-	sed -i -e 's/^\(_debian_package\) = /\1 = 1/' debian/tmp/usr/lib/python3*/dist-packages/docutils/__init__.py
+	# Set the Debian package marker to use the build-time Debian paths
+	sed -i -e 's/^\(_debian_package\) = 0/\1 = "build"/' debian/tmp/usr/lib/python3*/dist-packages/docutils/__init__.py
 	# Give scripts canonical names
-	set -ex && for exe in $(filter-out rst-buildhtml,$(scripts)); do \
+	set -ex && for exe in $(filter-out docutils rst-buildhtml,$(scripts)); do \
 		mv debian/tmp/usr/bin/$$exe.py debian/tmp/usr/bin/$$exe; \
 	done
 	install tools/buildhtml.py debian/tmp/usr/bin/rst-buildhtml
 	sed -i -e "1 s,^#!.*,#!/usr/bin/python3," debian/tmp/usr/bin/rst-buildhtml
-	: # Make the man pages (we want to do this *after* renaming all the
-	: # tools, because their executable name goes into the --help output)
+	# Make the man pages (we want to do this *after* renaming all the
+	# tools, because their executable name goes into the --help output,
+	# and with _debian_package = "_build" set, to make sure that data paths
+	# in generated man pages are correct).
 	mkdir -p debian/tmp/man/
 	set -ex && for exe in $(filter-out rst2odt_prepstyles,$(scripts)); do \
 		export PYTHONPATH=debian/tmp/usr/lib/$(shell py3versions -d)/dist-packages; \
 		cp debian/$$exe.txt debian/tmp/man/$$exe.txt; \
-		python3 debian/tmp/usr/bin/$$exe --help | \
-			sed \
-				-e '1 s/^Usage$$/Synopsis/' \
-				-e 's/^=/====/' \
-				-e '3 s/^  //' \
-				-e '4 a Description' \
-				-e '4 a ===========' \
-			>> debian/tmp/man/$$exe.txt;\
+		python3 debian/tmp/usr/bin/$$exe --help > debian/tmp/man/$$exe.help.txt; \
+		sed \
+			-e '1 s/^Usage$$/Synopsis/' \
+			-e 's/^=/====/' \
+			-e '3 s/^  //' \
+			-e '4 a Description' \
+			-e '4 a ===========' \
+		< debian/tmp/man/$$exe.help.txt >> debian/tmp/man/$$exe.txt;\
 		python3 tools/rst2man.py debian/tmp/man/$$exe.txt \
 			debian/tmp/man/$$exe.1; \
-		rm debian/tmp/man/$$exe.txt; \
+		rm debian/tmp/man/$$exe.help.txt debian/tmp/man/$$exe.txt; \
 	done
+	# Set the Debian package marker to use the runtime Debian paths
+	sed -i -e 's/^\(_debian_package\) = "build"/\1 = 1/' debian/tmp/usr/lib/python3*/dist-packages/docutils/__init__.py
 	PYTHONPATH=. LC_ALL=C.UTF-8 python3 tools/rst2man.py debian/rst2odt_prepstyles.txt \
 		debian/tmp/man/rst2odt_prepstyles.1
 	sed -i -e 's,"\(docutils/writers/\),"/usr/share/\1,g' debian/tmp/man/*

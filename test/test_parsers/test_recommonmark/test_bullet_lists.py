@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf8 -*-
 # :Copyright: © 2020 Günter Milde.
 # :License: Released under the terms of the `2-Clause BSD license`_, in short:
 #
@@ -15,16 +14,32 @@ Test for bullet lists in CommonMark parsers.
 Cf. the `CommonMark Specification <https://spec.commonmark.org/>`__
 """
 
-from __future__ import absolute_import
+from pathlib import Path
+import sys
+import unittest
 
 if __name__ == '__main__':
-    import __init__
-from test_parsers import DocutilsTestSupport
+    # prepend the "docutils root" to the Python library path
+    # so we import the local `docutils` package.
+    sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 
-def suite():
-    s = DocutilsTestSupport.RecommonmarkParserTestSuite()
-    s.generateTests(totest)
-    return s
+from docutils.frontend import get_default_settings
+from docutils.parsers.recommonmark_wrapper import Parser
+from docutils.utils import new_document
+
+
+class RecommonmarkParserTestCase(unittest.TestCase):
+    def test_parser(self):
+        parser = Parser()
+        settings = get_default_settings(Parser)
+        for name, cases in totest.items():
+            for casenum, (case_input, case_expected) in enumerate(cases):
+                with self.subTest(id=f'totest[{name!r}][{casenum}]'):
+                    document = new_document('test data', settings.copy())
+                    parser.parse(case_input, document)
+                    output = document.pformat()
+                    self.assertEqual(output, case_expected)
+
 
 totest = {}
 
@@ -108,7 +123,7 @@ No blank line between:
                 item 2
 """],
 ["""\
-Different bullets start different lists: 
+Different bullets start different lists:
 
 - item 1
 
@@ -173,7 +188,7 @@ empty item above, no blank line
     <paragraph>
         empty item above, no blank line
 """],
-[u"""\
+["""\
 Unicode bullets are not supported by CommonMark.
 
 • BULLET
@@ -182,7 +197,7 @@ Unicode bullets are not supported by CommonMark.
 
 ⁃ HYPHEN BULLET
 """,
-u"""\
+"""\
 <document source="test data">
     <paragraph>
         Unicode bullets are not supported by CommonMark.
@@ -196,5 +211,4 @@ u"""\
 ]
 
 if __name__ == '__main__':
-    import unittest
-    unittest.main(defaultTest='suite')
+    unittest.main()

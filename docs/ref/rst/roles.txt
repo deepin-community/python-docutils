@@ -1,15 +1,17 @@
+.. include:: ../../header2.txt
+
 =========================================
  reStructuredText Interpreted Text Roles
 =========================================
 
 :Author: David Goodger
 :Contact: docutils-develop@lists.sourceforge.net
-:Revision: $Revision: 8588 $
-:Date: $Date: 2020-12-09 16:34:10 +0100 (Mi, 09. Dez 2020) $
+:Revision: $Revision: 9118 $
+:Date: $Date: 2022-07-29 13:56:58 +0200 (Fr, 29. Jul 2022) $
 :Copyright: This document has been placed in the public domain.
-
-This document describes the interpreted text roles implemented in the
-reference reStructuredText parser.
+:Abstract: 
+  This document describes the interpreted text roles implemented in the
+  reference reStructuredText parser.
 
 Interpreted text uses backquotes (`) around the text.  An explicit
 role marker may optionally appear before or after the text, delimited
@@ -64,51 +66,37 @@ __ directives.html#role-class
  Standard Roles
 ----------------
 
-``:emphasis:``
-==============
 
-:Aliases: None
-:DTD Element: emphasis
+``:abbreviation:``
+==================
+
+:Aliases: ``:ab:``
+:DTD Element: abbreviation_
 :Customization:
     :Options: class_.
     :Content: None.
 
-Implements emphasis.  These are equivalent::
-
-    *text*
-    :emphasis:`text`
+An abbreviation used in the document.
+An example of an abbreviation is ‘St’ being used instead of ‘Street’.
 
 
-``:literal:``
-==============
+``:acronym:``
+==================
 
-:Aliases: None
-:DTD Element: literal
+:Aliases: ``:ac:``
+:DTD Element: acronym_
 :Customization:
     :Options: class_.
     :Content: None.
 
-Implements inline literal text.  These are equivalent::
-
-    ``text``
-    :literal:`text`
-
-Care must be taken with backslash-escapes though.  These are *not*
-equivalent::
-
-    ``text \ and \ backslashes``
-    :literal:`text \ and \ backslashes`
-
-The backslashes in the first line are preserved (and do nothing),
-whereas the backslashes in the second line escape the following
-spaces.
+An acronym.
 
 
 ``:code:``
 ==========
 
 :Aliases: None
-:DTD Element: literal
+:DTD Element: literal_
 :Customization:
     :Options: class_, language
     :Content: None.
@@ -137,15 +125,55 @@ In addition to "class_", the following option is recognized:
     See `supported languages and markup formats`_ for recognized values.
 
 .. _code directive: directives.html#code
-.. _Pygments: http://pygments.org/
-.. _supported languages and markup formats: http://pygments.org/languages/
+.. _Pygments: https://pygments.org/
+.. _supported languages and markup formats: https://pygments.org/languages/
+
+
+``:emphasis:``
+==============
+
+:Aliases: None
+:DTD Element: emphasis_
+:Customization:
+    :Options: class_.
+    :Content: None.
+
+Implements emphasis.  These are equivalent::
+
+    *text*
+    :emphasis:`text`
+
+
+``:literal:``
+==============
+
+:Aliases: None
+:DTD Element: literal_
+:Customization:
+    :Options: class_.
+    :Content: None.
+
+Implements inline literal text.  These are equivalent::
+
+    ``text``
+    :literal:`text`
+
+Care must be taken with backslash-escapes though.  These are *not*
+equivalent::
+
+    ``text \ and \ backslashes``
+    :literal:`text \ and \ backslashes`
+
+The backslashes in the first line are preserved (and do nothing),
+whereas the backslashes in the second line escape the following
+spaces.
 
 
 ``:math:``
 ==========
 
 :Aliases: None
-:DTD Element: math
+:DTD Element: math_
 :Customization:
     :Options: class_
     :Content: None.
@@ -170,7 +198,7 @@ on mathematical notation in reStructuredText.
 ===================
 
 :Aliases: ``:PEP:``
-:DTD Element: reference
+:DTD Element: reference_
 :Customization:
     :Options: class_.
     :Content: None.
@@ -185,14 +213,14 @@ This is equivalent to::
 
     See `PEP 287`__ for more information about reStructuredText.
 
-    __ http://www.python.org/peps/pep-0287.html
+    __ https://peps.python.org/pep-0287
 
 
 ``:rfc-reference:``
 ===================
 
 :Aliases: ``:RFC:``
-:DTD Element: reference
+:DTD Element: reference_
 :Customization:
     :Options: class_.
     :Content: None.
@@ -207,12 +235,12 @@ This is equivalent to::
 
     See `RFC 2822`__ for information about email headers.
 
-    __ http://tools.ietf.org/html/rfc2822.html
+    __ https://tools.ietf.org/html/rfc2822.html
 
 .. [#] You can link to a specific section by saying
    ``:rfc:`number#anchor```. (New in Docutils 0.15.)
 
-   .. Warning:: The anchor (anything follwing a ``#``) is appended to
+   .. Warning:: The anchor (anything following a ``#``) is appended to
       the reference without any checks and not shown in the link text.
 
       It is recommended to use `hyperlink references`_ for
@@ -225,7 +253,7 @@ This is equivalent to::
 ============
 
 :Aliases: None
-:DTD Element: strong
+:DTD Element: strong_
 :Customization:
     :Options: class_.
     :Content: None.
@@ -240,7 +268,7 @@ Implements strong emphasis.  These are equivalent::
 ===============
 
 :Aliases: ``:sub:``
-:DTD Element: subscript
+:DTD Element: subscript_
 :Customization:
     :Options: class_.
     :Content: None.
@@ -276,7 +304,7 @@ Implements subscripts.
 =================
 
 :Aliases: ``:sup:``
-:DTD Element: superscript
+:DTD Element: superscript_
 :Customization:
     :Options: class_.
     :Content: None.
@@ -288,7 +316,7 @@ Implements superscripts.  See the tip in `:subscript:`_ above.
 =====================
 
 :Aliases: ``:title:``, ``:t:``.
-:DTD Element: title_reference
+:DTD Element: title_reference_
 :Customization:
     :Options: class_.
     :Content: None.
@@ -337,7 +365,7 @@ must be used to obtain a ``title_reference`` element.
 =======
 
 :Aliases: None
-:DTD Element: raw
+:DTD Element: raw_
 :Customization:
     :Options: class_, format
     :Content: None
@@ -389,3 +417,17 @@ In addition to "class_", the following option is recognized:
 
 ``format`` : text
     One or more space-separated output format names (Writer names).
+
+
+.. References
+
+.. _abbreviation: ../doctree.html#abbreviation
+.. _acronym: ../doctree.html#acronym
+.. _emphasis: ../doctree.html#emphasis
+.. _literal: ../doctree.html#literal
+.. _math: ../doctree.html#math
+.. _reference: ../doctree.html#reference
+.. _strong: ../doctree.html#strong
+.. _subscript: ../doctree.html#subscript
+.. _superscript: ../doctree.html#superscript
+.. _title_reference: ../doctree.html#title-reference

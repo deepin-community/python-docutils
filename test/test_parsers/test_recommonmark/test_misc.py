@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf8 -*-
 # :Copyright: © 2020 Günter Milde.
 # :License: Released under the terms of the `2-Clause BSD license`_, in short:
 #
@@ -14,24 +13,19 @@
 Various tests for the recommonmark parser.
 """
 
-from __future__ import absolute_import
+from pathlib import Path
 import sys
 import unittest
 
 if __name__ == '__main__':
-    import __init__
-from test_parsers import DocutilsTestSupport # must be imported before docutils
-from docutils import core, utils
+    # prepend the "docutils root" to the Python library path
+    # so we import the local `docutils` package.
+    sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
+
 from docutils.core import publish_string
-from docutils.parsers import recommonmark_wrapper
+from docutils.parsers.rst import directives as rst_directives
+from docutils.parsers.recommonmark_wrapper import Parser
 
-sample1 = """\
-Test unexpected section titles.
-
-* Title
-  =====
-  Paragraph.
-"""
 
 sample_with_html = """\
 A paragraph:
@@ -46,55 +40,34 @@ Next paragraph.
 Final paragraph.
 """
 
-skip_msg = 'optional module "recommonmark" not found'
 
-class reCommonMarkParserTests(unittest.TestCase):
+@unittest.skipIf(Parser is None, 'Optional "recommonmark" module not found.')
+class RecommonmarkParserTests(unittest.TestCase):
 
-    @unittest.skipUnless(recommonmark_wrapper.CommonMarkParser, skip_msg)
-    def test_parsing_error(self):
-        output = publish_string(sample1, parser_name='recommonmark',
-                                settings_overrides={'warning_stream': ''})
+    def test_parser_name(self):
+        # cf. ../test_rst/test_directives/test__init__.py
+        # this is used in the "include" directive's :parser: option.
+        self.assertIs(rst_directives.parser_name('recommonmark'), Parser)
 
-        self.assertIn(b'Parsing with "recommonmark" returned the error:',
-                      output)
-
-    @unittest.skipUnless(recommonmark_wrapper.CommonMarkParser, skip_msg)
     def test_raw_disabled(self):
-        output = publish_string(sample_with_html, parser_name='recommonmark',
-                                settings_overrides={'warning_stream': '',
-                                                    'raw_enabled': False})
+        output = publish_string(sample_with_html, parser=Parser(),
+                                settings_overrides={
+                                    'warning_stream': '',
+                                    'raw_enabled': False,
+                                    })
         self.assertNotIn(b'<raw>', output)
         self.assertIn(b'<system_message', output)
         self.assertIn(b'Raw content disabled.', output)
 
-    @unittest.skipUnless(recommonmark_wrapper.CommonMarkParser, skip_msg)
     def test_raw_disabled_inline(self):
-        output = publish_string('foo <a href="uri">', parser_name='recommonmark',
+        output = publish_string('foo <a href="uri">', parser=Parser(),
                                 settings_overrides={'warning_stream': '',
                                                     'raw_enabled': False,
-                                                   })
+                                                    })
         self.assertNotIn(b'<raw>', output)
         self.assertIn(b'<system_message', output)
         self.assertIn(b'Raw content disabled.', output)
 
-
-    @unittest.skipUnless(recommonmark_wrapper.CommonMarkParser, skip_msg)
-    def test_raw_disabled(self):
-        output = publish_string(sample_with_html, parser_name='recommonmark',
-                                settings_overrides={'warning_stream': '',
-                                                    'raw_enabled': False,
-                                                    'report_level': 3,
-                                                   })
-        self.assertNotIn(b'<raw>', output)
-        self.assertNotIn(b'<system_message', output)
-
-    @unittest.skipIf(recommonmark_wrapper.CommonMarkParser,
-                     'recommonmark_wrapper: parser found, fallback not used')
-    def test_fallback_parser(self):
-        output = publish_string(sample1, parser_name='recommonmark',
-                                settings_overrides={'warning_stream': ''})
-        self.assertIn(b'Python did not find the required module "recommonmark"',
-                      output)
 
 if __name__ == '__main__':
     unittest.main()

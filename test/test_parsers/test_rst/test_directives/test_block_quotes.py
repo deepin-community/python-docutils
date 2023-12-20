@@ -1,6 +1,6 @@
-#! /usr/bin/env python
+#! /usr/bin/env python3
 
-# $Id: test_block_quotes.py 8481 2020-01-31 08:17:24Z milde $
+# $Id: test_block_quotes.py 9277 2022-11-26 23:15:13Z milde $
 # Author: Lea Wiemann <LeWiemann@gmail.com>
 # Copyright: This module has been placed in the public domain.
 
@@ -8,16 +8,34 @@
 Tests for the block quote directives "epigraph", "highlights", and
 "pull-quote".
 """
-from __future__ import absolute_import
+
+from pathlib import Path
+import sys
+import unittest
 
 if __name__ == '__main__':
-    import __init__
-from test_parsers import DocutilsTestSupport
+    # prepend the "docutils root" to the Python library path
+    # so we import the local `docutils` package.
+    sys.path.insert(0, str(Path(__file__).resolve().parents[4]))
 
-def suite():
-    s = DocutilsTestSupport.ParserTestSuite()
-    s.generateTests(totest)
-    return s
+from docutils.frontend import get_default_settings
+from docutils.parsers.rst import Parser
+from docutils.utils import new_document
+
+
+class ParserTestCase(unittest.TestCase):
+    def test_parser(self):
+        parser = Parser()
+        settings = get_default_settings(Parser)
+        settings.warning_stream = ''
+        for name, cases in totest.items():
+            for casenum, (case_input, case_expected) in enumerate(cases):
+                with self.subTest(id=f'totest[{name!r}][{casenum}]'):
+                    document = new_document('test data', settings.copy())
+                    parser.parse(case_input, document)
+                    output = document.pformat()
+                    self.assertEqual(output, case_expected)
+
 
 generic_tests = [
 ["""\
@@ -62,11 +80,10 @@ generic_tests = [
 
 totest = {}
 for block_quote_type in ('epigraph', 'highlights', 'pull-quote'):
-   totest[block_quote_type] = [
-       [text % {'type': block_quote_type} for text in pair]
-       for pair in generic_tests]
+    totest[block_quote_type] = [
+        [text % {'type': block_quote_type} for text in pair]
+        for pair in generic_tests]
 
 
 if __name__ == '__main__':
-    import unittest
-    unittest.main(defaultTest='suite')
+    unittest.main()

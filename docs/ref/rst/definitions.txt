@@ -1,10 +1,12 @@
+.. include:: ../../header2.txt
+
 ============================================
  reStructuredText Standard Definition Files
 ============================================
 :Author: David Goodger
 :Contact: docutils-develop@lists.sourceforge.net
-:Revision: $Revision: 7302 $
-:Date: $Date: 2012-01-03 20:23:53 +0100 (Di, 03. Jän 2012) $
+:Revision: $Revision: 9051 $
+:Date: $Date: 2022-04-02 23:59:06 +0200 (Sa, 02. Apr 2022) $
 :Copyright: This document has been placed in the public domain.
 
 .. contents::
@@ -84,7 +86,7 @@ the ``tools/dev/unicode2rstsubs.py`` program from the input file
 unicode.xml__, which is maintained as part of the MathML 2
 Recommentation XML source.
 
-__ http://www.w3.org/2003/entities/xml/
+__ https://www.w3.org/2003/entities/xml/
 
 ===================  =================================================
 Entity Set File      Description
@@ -165,7 +167,7 @@ S5/HTML Definitions
 
 The "s5defs.txt_" standard definition file contains interpreted text
 roles (classes) and other definitions for documents destined to become
-`S5/HTML slide shows`_.  
+`S5/HTML slide shows`_.
 
 .. _s5defs.txt: ../../../docutils/parsers/rst/include/s5defs.txt
 .. _S5/HTML slide shows: ../../user/slide-shows.html

@@ -1,28 +1,44 @@
-#! /usr/bin/env python
+#! /usr/bin/env python3
 
-# $Id: test_transitions.py 8585 2020-12-01 11:38:25Z milde $
+# $Id: test_transitions.py 9301 2022-12-02 17:13:54Z milde $
 # Author: David Goodger <goodger@python.org>
 # Copyright: This module has been placed in the public domain.
 
 """
 Tests for transitions (`thematic breaks`).
 """
-from __future__ import absolute_import
+
+from pathlib import Path
+import sys
+import unittest
 
 if __name__ == '__main__':
-    import __init__
-from test_parsers import DocutilsTestSupport
+    # prepend the "docutils root" to the Python library path
+    # so we import the local `docutils` package.
+    sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
+
+from docutils.frontend import get_default_settings
+from docutils.parsers.recommonmark_wrapper import Parser
+from docutils.utils import new_document
 
 
-def suite():
-    s = DocutilsTestSupport.RecommonmarkParserTestSuite()
-    s.generateTests(totest)
-    return s
+class RecommonmarkParserTestCase(unittest.TestCase):
+    def test_parser(self):
+        parser = Parser()
+        settings = get_default_settings(Parser)
+        for name, cases in totest.items():
+            for casenum, (case_input, case_expected) in enumerate(cases):
+                with self.subTest(id=f'totest[{name!r}][{casenum}]'):
+                    document = new_document('test data', settings.copy())
+                    parser.parse(case_input, document)
+                    output = document.pformat()
+                    self.assertEqual(output, case_expected)
+
 
 totest = {}
 
-# See DocutilsTestSupport.RecommonmarkParserTestSuite.generateTests for a
-# description of the 'totest' data structure.
+# Each dictionary key (test type name) maps to a list of tests. Each
+# test is a list: input, expected output.
 totest['transitions'] = [
 ["""\
 Test transition markers.
@@ -70,21 +86,21 @@ Paragraph 2 in section 2.
 """],
 # ["""\
 # --------
-# 
+#
 # A section or document may not begin with a transition.
-# 
+#
 # The DTD specifies that two transitions may not
 # be adjacent:
-# 
+#
 # --------
-# 
+#
 # --------
-# 
+#
 # --------
-# 
+#
 # The DTD also specifies that a section or document
 # may not end with a transition.
-# 
+#
 # --------
 # """,
 # """\
@@ -204,7 +220,7 @@ A paragraph and two transitions.
 ----------
 
 ----------
-""", # the same:
+""",
 """\
 <document source="test data">
     <paragraph>
@@ -314,5 +330,4 @@ A paragraph.
 
 
 if __name__ == '__main__':
-    import unittest
-    unittest.main(defaultTest='suite')
+    unittest.main()

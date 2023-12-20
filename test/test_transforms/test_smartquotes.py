@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-# $Id: test_smartquotes.py 8554 2020-09-04 16:52:11Z milde $
-#
+# $Id: test_smartquotes.py 9321 2023-01-17 15:40:27Z milde $
 # :Copyright: © 2011 Günter Milde.
 # :Maintainer: docutils-develop@lists.sourceforge.net
 # :License: Released under the terms of the `2-Clause BSD license`_, in short:
@@ -16,31 +14,88 @@
 """
 Test module for universal.SmartQuotes transform.
 """
-from __future__ import absolute_import
+
+from pathlib import Path
+import sys
+import unittest
 
 if __name__ == '__main__':
-    import __init__
-from test_transforms import DocutilsTestSupport  # before importing docutils!
-from docutils.transforms.universal import SmartQuotes
+    # prepend the "docutils root" to the Python library path
+    # so we import the local `docutils` package.
+    sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+
+from docutils.frontend import get_default_settings
 from docutils.parsers.rst import Parser
+from docutils.transforms.universal import (SmartQuotes, FilterMessages,
+                                           TestMessages)
+from docutils.utils import new_document
 
 
-def suite():
-    parser = Parser()
-    settings = {'smart_quotes': True,
-                'trim_footnote_ref_space': True,
-                'report': 2} # TODO: why is this ignored when running as main?
-    s = DocutilsTestSupport.TransformTestSuite(
-        parser, suite_settings=settings)
-    s.generateTests(totest)
-    settings['language_code'] = 'de'
-    s.generateTests(totest_de)
-    settings['smart_quotes'] = 'alternative'
-    s.generateTests(totest_de_alt)
-    settings['smart_quotes'] = True
-    settings['smartquotes_locales'] = [('de', u'«»()'), ('nl', u'„”’’')]
-    s.generateTests(totest_locales)
-    return s
+class TransformTestCase(unittest.TestCase):
+    def test_transforms(self):
+        parser = Parser()
+        settings = get_default_settings(Parser)
+        settings.warning_stream = ''
+        settings.smart_quotes = True
+        settings.trim_footnote_ref_space = True
+        for name, (transforms, cases) in totest.items():
+            for casenum, (case_input, case_expected) in enumerate(cases):
+                with self.subTest(id=f'totest[{name!r}][{casenum}]'):
+                    document = new_document('test data', settings.copy())
+                    parser.parse(case_input, document)
+                    # Don't do a ``populate_from_components()`` because that
+                    # would enable the Transformer's default transforms.
+                    document.transformer.add_transforms(transforms)
+                    document.transformer.add_transform(TestMessages)
+                    document.transformer.apply_transforms()
+                    output = document.pformat()
+                    self.assertEqual(output, case_expected)
+
+        settings.language_code = 'de'
+        for name, (transforms, cases) in totest_de.items():
+            for casenum, (case_input, case_expected) in enumerate(cases):
+                with self.subTest(id=f'totest_de[{name!r}][{casenum}]'):
+                    document = new_document('test data', settings.copy())
+                    parser.parse(case_input, document)
+                    # Don't do a ``populate_from_components()`` because that
+                    # would enable the Transformer's default transforms.
+                    document.transformer.add_transforms(transforms)
+                    document.transformer.add_transform(TestMessages)
+                    # Filter with increased priority: call later, so that
+                    # messages added by `TestMessages` are filtered, too.
+                    document.transformer.add_transform(FilterMessages, 890)
+                    document.transformer.apply_transforms()
+                    output = document.pformat()
+                    self.assertEqual(output, case_expected)
+
+        settings.smart_quotes = 'alternative'
+        for name, (transforms, cases) in totest_de_alt.items():
+            for casenum, (case_input, case_expected) in enumerate(cases):
+                with self.subTest(id=f'totest_de_alt[{name!r}][{casenum}]'):
+                    document = new_document('test data', settings.copy())
+                    parser.parse(case_input, document)
+                    # Don't do a ``populate_from_components()`` because that
+                    # would enable the Transformer's default transforms.
+                    document.transformer.add_transforms(transforms)
+                    document.transformer.add_transform(TestMessages)
+                    document.transformer.apply_transforms()
+                    output = document.pformat()
+                    self.assertEqual(output, case_expected)
+
+        settings.smart_quotes = True
+        settings.smartquotes_locales = [('de', '«»()'), ('nl', '„”’’')]
+        for name, (transforms, cases) in totest_locales.items():
+            for casenum, (case_input, case_expected) in enumerate(cases):
+                with self.subTest(id=f'totest_locales[{name!r}][{casenum}]'):
+                    document = new_document('test data', settings.copy())
+                    parser.parse(case_input, document)
+                    # Don't do a ``populate_from_components()`` because that
+                    # would enable the Transformer's default transforms.
+                    document.transformer.add_transforms(transforms)
+                    document.transformer.add_transform(TestMessages)
+                    document.transformer.apply_transforms()
+                    output = document.pformat()
+                    self.assertEqual(output, case_expected)
 
 
 totest = {}
@@ -54,7 +109,7 @@ Test "smart quotes", 'secondary smart quotes',
 "'nested' smart" quotes
 -- and ---also long--- dashes.
 """,
-u"""\
+"""\
 <document source="test data">
     <paragraph>
         Test “smart quotes”, ‘secondary smart quotes’,
@@ -63,7 +118,7 @@ u"""\
 """],
 [r"""Escaped \"ASCII quotes\" and \'secondary ASCII quotes\'.
 """,
-u"""\
+"""\
 <document source="test data">
     <paragraph>
         Escaped "ASCII quotes" and 'secondary ASCII quotes'.
@@ -88,10 +143,10 @@ Keep quotes straight in code and math:
    f'(x) = df(x)/dx
 
 """,
-u"""\
+"""\
 <document source="test data">
     <paragraph>
-        Do not “educate” quotes 
+        Do not “educate” quotes \n\
         <literal>
             inside "literal" text
          and
@@ -101,10 +156,10 @@ u"""\
         Keep quotes straight in code and math:
         <literal classes="code">
             print "hello"
-         
+         \n\
         <literal classes="code python">
             print("hello")
-         
+         \n\
         <math>
             1' 12"
         .
@@ -113,7 +168,7 @@ u"""\
     <math_block xml:space="preserve">
         f'(x) = df(x)/dx
 """],
-[u"""\
+["""\
 Closing quotes, if preceded by
 wor"d char's
 or punctuation:"a",'a';'a' (TODO: opening quotes if followed by word-char?).
@@ -138,7 +193,7 @@ But not if followed by (optional punctuation and) whitespace:
 "-", "–", "—", "(", "a[", "{"
 '-', '–', '—', '((', '[', '{'
 """,
-u"""\
+"""\
 <document source="test data">
     <paragraph>
         Closing quotes, if preceded by
@@ -176,7 +231,7 @@ Quotes and inline-elements:
 Do not drop characters from intra-word inline markup like
 *re*\\ ``Structured``\\ *Text*.
 """,
-u"""\
+"""\
 <document source="test data">
     <paragraph>
         Quotes and inline-elements:
@@ -213,7 +268,7 @@ u"""\
             Structured
         <emphasis>
             Text
-        .\
+        .
 """],
 ["""\
 Do not convert context-character at inline-tag boundaries
@@ -230,7 +285,7 @@ Do not convert context-character at inline-tag boundaries
   Do not drop characters from intra-word inline markup like
   *re*\\ ``Structured``\\ *Text*.
 """,
-u"""\
+"""\
 <document source="test data">
     <paragraph>
         Do not convert context-character at inline-tag boundaries
@@ -264,7 +319,7 @@ u"""\
         ), (
         <literal>
             'string'
-        ), 
+        ), \n\
         <emphasis>
             «\u202fbetont\u202f»
         , «\u202f
@@ -307,7 +362,7 @@ Test around inline elements:\ [*]_
 
 .. [*] and footnotes
 """,
-u"""\
+"""\
 <document source="test data">
     <paragraph>
         Docutils escape mechanism uses the backslash:
@@ -335,7 +390,7 @@ u"""\
         .
     <paragraph>
         Test around inline elements:
-        <footnote_reference auto="*" ids="id1">
+        <footnote_reference auto="*" ids="footnote-reference-1">
     <paragraph>
         <emphasis>
             emphasized
@@ -355,7 +410,7 @@ u"""\
             O and \n\
             <math>
                 x^2
-        <footnote auto="*" ids="id2">
+        <footnote auto="*" ids="footnote-1">
             <paragraph>
                 and footnotes
 """],
@@ -397,7 +452,7 @@ British "primary quotes" use single and
 
 Alternative German "smart quotes" and 'secondary smart quotes'.
 """,
-u"""\
+"""\
 <document source="test data">
     <paragraph classes="language-de">
         German „smart quotes“ and ‚secondary smart quotes‘.
@@ -422,7 +477,7 @@ German "smart quotes" and 'secondary smart quotes'.
 
 English "smart quotes" and 'secondary smart quotes'.
 """,
-u"""\
+"""\
 <document source="test data">
     <paragraph>
         German „smart quotes“ and ‚secondary smart quotes‘.
@@ -446,7 +501,7 @@ British "quotes" use single and 'secondary quotes' double quote signs
 
 Romanian "smart quotes" and 'secondary' smart quotes.
 """,
-u"""\
+"""\
 <document source="test data">
     <paragraph>
         Alternative German »smart quotes« and ›secondary smart quotes‹.
@@ -468,7 +523,7 @@ German "smart quotes" and 'secondary smart quotes'.
 
 Dutch "smart quotes" and 's Gravenhage (leading apostrophe).
 """,
-u"""\
+"""\
 <document source="test data">
     <paragraph>
         German «smart quotes» and (secondary smart quotes).
@@ -479,5 +534,4 @@ u"""\
 
 
 if __name__ == '__main__':
-    import unittest
-    unittest.main(defaultTest='suite')
+    unittest.main()

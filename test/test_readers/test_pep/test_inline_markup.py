@@ -1,23 +1,40 @@
-#! /usr/bin/env python
+#! /usr/bin/env python3
 
-# $Id: test_inline_markup.py 8481 2020-01-31 08:17:24Z milde $
+# $Id: test_inline_markup.py 9277 2022-11-26 23:15:13Z milde $
 # Author: David Goodger <goodger@python.org>
 # Copyright: This module has been placed in the public domain.
 
 """
 Tests for inline markup in PEPs (readers/pep.py).
 """
-from __future__ import absolute_import
+
+from pathlib import Path
+import sys
+import unittest
 
 if __name__ == '__main__':
-    import __init__
-from test_readers import DocutilsTestSupport
+    # prepend the "docutils root" to the Python library path
+    # so we import the local `docutils` package.
+    sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
+
+from docutils.frontend import get_default_settings
+from docutils.parsers.rst import Parser
+from docutils.parsers.rst.states import Inliner
+from docutils.readers.pep import Reader
+from docutils.utils import new_document
 
 
-def suite():
-    s = DocutilsTestSupport.PEPParserTestSuite()
-    s.generateTests(totest)
-    return s
+class PEPParserTestCase(unittest.TestCase):
+    def test_parser(self):
+        parser = Parser(rfc2822=True, inliner=Inliner())
+        settings = get_default_settings(Parser, Reader)
+        for name, cases in totest.items():
+            for casenum, (case_input, case_expected) in enumerate(cases):
+                with self.subTest(id=f'totest[{name!r}][{casenum}]'):
+                    document = new_document('test data', settings.copy())
+                    parser.parse(case_input, document)
+                    output = document.pformat()
+                    self.assertEqual(output, case_expected)
 
 
 totest = {}
@@ -31,20 +48,20 @@ and RFC 2822 (which obsoletes RFC822 and RFC-733).
 <document source="test data">
     <paragraph>
         See \n\
-        <reference refuri="http://www.python.org/dev/peps/pep-0287">
+        <reference refuri="https://peps.python.org/pep-0287">
             PEP 287
          (
-        <reference refuri="http://www.python.org/dev/peps/pep-0287">
+        <reference refuri="https://peps.python.org/pep-0287">
             pep-0287.txt
         ),
         and \n\
-        <reference refuri="http://tools.ietf.org/html/rfc2822.html">
+        <reference refuri="https://tools.ietf.org/html/rfc2822.html">
             RFC 2822
          (which obsoletes \n\
-        <reference refuri="http://tools.ietf.org/html/rfc822.html">
+        <reference refuri="https://tools.ietf.org/html/rfc822.html">
             RFC822
          and \n\
-        <reference refuri="http://tools.ietf.org/html/rfc733.html">
+        <reference refuri="https://tools.ietf.org/html/rfc733.html">
             RFC-733
         ).
 """],
@@ -62,31 +79,31 @@ RFC
     <paragraph>
         References split across lines:
     <paragraph>
-        <reference refuri="http://www.python.org/dev/peps/pep-0287">
+        <reference refuri="https://peps.python.org/pep-0287">
             PEP
             287
     <paragraph>
-        <reference refuri="http://tools.ietf.org/html/rfc2822.html">
+        <reference refuri="https://tools.ietf.org/html/rfc2822.html">
             RFC
             2822
 """],
 ["""\
 Test PEP-specific implicit references before a URL:
 
-PEP 287 (http://www.python.org/dev/peps/pep-0287), RFC 2822.
+PEP 287 (https://peps.python.org/pep-0287), RFC 2822.
 """,
 """\
 <document source="test data">
     <paragraph>
         Test PEP-specific implicit references before a URL:
     <paragraph>
-        <reference refuri="http://www.python.org/dev/peps/pep-0287">
+        <reference refuri="https://peps.python.org/pep-0287">
             PEP 287
          (
-        <reference refuri="http://www.python.org/dev/peps/pep-0287">
-            http://www.python.org/dev/peps/pep-0287
+        <reference refuri="https://peps.python.org/pep-0287">
+            https://peps.python.org/pep-0287
         ), \n\
-        <reference refuri="http://tools.ietf.org/html/rfc2822.html">
+        <reference refuri="https://tools.ietf.org/html/rfc2822.html">
             RFC 2822
         .
 """],
@@ -97,7 +114,7 @@ totest['miscellaneous'] = [
 For *completeness*, _`let's` ``test`` **other** forms_
 |of| `inline markup` [*]_.
 
-.. [*] See http://docutils.sf.net/docs/ref/rst/restructuredtext.html.
+.. [*] See https://docutils.sourceforge.io/docs/ref/rst/restructuredtext.html.
 """,
 """\
 <document source="test data">
@@ -124,18 +141,17 @@ For *completeness*, _`let's` ``test`` **other** forms_
         <title_reference>
             inline markup
          \n\
-        <footnote_reference auto="*" ids="id1">
+        <footnote_reference auto="*" ids="footnote-reference-1">
         .
-    <footnote auto="*" ids="id2">
+    <footnote auto="*" ids="footnote-1">
         <paragraph>
             See \n\
-            <reference refuri="http://docutils.sf.net/docs/ref/rst/restructuredtext.html">
-                http://docutils.sf.net/docs/ref/rst/restructuredtext.html
+            <reference refuri="https://docutils.sourceforge.io/docs/ref/rst/restructuredtext.html">
+                https://docutils.sourceforge.io/docs/ref/rst/restructuredtext.html
             .
 """],
 ]
 
 
 if __name__ == '__main__':
-    import unittest
-    unittest.main(defaultTest='suite')
+    unittest.main()

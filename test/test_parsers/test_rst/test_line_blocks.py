@@ -1,23 +1,40 @@
-#! /usr/bin/env python
+#! /usr/bin/env python3
 
-# $Id: test_line_blocks.py 8481 2020-01-31 08:17:24Z milde $
+# $Id: test_line_blocks.py 9277 2022-11-26 23:15:13Z milde $
 # Author: David Goodger <goodger@python.org>
 # Copyright: This module has been placed in the public domain.
 
 """
 Tests for states.py.
 """
-from __future__ import absolute_import
+
+from pathlib import Path
+import sys
+import unittest
 
 if __name__ == '__main__':
-    import __init__
-from test_parsers import DocutilsTestSupport
+    # prepend the "docutils root" to the Python library path
+    # so we import the local `docutils` package.
+    sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
+
+from docutils.frontend import get_default_settings
+from docutils.parsers.rst import Parser
+from docutils.utils import new_document
 
 
-def suite():
-    s = DocutilsTestSupport.ParserTestSuite()
-    s.generateTests(totest)
-    return s
+class ParserTestCase(unittest.TestCase):
+    def test_parser(self):
+        parser = Parser()
+        settings = get_default_settings(Parser)
+        settings.warning_stream = ''
+        for name, cases in totest.items():
+            for casenum, (case_input, case_expected) in enumerate(cases):
+                with self.subTest(id=f'totest[{name!r}][{casenum}]'):
+                    document = new_document('test data', settings.copy())
+                    parser.parse(case_input, document)
+                    output = document.pformat()
+                    self.assertEqual(output, case_expected)
+
 
 totest = {}
 
@@ -248,16 +265,16 @@ This is not
 """\
 <document source="test data">
     <paragraph>
-        <problematic ids="id2" refid="id1">
+        <problematic ids="problematic-1" refid="system-message-1">
             |
         This is not
-        <problematic ids="id4" refid="id3">
+        <problematic ids="problematic-2" refid="system-message-2">
             |
         a line block
-    <system_message backrefs="id2" ids="id1" level="2" line="1" source="test data" type="WARNING">
+    <system_message backrefs="problematic-1" ids="system-message-1" level="2" line="1" source="test data" type="WARNING">
         <paragraph>
             Inline substitution_reference start-string without end-string.
-    <system_message backrefs="id4" ids="id3" level="2" line="1" source="test data" type="WARNING">
+    <system_message backrefs="problematic-2" ids="system-message-2" level="2" line="1" source="test data" type="WARNING">
         <paragraph>
             Inline substitution_reference start-string without end-string.
     <line_block>
@@ -267,10 +284,10 @@ This is not
         <paragraph>
             Line block ends without a blank line.
     <paragraph>
-        <problematic ids="id6" refid="id5">
+        <problematic ids="problematic-3" refid="system-message-3">
             |
         incomplete line block.
-    <system_message backrefs="id6" ids="id5" level="2" line="5" source="test data" type="WARNING">
+    <system_message backrefs="problematic-3" ids="system-message-3" level="2" line="5" source="test data" type="WARNING">
         <paragraph>
             Inline substitution_reference start-string without end-string.
 """],
@@ -283,12 +300,12 @@ This is not
     <line_block>
         <line>
             Inline markup \n\
-            <problematic ids="id2" refid="id1">
+            <problematic ids="problematic-1" refid="system-message-1">
                 *
             may not
         <line>
             wrap* over several lines.
-    <system_message backrefs="id2" ids="id1" level="2" line="1" source="test data" type="WARNING">
+    <system_message backrefs="problematic-1" ids="system-message-1" level="2" line="1" source="test data" type="WARNING">
         <paragraph>
             Inline emphasis start-string without end-string.
 """],
@@ -319,17 +336,16 @@ System messages can appear in place of lines:
             <reference name="uff" refuri="test1">
                 uff
             <target dupnames="uff" ids="uff" refuri="test1">
-        <system_message backrefs="id1" level="2" line="3" source="test data" type="WARNING">
+        <system_message backrefs="uff-1" level="2" line="3" source="test data" type="WARNING">
             <paragraph>
                 Duplicate explicit target name: "uff".
         <line>
             <reference name="uff" refuri="test2">
                 uff
-            <target dupnames="uff" ids="id1" refuri="test2">
+            <target dupnames="uff" ids="uff-1" refuri="test2">
 """],
 ]
 
 
 if __name__ == '__main__':
-    import unittest
-    unittest.main(defaultTest='suite')
+    unittest.main()

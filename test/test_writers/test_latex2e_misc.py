@@ -1,7 +1,5 @@
-#! /usr/bin/env python
-# coding: utf-8
-
-# $Id: test_latex2e_misc.py 8582 2020-12-01 09:38:02Z milde $
+#! /usr/bin/env python3
+# $Id: test_latex2e_misc.py 9368 2023-04-28 21:26:36Z milde $
 # Author: Günter Milde
 # Maintainer: docutils-develop@lists.sourceforge.net
 # :Copyright: 2020 Günter Milde,
@@ -17,13 +15,9 @@
 """
 Miscellaneous LaTeX writer tests.
 """
-from __future__ import absolute_import
 
-import os
+import unittest
 
-if __name__ == '__main__':
-    import __init__
-from test_writers import DocutilsTestSupport
 from docutils import core
 
 contents_test_input = """\
@@ -37,23 +31,78 @@ bar
 
 """
 
-class TocTestCase(DocutilsTestSupport.StandardTestCase):
+
+class PublishTestCase(unittest.TestCase):
+
+    settings = {'_disable_config': True,
+                # avoid latex writer future warnings:
+                'use_latex_citations': False,
+                'legacy_column_widths': True,
+                }
 
     def test_publish_from_doctree(self):
-        """Ignore the Docutils-generated ToC, when ``use_latex_toc``
-        is True. (This did happen when publishing from a doctree.)
+        """Ignore the Docutils-generated ToC when ``use_latex_toc`` is True.
+
+        (This did happen when publishing from a doctree.)
         """
-        settings_overrides={'output_encoding': 'unicode',
-                            '_disable_config': True,}
+        settings = self.settings.copy()
+        settings['output_encoding'] = 'unicode'
         doctree = core.publish_doctree(contents_test_input,
-                                       settings_overrides=settings_overrides)
+                                       settings_overrides=settings)
         result = core.publish_from_doctree(doctree,
-                                     writer_name='latex',
-                                     settings_overrides=settings_overrides)
+                                           writer_name='latex',
+                                           settings_overrides=settings)
         self.assertNotIn(r'\item \hyperref[foo]{foo}', result)
         # self.assertIn(r'\tableofcontents', result)
 
+    def test_publish_parts(self):
+        """Check for the presence of documented parts.
+        """
+        parts = core.publish_parts(contents_test_input,
+                                   writer_name='latex',
+                                   settings_overrides=self.settings)
+        documented_parts = [
+            'abstract',
+            'body',
+            'body_pre_docinfo',
+            'dedication',
+            'docinfo',
+            'encoding',
+            'errors',
+            'fallbacks',
+            'head_prefix',
+            'latex_preamble',
+            'pdfsetup',
+            'requirements',
+            'stylesheet',
+            'subtitle',
+            'title',
+            'titledata',
+            'version',
+            'whole'
+            ]
+        self.assertEqual(sorted(parts.keys()), documented_parts)
+
+
+class WarningsTestCase(unittest.TestCase):
+
+    def test_future_warnings(self):
+        """Warn about changing defaults."""
+        # Warn only if not set (uncommenting should make test fail):
+        settings = {'_disable_config': True,
+                    # 'use_latex_citations': False,
+                    # 'legacy_column_widths': True,
+                    'output_encoding': 'unicode',
+                    }
+        with self.assertWarnsRegex(FutureWarning,
+                                   '"legacy_column_widths" will change'):
+            core.publish_string('warnings test', writer_name='latex',
+                                settings_overrides=settings)
+        with self.assertWarnsRegex(FutureWarning,
+                                   '"use_latex_citations" will change'):
+            core.publish_string('warnings test', writer_name='latex',
+                                settings_overrides=settings)
+
 
 if __name__ == '__main__':
-    import unittest
     unittest.main()

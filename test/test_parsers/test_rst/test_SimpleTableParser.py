@@ -1,23 +1,38 @@
-#! /usr/bin/env python
-# .. coding: utf-8
-
-# $Id: test_SimpleTableParser.py 8481 2020-01-31 08:17:24Z milde $
+#! /usr/bin/env python3
+# $Id: test_SimpleTableParser.py 9277 2022-11-26 23:15:13Z milde $
 # Author: David Goodger <goodger@python.org>
 # Copyright: This module has been placed in the public domain.
 
 """
 Tests for states.py.
 """
-from __future__ import absolute_import
+
+from pathlib import Path
+import sys
+import unittest
 
 if __name__ == '__main__':
-    import __init__
-from test_parsers import DocutilsTestSupport
+    # prepend the "docutils root" to the Python library path
+    # so we import the local `docutils` package.
+    sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 
-def suite():
-    s = DocutilsTestSupport.SimpleTableParserTestSuite()
-    s.generateTests(totest)
-    return s
+from docutils.parsers.rst import tableparser
+from docutils.statemachine import StringList, string2lines
+
+
+class SimpleTableParserTestCase(unittest.TestCase):
+    def test_parse(self):
+        parser = tableparser.SimpleTableParser()
+        for name, cases in totest.items():
+            for casenum, (case_input, case_expected) in enumerate(cases):
+                lines_input = StringList(string2lines(case_input), 'test data')
+                with self.subTest(id=f'totest[{name!r}][{casenum}]'):
+                    try:
+                        output = parser.parse(lines_input)
+                    except Exception as details:
+                        output = f'{details.__class__.__name__}: {details}'
+                    self.assertEqual(output, case_expected)
+
 
 totest = {}
 
@@ -31,15 +46,15 @@ A table with  two columns.
  [],
  [[[0, 0, 1, ['A table with']],
    [0, 0, 1, ['two columns.']]]])],
-[u"""\
+["""\
 ============  ===============
 A tāble w̅ith  comb̲ining chars
 ============  ===============
 """,
 ([12, 15],
  [],
- [[[0, 0, 1, [u'A ta\u0304ble w\u0305ith']],
-   [0, 0, 1, [u'comb\u0332ining chars']]]])],
+ [[[0, 0, 1, ['A ta\u0304ble w\u0305ith']],
+   [0, 0, 1, ['comb\u0332ining chars']]]])],
 ["""\
 ============  ============
 A table with  two columns
@@ -66,9 +81,9 @@ second row.
 ==========  ===========
 A table with four rows,
 -----------------------
-and two     columns.   
-First and   last rows     
-contain column spans.   
+and two     columns.
+First and   last rows
+contain column spans.
 =======================
 """,
 ([10, 11],
@@ -97,10 +112,10 @@ Another bad    table
 ===========  ================
 A table with two header rows,
 -----------------------------
-the first    with a span.    
+the first    with a span.
 ===========  ================
-Two body     rows,           
-the second with a span.      
+Two body     rows,
+the second with a span.
 =============================
 """,
 ([11, 16],
@@ -147,5 +162,4 @@ That's bad.
 
 
 if __name__ == '__main__':
-    import unittest
-    unittest.main(defaultTest='suite')
+    unittest.main()

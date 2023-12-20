@@ -9,17 +9,17 @@ Last-Update: 2017-09-19
  1 file changed, 2 insertions(+), 1 deletion(-)
 
 diff --git a/docutils/parsers/rst/states.py b/docutils/parsers/rst/states.py
-index fa4c507..c590afa 100644
+index 208023d..c6f130c 100644
 --- a/docutils/parsers/rst/states.py
 +++ b/docutils/parsers/rst/states.py
-@@ -116,8 +116,9 @@ import docutils.parsers.rst
+@@ -114,8 +114,9 @@ from docutils.nodes import unescape, whitespace_normalize_name
+ import docutils.parsers.rst
  from docutils.parsers.rst import directives, languages, tableparser, roles
- from docutils.parsers.rst.languages import en as _fallback_language_module
- from docutils.utils import escape2null, unescape, column_width
+ from docutils.utils import escape2null, column_width
 -from docutils.utils import punctuation_chars, roman, urischemes
 +from docutils.utils import punctuation_chars, urischemes
  from docutils.utils import split_escaped_whitespace
 +import roman
  
+ 
  class MarkupError(DataError): pass
- class UnknownInterpretedRoleError(DataError): pass

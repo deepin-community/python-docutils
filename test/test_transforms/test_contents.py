@@ -1,6 +1,6 @@
-#! /usr/bin/env python
+#! /usr/bin/env python3
 
-# $Id: test_contents.py 8481 2020-01-31 08:17:24Z milde $
+# $Id: test_contents.py 9277 2022-11-26 23:15:13Z milde $
 # Author: David Goodger <goodger@python.org>
 # Copyright: This module has been placed in the public domain.
 
@@ -8,20 +8,41 @@
 Tests for `docutils.transforms.parts.Contents` (via
 `docutils.transforms.universal.LastReaderPending`).
 """
-from __future__ import absolute_import
+
+from pathlib import Path
+import sys
+import unittest
 
 if __name__ == '__main__':
-    import __init__
-from test_transforms import DocutilsTestSupport
-from docutils.transforms.references import Substitutions
+    # prepend the "docutils root" to the Python library path
+    # so we import the local `docutils` package.
+    sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+
+from docutils.frontend import get_default_settings
 from docutils.parsers.rst import Parser
+from docutils.transforms.references import Substitutions
+from docutils.transforms.universal import TestMessages
+from docutils.utils import new_document
 
 
-def suite():
-    parser = Parser()
-    s = DocutilsTestSupport.TransformTestSuite(parser)
-    s.generateTests(totest)
-    return s
+class TransformTestCase(unittest.TestCase):
+    def test_transforms(self):
+        parser = Parser()
+        settings = get_default_settings(Parser)
+        settings.warning_stream = ''
+        for name, (transforms, cases) in totest.items():
+            for casenum, (case_input, case_expected) in enumerate(cases):
+                with self.subTest(id=f'totest[{name!r}][{casenum}]'):
+                    document = new_document('test data', settings.copy())
+                    parser.parse(case_input, document)
+                    # Don't do a ``populate_from_components()`` because that
+                    # would enable the Transformer's default transforms.
+                    document.transformer.add_transforms(transforms)
+                    document.transformer.add_transform(TestMessages)
+                    document.transformer.apply_transforms()
+                    output = document.pformat()
+                    self.assertEqual(output, case_expected)
+
 
 totest = {}
 
@@ -53,26 +74,26 @@ Paragraph 4.
         <bullet_list>
             <list_item>
                 <paragraph>
-                    <reference ids="id1" refid="title-1">
+                    <reference ids="toc-entry-1" refid="title-1">
                         Title 1
                 <bullet_list>
                     <list_item>
                         <paragraph>
-                            <reference ids="id2" refid="title-2">
+                            <reference ids="toc-entry-2" refid="title-2">
                                 Title
                                  2
                         <bullet_list>
                             <list_item>
                                 <paragraph>
-                                    <reference ids="id3" refid="title-3">
+                                    <reference ids="toc-entry-3" refid="title-3">
                                         Title
                                          3
                     <list_item>
                         <paragraph>
-                            <reference ids="id4" refid="title-4">
+                            <reference ids="toc-entry-4" refid="title-4">
                                 Title 4
     <section ids="title-1" names="title\\ 1">
-        <title refid="id1">
+        <title refid="toc-entry-1">
             Title 1
         <paragraph>
             Paragraph 1.
@@ -84,14 +105,14 @@ Paragraph 4.
             <paragraph>
                 Paragraph 2.
             <section ids="title-3" names="title\\ 3">
-                <title refid="id3">
+                <title refid="toc-entry-3">
                     <target ids="title" names="title">
                         Title
                      3
                 <paragraph>
                     Paragraph 3.
         <section ids="title-4" names="title\\ 4">
-            <title refid="id4">
+            <title refid="toc-entry-4">
                 Title 4
             <paragraph>
                 Paragraph 4.
@@ -115,20 +136,20 @@ Paragraph 2.
         <bullet_list>
             <list_item>
                 <paragraph>
-                    <reference ids="id1" refid="title-1">
+                    <reference ids="toc-entry-1" refid="title-1">
                         Title 1
                 <bullet_list>
                     <list_item>
                         <paragraph>
-                            <reference ids="id2" refid="title-2">
+                            <reference ids="toc-entry-2" refid="title-2">
                                 Title 2
     <section ids="title-1" names="title\\ 1">
-        <title refid="id1">
+        <title refid="toc-entry-1">
             Title 1
         <paragraph>
             Paragraph 1.
         <section ids="title-2" names="title\\ 2">
-            <title refid="id2">
+            <title refid="toc-entry-2">
                 Title 2
             <paragraph>
                 Paragraph 2.
@@ -154,19 +175,19 @@ Paragraph 2.
         <bullet_list>
             <list_item>
                 <paragraph>
-                    <reference ids="id1" refid="title-1">
+                    <reference ids="toc-entry-1" refid="title-1">
                         Title 1
             <list_item>
                 <paragraph>
-                    <reference ids="id2" refid="title-2">
+                    <reference ids="toc-entry-2" refid="title-2">
                         Title 2
     <section ids="title-1" names="title\\ 1">
-        <title refid="id1">
+        <title refid="toc-entry-1">
             Title 1
         <paragraph>
             Paragraph 1.
     <section ids="title-2" names="title\\ 2">
-        <title refid="id2">
+        <title refid="toc-entry-2">
             <image alt="Title 2" uri="title2.png">
         <paragraph>
             Paragraph 2.
@@ -201,24 +222,24 @@ Paragraph 4.
         <bullet_list>
             <list_item>
                 <paragraph>
-                    <reference ids="id1" refid="title-1">
+                    <reference ids="toc-entry-1" refid="title-1">
                         Title 1
                 <bullet_list>
                     <list_item>
                         <paragraph>
-                            <reference ids="id2" refid="title-2">
+                            <reference ids="toc-entry-2" refid="title-2">
                                 Title 2
                     <list_item>
                         <paragraph>
-                            <reference ids="id3" refid="title-4">
+                            <reference ids="toc-entry-3" refid="title-4">
                                 Title 4
     <section ids="title-1" names="title\\ 1">
-        <title refid="id1">
+        <title refid="toc-entry-1">
             Title 1
         <paragraph>
             Paragraph 1.
         <section ids="title-2" names="title\\ 2">
-            <title refid="id2">
+            <title refid="toc-entry-2">
                 Title 2
             <paragraph>
                 Paragraph 2.
@@ -228,7 +249,7 @@ Paragraph 4.
                 <paragraph>
                     Paragraph 3.
         <section ids="title-4" names="title\\ 4">
-            <title refid="id3">
+            <title refid="toc-entry-3">
                 Title 4
             <paragraph>
                 Paragraph 4.
@@ -263,31 +284,31 @@ Paragraph 4.
             <bullet_list>
                 <list_item>
                     <paragraph>
-                        <reference ids="id1" refid="title-2">
+                        <reference ids="toc-entry-1" refid="title-2">
                             Title 2
                     <bullet_list>
                         <list_item>
                             <paragraph>
-                                <reference ids="id2" refid="title-3">
+                                <reference ids="toc-entry-2" refid="title-3">
                                     Title 3
                 <list_item>
                     <paragraph>
-                        <reference ids="id3" refid="title-4">
+                        <reference ids="toc-entry-3" refid="title-4">
                             Title 4
         <paragraph>
             Paragraph 1.
         <section ids="title-2" names="title\\ 2">
-            <title refid="id1">
+            <title refid="toc-entry-1">
                 Title 2
             <paragraph>
                 Paragraph 2.
             <section ids="title-3" names="title\\ 3">
-                <title refid="id2">
+                <title refid="toc-entry-2">
                     Title 3
                 <paragraph>
                     Paragraph 3.
         <section ids="title-4" names="title\\ 4">
-            <title refid="id3">
+            <title refid="toc-entry-3">
                 Title 4
             <paragraph>
                 Paragraph 4.
@@ -308,12 +329,12 @@ Paragraph.
         <bullet_list>
             <list_item>
                 <paragraph>
-                    <reference ids="id1" refid="section">
+                    <reference ids="toc-entry-1" refid="section">
                         Section
     <paragraph>
         Test duplicate name "Contents".
     <section ids="section" names="section">
-        <title refid="id1">
+        <title refid="toc-entry-1">
             Section
         <paragraph>
             Paragraph.
@@ -334,7 +355,7 @@ Paragraph.
         <bullet_list>
             <list_item>
                 <paragraph>
-                    <reference ids="id1" refid="section">
+                    <reference ids="toc-entry-1" refid="section">
                         Section
     <section ids="section" names="section">
         <title refid="contents">
@@ -358,7 +379,7 @@ Paragraph.
         <bullet_list>
             <list_item>
                 <paragraph>
-                    <reference ids="id1" refid="section">
+                    <reference ids="toc-entry-1" refid="section">
                         Section
     <section ids="section" names="section">
         <title>
@@ -409,20 +430,20 @@ Paragraph 3.
                 <bullet_list>
                     <list_item>
                         <paragraph>
-                            <reference ids="id1" refid="title-2">
+                            <reference ids="toc-entry-1" refid="title-2">
                                 Title 2
                         <bullet_list>
                             <list_item>
                                 <paragraph>
-                                    <reference ids="id2" refid="title-3">
+                                    <reference ids="toc-entry-2" refid="title-3">
                                         Title 3
         <section ids="title-2" names="title\\ 2">
-            <title refid="id1">
+            <title refid="toc-entry-1">
                 Title 2
             <paragraph>
                 Paragraph 2.
             <section ids="title-3" names="title\\ 3">
-                <title refid="id2">
+                <title refid="toc-entry-2">
                     Title 3
                 <paragraph>
                     Paragraph 3.
@@ -431,5 +452,4 @@ Paragraph 3.
 
 
 if __name__ == '__main__':
-    import unittest
-    unittest.main(defaultTest='suite')
+    unittest.main()

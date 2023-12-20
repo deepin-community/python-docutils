@@ -1,27 +1,48 @@
-#! /usr/bin/env python
+#! /usr/bin/env python3
 
-# $Id: test_substitution_expansion_length_limit.py 8565 2020-09-14 10:26:03Z milde $
+# $Id: test_substitution_expansion_length_limit.py 9277 2022-11-26 23:15:13Z milde $
 # Author: David Goodger <goodger@python.org>
 # Copyright: This module has been placed in the public domain.
 
 """
 Tests for docutils.transforms.references.Substitutions.
 """
-from __future__ import absolute_import
+
+from pathlib import Path
+import sys
+import unittest
 
 if __name__ == '__main__':
-    import __init__
-from test_transforms import DocutilsTestSupport
-from docutils.transforms.references import Substitutions
+    # prepend the "docutils root" to the Python library path
+    # so we import the local `docutils` package.
+    sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+
+from docutils.frontend import get_default_settings
 from docutils.parsers.rst import Parser
+from docutils.transforms.references import Substitutions
+from docutils.transforms.universal import TestMessages
+from docutils.utils import new_document
 
 
-def suite():
-    parser = Parser()
-    s = DocutilsTestSupport.TransformTestSuite(parser,
-                suite_settings={'line_length_limit': 80})
-    s.generateTests(totest)
-    return s
+class TransformTestCase(unittest.TestCase):
+    def test_transforms(self):
+        parser = Parser()
+        settings = get_default_settings(Parser)
+        settings.warning_stream = ''
+        settings.line_length_limit = 80
+        for name, (transforms, cases) in totest.items():
+            for casenum, (case_input, case_expected) in enumerate(cases):
+                with self.subTest(id=f'totest[{name!r}][{casenum}]'):
+                    document = new_document('test data', settings.copy())
+                    parser.parse(case_input, document)
+                    # Don't do a ``populate_from_components()`` because that
+                    # would enable the Transformer's default transforms.
+                    document.transformer.add_transforms(transforms)
+                    document.transformer.add_transform(TestMessages)
+                    document.transformer.apply_transforms()
+                    output = document.pformat()
+                    self.assertEqual(output, case_expected)
+
 
 # pseudoxml representation of the substitution definition content:
 a = '        lol'
@@ -56,10 +77,10 @@ The billion laughs attack for ReStructuredText:
     <paragraph>
         lol
          \n\
-        <problematic ids="id2" refid="id1">
+        <problematic ids="problematic-1" refid="system-message-1">
             |c|
          continuation text
-    <system_message backrefs="id2" ids="id1" level="3" line="9" source="test data" type="ERROR">
+    <system_message backrefs="problematic-1" ids="system-message-1" level="3" line="9" source="test data" type="ERROR">
         <paragraph>
             Substitution definition "c" exceeds the line-length-limit.
 """.format(b, c)],
@@ -67,5 +88,4 @@ The billion laughs attack for ReStructuredText:
 
 
 if __name__ == '__main__':
-    import unittest
-    unittest.main(defaultTest='suite')
+    unittest.main()

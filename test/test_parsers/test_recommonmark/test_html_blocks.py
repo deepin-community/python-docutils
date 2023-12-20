@@ -1,6 +1,5 @@
 #! /usr/bin/env python3
-# -*- coding: utf-8 -*-
-# $Id: test_html_blocks.py 8594 2020-12-15 23:06:43Z milde $
+# $Id: test_html_blocks.py 9301 2022-12-02 17:13:54Z milde $
 # :Copyright: © 2020 Günter Milde.
 # :License: Released under the terms of the `2-Clause BSD license`_, in short:
 #
@@ -14,17 +13,33 @@
 Tests for HTML blocks in CommonMark parsers
 Cf. the `CommonMark Specification <https://spec.commonmark.org/>`__
 """
-from __future__ import absolute_import
+
+from pathlib import Path
+import sys
+import unittest
 
 if __name__ == '__main__':
-    import __init__
-from test_parsers import DocutilsTestSupport
+    # prepend the "docutils root" to the Python library path
+    # so we import the local `docutils` package.
+    sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
+
+from docutils.frontend import get_default_settings
+from docutils.parsers.recommonmark_wrapper import Parser
+from docutils.utils import new_document
 
 
-def suite():
-    s = DocutilsTestSupport.RecommonmarkParserTestSuite()
-    s.generateTests(totest)
-    return s
+class RecommonmarkParserTestCase(unittest.TestCase):
+    def test_parser(self):
+        parser = Parser()
+        settings = get_default_settings(Parser)
+        for name, cases in totest.items():
+            for casenum, (case_input, case_expected) in enumerate(cases):
+                with self.subTest(id=f'totest[{name!r}][{casenum}]'):
+                    document = new_document('test data', settings.copy())
+                    parser.parse(case_input, document)
+                    output = document.pformat()
+                    self.assertEqual(output, case_expected)
+
 
 totest = {}
 
@@ -65,30 +80,30 @@ A paragraph:
 """,
 """\
 <document source="test data">
-    <paragraph>
-        <raw format="html" xml:space="preserve">
-            <a href="foo">
-        \n\
-        <emphasis>
-            bar
-        \n\
-        <raw format="html" xml:space="preserve">
-            </a>
-"""],
-["""\
-<!-- foo -->*bar*
-*baz*
-""",
-"""\
-<document source="test data">
     <raw format="html" xml:space="preserve">
-        <!-- foo -->*bar*
-        *baz*
+        <a href="foo">
+        *bar*
+        </a>
 """],
+# In recommonmark 0.7.0, some raw blocks at paragraph start make the
+# paragraph a raw block :(
+# ["""\
+# <!-- foo -->*bar* (raw because of the comment tag at start of paragraph)
+# *baz*
+# """,
+# """\
+# <document source="test data">
+#     <paragraph>
+#         <raw format="html" xml:space="preserve">
+#             <!-- foo -->
+#         <emphasis>
+#             bar
+#     <paragraph>
+#         <emphasis>
+#             baz
+# """],
 ]
 
 
-
 if __name__ == '__main__':
-    import unittest
-    unittest.main(defaultTest='suite')
+    unittest.main()

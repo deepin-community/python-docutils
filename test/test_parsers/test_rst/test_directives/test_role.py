@@ -1,23 +1,45 @@
-#! /usr/bin/env python
+#! /usr/bin/env python3
 
-# $Id: test_role.py 8571 2020-10-28 08:46:19Z milde $
+# $Id: test_role.py 9277 2022-11-26 23:15:13Z milde $
 # Author: David Goodger <goodger@python.org>
 # Copyright: This module has been placed in the public domain.
 
 """
 Tests for misc.py "role" directive.
 """
-from __future__ import absolute_import
+
+from pathlib import Path
+import sys
+import unittest
 
 if __name__ == '__main__':
-    import __init__
-from test_parsers import DocutilsTestSupport
+    # prepend the "docutils root" to the Python library path
+    # so we import the local `docutils` package.
+    sys.path.insert(0, str(Path(__file__).resolve().parents[4]))
+
+from docutils.frontend import get_default_settings
+from docutils.parsers.rst import Parser, roles
+from docutils.utils import new_document
 
 
-def suite():
-    s = DocutilsTestSupport.ParserTestSuite()
-    s.generateTests(totest)
-    return s
+class ParserTestCase(unittest.TestCase):
+    def test_parser(self):
+        parser = Parser()
+        settings = get_default_settings(Parser)
+        settings.warning_stream = ''
+        for name, cases in totest.items():
+            for casenum, (case_input, case_expected) in enumerate(cases):
+                # Language-specific roles and roles added by the
+                # "default-role" and "role" directives are currently stored
+                # globally in the roles._roles dictionary.  This workaround
+                # empties that dictionary.
+                roles._roles = {}
+                with self.subTest(id=f'totest[{name!r}][{casenum}]'):
+                    document = new_document('test data', settings.copy())
+                    parser.parse(case_input, document)
+                    output = document.pformat()
+                    self.assertEqual(output, case_expected)
+
 
 totest = {}
 
@@ -64,15 +86,15 @@ Now that it's defined, :custom:`interpreted` works.
 """\
 <document source="test data">
     <paragraph>
-        Must define 
-        <problematic ids="id2" refid="id1">
+        Must define \n\
+        <problematic ids="problematic-1" refid="system-message-1">
             :custom:`interpreted`
          before using it.
     <system_message level="1" line="1" source="test data" type="INFO">
         <paragraph>
             No role entry for "custom" in module "docutils.parsers.rst.languages.en".
             Trying "custom" as canonical role name.
-    <system_message backrefs="id2" ids="id1" level="3" line="1" source="test data" type="ERROR">
+    <system_message backrefs="problematic-1" ids="system-message-1" level="3" line="1" source="test data" type="ERROR">
         <paragraph>
             Unknown interpreted text role "custom".
     <paragraph>
@@ -207,9 +229,9 @@ Empty :custom:`\\ ` and empty `\\ `:special:
 """\
 <document source="test data">
     <paragraph>
-        Empty 
+        Empty \n\
         <inline classes="custom">
-         and empty 
+         and empty \n\
         <inline classes="special">
 """],
 ["""\
@@ -263,10 +285,10 @@ Can't use the :raw:`role` directly.
 <document source="test data">
     <paragraph>
         Can't use the \n\
-        <problematic ids="id2" refid="id1">
+        <problematic ids="problematic-1" refid="system-message-1">
             :raw:`role`
          directly.
-    <system_message backrefs="id2" ids="id1" level="3" line="1" source="test data" type="ERROR">
+    <system_message backrefs="problematic-1" ids="system-message-1" level="3" line="1" source="test data" type="ERROR">
         <paragraph>
             No format (Writer name) is associated with this role: "raw".
             The "raw" role cannot be used directly.
@@ -276,5 +298,4 @@ Can't use the :raw:`role` directly.
 
 
 if __name__ == '__main__':
-    import unittest
-    unittest.main(defaultTest='suite')
+    unittest.main()

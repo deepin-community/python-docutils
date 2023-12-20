@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf8 -*-
 # :Copyright: © 2020 Günter Milde.
 # :License: Released under the terms of the `2-Clause BSD license`_, in short:
 #
@@ -14,13 +13,15 @@
 Various tests for the `pygments` code highlighter.
 """
 
-from __future__ import absolute_import
+from pathlib import Path
+import sys
 import unittest
 
 if __name__ == '__main__':
-    import __init__
-from test_parsers import DocutilsTestSupport # must be imported before docutils
-from docutils import core, utils
+    # prepend the "docutils root" to the Python library path
+    # so we import the local `docutils` package.
+    sys.path.insert(0, str(Path(__file__).resolve().parents[4]))
+
 from docutils.core import publish_string
 from docutils.utils.code_analyzer import with_pygments
 
@@ -33,8 +34,9 @@ Unknown language "S-Lang".
    autoload("abc_mode", "abc");
 """
 
-class_arg = """\
-Unknown language "S-Lang".
+workaround = """\
+Workaround to silence warning: disable code parsing with
+"syntax highlight" setting or put code language in class argument:
 
 .. code::
    :class: s-lang
@@ -43,12 +45,12 @@ Unknown language "S-Lang".
    autoload("abc_mode", "abc");
 """
 
-skip_msg = 'optional module "pygments" not found'
 settings = {'warning_stream': ''}
 
+
+@unittest.skipUnless(with_pygments, 'optional module "pygments" not found')
 class CodeParsingTests(unittest.TestCase):
 
-    @unittest.skipUnless(with_pygments, skip_msg)
     def test_lexer_error(self):
         output = publish_string(unknown_language, settings_overrides=settings)
         self.assertIn(b'<system_message level="2"', output)
@@ -56,9 +58,8 @@ class CodeParsingTests(unittest.TestCase):
                       b'No Pygments lexer found for "s-lang".', output)
         self.assertIn(b'<literal_block xml:space="preserve">', output)
 
-    @unittest.skipUnless(with_pygments, skip_msg)
     def test_lexer_error_workaround(self):
-        output = publish_string(class_arg, settings_overrides=settings)
+        output = publish_string(workaround, settings_overrides=settings)
         self.assertNotIn(b'<system_message', output)
         self.assertIn(b'<literal_block classes="code s-lang"', output)
         self.assertIn(b'autoload("abc_mode", "abc");', output)

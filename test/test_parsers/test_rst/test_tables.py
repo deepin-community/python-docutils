@@ -1,27 +1,48 @@
-#! /usr/bin/env python
+#! /usr/bin/env python3
 
-# $Id: test_tables.py 8481 2020-01-31 08:17:24Z milde $
+# $Id: test_tables.py 9277 2022-11-26 23:15:13Z milde $
 # Author: David Goodger <goodger@python.org>
 # Copyright: This module has been placed in the public domain.
 
 """
 Tests for states.py.
 """
-from __future__ import absolute_import
 
 import os
 
+from pathlib import Path
+import sys
+import unittest
+
 if __name__ == '__main__':
-    import __init__
-from test_parsers import DocutilsTestSupport
+    # prepend the "docutils root" to the Python library path
+    # so we import the local `docutils` package.
+    sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
+
+from docutils.frontend import get_default_settings
+from docutils.parsers.rst import Parser
+from docutils.utils import new_document
+
+# TEST_ROOT is ./test/ from the docutils root
+TEST_ROOT = os.path.abspath(os.path.join(__file__, '..', '..', '..'))
 
 
-def suite():
-    s = DocutilsTestSupport.ParserTestSuite()
-    s.generateTests(totest)
-    return s
+class ParserTestCase(unittest.TestCase):
+    def test_parser(self):
+        parser = Parser()
+        settings = get_default_settings(Parser)
+        settings.warning_stream = ''
+        settings.halt_level = 5
+        for name, cases in totest.items():
+            for casenum, (case_input, case_expected) in enumerate(cases):
+                with self.subTest(id=f'totest[{name!r}][{casenum}]'):
+                    document = new_document('test data', settings.copy())
+                    parser.parse(case_input, document)
+                    output = document.pformat()
+                    self.assertEqual(output, case_expected)
 
-mydir = 'test_parsers/test_rst/'
+
+mydir = os.path.join(TEST_ROOT, 'test_parsers/test_rst')
 include2 = os.path.join(mydir, 'test_directives/include2.txt')
 
 totest = {}
@@ -572,8 +593,8 @@ No blank line after table.
 | (The first cell of this table may expand                                     |
 | to accommodate long filesystem paths.)                                       |
 +------------------------------------------------------------------------------+
-""") % ('\n'.join(['|    %-70s    |' % include2[part * 70 : (part + 1) * 70]
-                   for part in range(len(include2) // 70 + 1)])),
+""") % ('\n'.join('|    %-70s    |' % include2[part * 70 : (part + 1) * 70]  # noqa: E203
+                  for part in range(len(include2) // 70 + 1))),
 """\
 <document source="test data">
     <table>
@@ -607,8 +628,8 @@ Something before.
 Something afterwards.
 
 And more.
-""") % ('\n'.join(['|    %-70s    |' % include2[part * 70 : (part + 1) * 70]
-                   for part in range(len(include2) // 70 + 1)])),
+""") % ('\n'.join('|    %-70s    |' % include2[part * 70 : (part + 1) * 70]  # noqa: E203
+                  for part in range(len(include2) // 70 + 1))),
 """\
 <document source="test data">
     <paragraph>
@@ -1275,8 +1296,8 @@ Inclusion  .. include::
 Note       The first row of this table may expand
            to accommodate long filesystem paths.
 =========  =====================================================================
-""" % ('\n'.join(['              %-65s' % include2[part * 65 : (part + 1) * 65]
-                  for part in range(len(include2) // 65 + 1)])),
+""" % ('\n'.join('              %-65s' % include2[part * 65 : (part + 1) * 65]  # noqa: E203
+                 for part in range(len(include2) // 65 + 1))),
 """\
 <document source="test data">
     <table>
@@ -1310,5 +1331,4 @@ Note       The first row of this table may expand
 
 
 if __name__ == '__main__':
-    import unittest
-    unittest.main(defaultTest='suite')
+    unittest.main()

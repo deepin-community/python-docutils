@@ -1,23 +1,40 @@
-#! /usr/bin/env python
+#! /usr/bin/env python3
 
-# $Id: test_meta.py 8603 2021-01-08 15:24:32Z milde $
+# $Id: test_meta.py 9277 2022-11-26 23:15:13Z milde $
 # Author: David Goodger <goodger@python.org>
 # Copyright: This module has been placed in the public domain.
 
 """
 Tests for html meta directives.
 """
-from __future__ import absolute_import
+
+from pathlib import Path
+import sys
+import unittest
 
 if __name__ == '__main__':
-    import __init__
-from test_parsers import DocutilsTestSupport
+    # prepend the "docutils root" to the Python library path
+    # so we import the local `docutils` package.
+    sys.path.insert(0, str(Path(__file__).resolve().parents[4]))
+
+from docutils.frontend import get_default_settings
+from docutils.parsers.rst import Parser
+from docutils.utils import new_document
 
 
-def suite():
-    s = DocutilsTestSupport.ParserTestSuite()
-    s.generateTests(totest)
-    return s
+class ParserTestCase(unittest.TestCase):
+    def test_parser(self):
+        parser = Parser()
+        settings = get_default_settings(Parser)
+        settings.warning_stream = ''
+        for name, cases in totest.items():
+            for casenum, (case_input, case_expected) in enumerate(cases):
+                with self.subTest(id=f'totest[{name!r}][{casenum}]'):
+                    document = new_document('test data', settings.copy())
+                    parser.parse(case_input, document)
+                    output = document.pformat()
+                    self.assertEqual(output, case_expected)
+
 
 totest = {}
 
@@ -29,22 +46,8 @@ totest['meta'] = [
 """,
 """\
 <document source="test data">
-    <pending>
-        .. internal attributes:
-             .transform: docutils.transforms.components.Filter
-             .details:
-               component: 'writer'
-               format: 'html,latex,odt'
-               nodes:
-                 <meta content="The reStructuredText plaintext markup language" name="description">
-    <pending>
-        .. internal attributes:
-             .transform: docutils.transforms.components.Filter
-             .details:
-               component: 'writer'
-               format: 'html,latex,odt'
-               nodes:
-                 <meta content="plaintext,markup language" name="keywords">
+    <meta content="The reStructuredText plaintext markup language" name="description">
+    <meta content="plaintext,markup language" name="keywords">
 """],
 ["""\
 .. meta::
@@ -53,22 +56,8 @@ totest['meta'] = [
 """,
 """\
 <document source="test data">
-    <pending>
-        .. internal attributes:
-             .transform: docutils.transforms.components.Filter
-             .details:
-               component: 'writer'
-               format: 'html,latex,odt'
-               nodes:
-                 <meta content="An amusing story" lang="en" name="description">
-    <pending>
-        .. internal attributes:
-             .transform: docutils.transforms.components.Filter
-             .details:
-               component: 'writer'
-               format: 'html,latex,odt'
-               nodes:
-                 <meta content="Un histoire amusant" lang="fr" name="description">
+    <meta content="An amusing story" lang="en" name="description">
+    <meta content="Un histoire amusant" lang="fr" name="description">
 """],
 ["""\
 .. meta::
@@ -76,14 +65,7 @@ totest['meta'] = [
 """,
 """\
 <document source="test data">
-    <pending>
-        .. internal attributes:
-             .transform: docutils.transforms.components.Filter
-             .details:
-               component: 'writer'
-               format: 'html,latex,odt'
-               nodes:
-                 <meta content="text/html; charset=ISO-8859-1" http-equiv="Content-Type">
+    <meta content="text/html; charset=ISO-8859-1" http-equiv="Content-Type">
 """],
 ["""\
 .. meta::
@@ -92,14 +74,7 @@ totest['meta'] = [
 """,
 """\
 <document source="test data">
-    <pending>
-        .. internal attributes:
-             .transform: docutils.transforms.components.Filter
-             .details:
-               component: 'writer'
-               format: 'html,latex,odt'
-               nodes:
-                 <meta content="content over multiple lines" name="name">
+    <meta content="content over multiple lines" name="name">
 """],
 ["""\
 Paragraph
@@ -109,16 +84,9 @@ Paragraph
 """,
 """\
 <document source="test data">
+    <meta content="content" name="name">
     <paragraph>
         Paragraph
-    <pending>
-        .. internal attributes:
-             .transform: docutils.transforms.components.Filter
-             .details:
-               component: 'writer'
-               format: 'html,latex,odt'
-               nodes:
-                 <meta content="content" name="name">
 """],
 ["""\
 .. meta::
@@ -164,14 +132,7 @@ Paragraph
 """,
 """\
 <document source="test data">
-    <pending>
-        .. internal attributes:
-             .transform: docutils.transforms.components.Filter
-             .details:
-               component: 'writer'
-               format: 'html,latex,odt'
-               nodes:
-                 <meta content="content" name="name">
+    <meta content="content" name="name">
     <system_message level="3" line="1" source="test data" type="ERROR">
         <paragraph>
             Invalid meta directive.
@@ -189,22 +150,8 @@ Paragraph
 """,
 """\
 <document source="test data">
-    <pending>
-        .. internal attributes:
-             .transform: docutils.transforms.components.Filter
-             .details:
-               component: 'writer'
-               format: 'html,latex,odt'
-               nodes:
-                 <meta content="content" name="name">
-    <pending>
-        .. internal attributes:
-             .transform: docutils.transforms.components.Filter
-             .details:
-               component: 'writer'
-               format: 'html,latex,odt'
-               nodes:
-                 <meta content="content" name="name">
+    <meta content="content" name="name">
+    <meta content="content" name="name">
     <system_message level="3" line="1" source="test data" type="ERROR">
         <paragraph>
             Invalid meta directive.
@@ -234,26 +181,11 @@ Paragraph
 """,
 """\
 <document source="test data">
-    <pending>
-        .. internal attributes:
-             .transform: docutils.transforms.components.Filter
-             .details:
-               component: 'writer'
-               format: 'html,latex,odt'
-               nodes:
-                 <meta content="escaped linebreak" name="name:with:colons">
-    <pending>
-        .. internal attributes:
-             .transform: docutils.transforms.components.Filter
-             .details:
-               component: 'writer'
-               format: 'html,latex,odt'
-               nodes:
-                 <meta content="content" name="unescaped:embedded:colons">
+    <meta content="escaped linebreak" name="name:with:colons">
+    <meta content="content" name="unescaped:embedded:colons">
 """],
 ]
 
 
 if __name__ == '__main__':
-    import unittest
-    unittest.main(defaultTest='suite')
+    unittest.main()

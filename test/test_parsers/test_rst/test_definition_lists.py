@@ -1,22 +1,40 @@
-#! /usr/bin/env python
+#! /usr/bin/env python3
 
-# $Id: test_definition_lists.py 8481 2020-01-31 08:17:24Z milde $
+# $Id: test_definition_lists.py 9277 2022-11-26 23:15:13Z milde $
 # Author: David Goodger <goodger@python.org>
 # Copyright: This module has been placed in the public domain.
 
 """
 Tests for states.py.
 """
-from __future__ import absolute_import
+
+from pathlib import Path
+import sys
+import unittest
 
 if __name__ == '__main__':
-    import __init__
-from test_parsers import DocutilsTestSupport
+    # prepend the "docutils root" to the Python library path
+    # so we import the local `docutils` package.
+    sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 
-def suite():
-    s = DocutilsTestSupport.ParserTestSuite()
-    s.generateTests(totest)
-    return s
+from docutils.frontend import get_default_settings
+from docutils.parsers.rst import Parser
+from docutils.utils import new_document
+
+
+class ParserTestCase(unittest.TestCase):
+    def test_parser(self):
+        parser = Parser()
+        settings = get_default_settings(Parser)
+        settings.warning_stream = ''
+        for name, cases in totest.items():
+            for casenum, (case_input, case_expected) in enumerate(cases):
+                with self.subTest(id=f'totest[{name!r}][{casenum}]'):
+                    document = new_document('test data', settings.copy())
+                    parser.parse(case_input, document)
+                    output = document.pformat()
+                    self.assertEqual(output, case_expected)
+
 
 totest = {}
 
@@ -299,75 +317,75 @@ Term `with *inline ``text **errors : classifier `with *errors ``too
         <definition_list_item>
             <term>
                 Term \n\
-                <problematic ids="id2" refid="id1">
+                <problematic ids="problematic-1" refid="system-message-1">
                     `
                 with \n\
-                <problematic ids="id4" refid="id3">
+                <problematic ids="problematic-2" refid="system-message-2">
                     *
                 inline \n\
-                <problematic ids="id6" refid="id5">
+                <problematic ids="problematic-3" refid="system-message-3">
                     ``
                 text \n\
-                <problematic ids="id8" refid="id7">
+                <problematic ids="problematic-4" refid="system-message-4">
                     **
                 errors
             <classifier>
                 classifier \n\
-                <problematic ids="id10" refid="id9">
+                <problematic ids="problematic-5" refid="system-message-5">
                     `
                 with \n\
-                <problematic ids="id12" refid="id11">
+                <problematic ids="problematic-6" refid="system-message-6">
                     *
                 errors \n\
-                <problematic ids="id14" refid="id13">
+                <problematic ids="problematic-7" refid="system-message-7">
                     ``
                 too
             <definition>
-                <system_message backrefs="id2" ids="id1" level="2" line="1" source="test data" type="WARNING">
+                <system_message backrefs="problematic-1" ids="system-message-1" level="2" line="1" source="test data" type="WARNING">
                     <paragraph>
                         Inline interpreted text or phrase reference start-string without end-string.
-                <system_message backrefs="id4" ids="id3" level="2" line="1" source="test data" type="WARNING">
+                <system_message backrefs="problematic-2" ids="system-message-2" level="2" line="1" source="test data" type="WARNING">
                     <paragraph>
                         Inline emphasis start-string without end-string.
-                <system_message backrefs="id6" ids="id5" level="2" line="1" source="test data" type="WARNING">
+                <system_message backrefs="problematic-3" ids="system-message-3" level="2" line="1" source="test data" type="WARNING">
                     <paragraph>
                         Inline literal start-string without end-string.
-                <system_message backrefs="id8" ids="id7" level="2" line="1" source="test data" type="WARNING">
+                <system_message backrefs="problematic-4" ids="system-message-4" level="2" line="1" source="test data" type="WARNING">
                     <paragraph>
                         Inline strong start-string without end-string.
-                <system_message backrefs="id10" ids="id9" level="2" line="1" source="test data" type="WARNING">
+                <system_message backrefs="problematic-5" ids="system-message-5" level="2" line="1" source="test data" type="WARNING">
                     <paragraph>
                         Inline interpreted text or phrase reference start-string without end-string.
-                <system_message backrefs="id12" ids="id11" level="2" line="1" source="test data" type="WARNING">
+                <system_message backrefs="problematic-6" ids="system-message-6" level="2" line="1" source="test data" type="WARNING">
                     <paragraph>
                         Inline emphasis start-string without end-string.
-                <system_message backrefs="id14" ids="id13" level="2" line="1" source="test data" type="WARNING">
+                <system_message backrefs="problematic-7" ids="system-message-7" level="2" line="1" source="test data" type="WARNING">
                     <paragraph>
                         Inline literal start-string without end-string.
                 <paragraph>
                     Definition \n\
-                    <problematic ids="id16" refid="id15">
+                    <problematic ids="problematic-8" refid="system-message-8">
                         `
                     with \n\
-                    <problematic ids="id18" refid="id17">
+                    <problematic ids="problematic-9" refid="system-message-9">
                         *
                     inline \n\
-                    <problematic ids="id20" refid="id19">
+                    <problematic ids="problematic-10" refid="system-message-10">
                         ``
                     text \n\
-                    <problematic ids="id22" refid="id21">
+                    <problematic ids="problematic-11" refid="system-message-11">
                         **
                     markup errors.
-                <system_message backrefs="id16" ids="id15" level="2" line="2" source="test data" type="WARNING">
+                <system_message backrefs="problematic-8" ids="system-message-8" level="2" line="2" source="test data" type="WARNING">
                     <paragraph>
                         Inline interpreted text or phrase reference start-string without end-string.
-                <system_message backrefs="id18" ids="id17" level="2" line="2" source="test data" type="WARNING">
+                <system_message backrefs="problematic-9" ids="system-message-9" level="2" line="2" source="test data" type="WARNING">
                     <paragraph>
                         Inline emphasis start-string without end-string.
-                <system_message backrefs="id20" ids="id19" level="2" line="2" source="test data" type="WARNING">
+                <system_message backrefs="problematic-10" ids="system-message-10" level="2" line="2" source="test data" type="WARNING">
                     <paragraph>
                         Inline literal start-string without end-string.
-                <system_message backrefs="id22" ids="id21" level="2" line="2" source="test data" type="WARNING">
+                <system_message backrefs="problematic-11" ids="system-message-11" level="2" line="2" source="test data" type="WARNING">
                     <paragraph>
                         Inline strong start-string without end-string.
 """],
@@ -430,5 +448,4 @@ Term : classifier one  :  classifier two
 ]
 
 if __name__ == '__main__':
-    import unittest
-    unittest.main(defaultTest='suite')
+    unittest.main()

@@ -1,24 +1,40 @@
-# -*- coding: utf-8 -*-
-#! /usr/bin/env python
-
-# $Id: test_section_headers.py 8481 2020-01-31 08:17:24Z milde $
+#! /usr/bin/env python3
+# $Id: test_section_headers.py 9277 2022-11-26 23:15:13Z milde $
 # Author: David Goodger <goodger@python.org>
 # Copyright: This module has been placed in the public domain.
 
 """
 Tests for states.py.
 """
-from __future__ import absolute_import
+
+from pathlib import Path
+import sys
+import unittest
 
 if __name__ == '__main__':
-    import __init__
-from test_parsers import DocutilsTestSupport
+    # prepend the "docutils root" to the Python library path
+    # so we import the local `docutils` package.
+    sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
+
+from docutils.frontend import get_default_settings
+from docutils.parsers.rst import Parser
+from docutils.utils import new_document
 
 
-def suite():
-    s = DocutilsTestSupport.ParserTestSuite()
-    s.generateTests(totest)
-    return s
+class ParserTestCase(unittest.TestCase):
+    def test_parser(self):
+        parser = Parser()
+        settings = get_default_settings(Parser)
+        settings.warning_stream = ''
+        settings.halt_level = 5
+        for name, cases in totest.items():
+            for casenum, (case_input, case_expected) in enumerate(cases):
+                with self.subTest(id=f'totest[{name!r}][{casenum}]'):
+                    document = new_document('test data', settings.copy())
+                    parser.parse(case_input, document)
+                    output = document.pformat()
+                    self.assertEqual(output, case_expected)
+
 
 totest = {}
 
@@ -127,13 +143,13 @@ Test short underline.
         <paragraph>
             Test short underline.
 """],
-[u"""\
+["""\
 à with combining varia
 ======================
 
 Do not count combining chars in title column width.
 """,
-u"""\
+"""\
 <document source="test data">
     <section ids="a-with-combining-varia" names="a\u0300\\ with\\ combining\\ varia">
         <title>
@@ -807,17 +823,17 @@ Paragraph
         <paragraph>
             Possible incomplete section title.
             Treating the overline as ordinary text because it's so short.
-    <section dupnames="..." ids="id1">
+    <section dupnames="..." ids="section-1">
         <title>
             ...
         <system_message level="1" line="4" source="test data" type="INFO">
             <paragraph>
                 Possible incomplete section title.
                 Treating the overline as ordinary text because it's so short.
-        <section dupnames="..." ids="id2">
+        <section dupnames="..." ids="section-2">
             <title>
                 ...
-            <system_message backrefs="id2" level="1" line="5" source="test data" type="INFO">
+            <system_message backrefs="section-2" level="1" line="5" source="test data" type="INFO">
                 <paragraph>
                     Duplicate implicit target name: "...".
             <system_message level="1" line="7" source="test data" type="INFO">
@@ -828,10 +844,10 @@ Paragraph
         <paragraph>
             Possible incomplete section title.
             Treating the overline as ordinary text because it's so short.
-    <section dupnames="..." ids="id3">
+    <section dupnames="..." ids="section-3">
         <title>
             ...
-        <system_message backrefs="id3" level="1" line="8" source="test data" type="INFO">
+        <system_message backrefs="section-3" level="1" line="8" source="test data" type="INFO">
             <paragraph>
                 Duplicate implicit target name: "...".
         <paragraph>
@@ -912,5 +928,4 @@ Without it, the parser ends up in an infinite loop.
 
 
 if __name__ == '__main__':
-    import unittest
-    unittest.main(defaultTest='suite')
+    unittest.main()

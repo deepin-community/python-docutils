@@ -1,3 +1,134 @@
+python-docutils (0.20.1+dfsg-3) unstable; urgency=medium
+
+  * Backport upstream changes to enable tbl preprocessor (closes: #1053355).
+
+ -- Dmitry Shachnev <mitya57@debian.org>  Thu, 30 Nov 2023 14:16:27 +0300
+
+python-docutils (0.20.1+dfsg-2) unstable; urgency=medium
+
+  * Merge 0.19+dfsg-8 upload from unstable.
+  * Refresh debian/patches/manpage-literal-blocks.diff.
+  * Upload to unstable.
+
+ -- Dmitry Shachnev <mitya57@debian.org>  Tue, 14 Nov 2023 13:45:51 +0300
+
+python-docutils (0.20.1+dfsg-1) experimental; urgency=medium
+
+  * New upstream release.
+  * Drop patches which are included in the new release:
+    - rst2odt_prepstyles-elementtree.diff
+    - no-empty-manual.diff
+  * Refresh and rebase other patches.
+  * Amend static-help-message.diff to fix newly added tests.
+  * Override false-positive privacy-breach-generic Lintian warning
+    in docutils-doc.
+  * Add a patch to support SOURCE_DATE_EPOCH (closes: #831779).
+    - Unset SOURCE_DATE_EPOCH when running tests, to make them pass.
+  * Bump python3-sphinx Breaks to 7.0.1.
+  * Remove ancient debian/NEWS to fix Lintian warning (see #1021502).
+
+ -- Dmitry Shachnev <mitya57@debian.org>  Sat, 20 May 2023 20:39:31 +0300
+
+python-docutils (0.19+dfsg-8) unstable; urgency=medium
+
+  * Backport upstream patch to fix previous_sibling() method.
+
+ -- Dmitry Shachnev <mitya57@debian.org>  Sun, 29 Oct 2023 21:38:21 +0300
+
+python-docutils (0.19+dfsg-7) unstable; urgency=medium
+
+  [ Julian Gilbey ]
+  * Slightly cleaner version of patch in -6.
+
+  [ Dmitry Shachnev ]
+  * Add a patch to use .EE and .EX macros for literal blocks in the
+    manpage writer, to fix warnings from groff 1.23 (closes: #1041809,
+    thanks G. Branden Robinson).
+
+ -- Dmitry Shachnev <mitya57@debian.org>  Wed, 02 Aug 2023 23:48:48 +0300
+
+python-docutils (0.19+dfsg-6) unstable; urgency=medium
+
+  * Team upload.
+  * Fix my error in -5, which gave the wrong paths in the manpages.
+
+ -- Julian Gilbey <jdg@debian.org>  Sun, 22 Jan 2023 14:52:02 +0000
+
+python-docutils (0.19+dfsg-5) unstable; urgency=medium
+
+  * Team upload.
+  * A cleaner fix for the bug fixed in -4
+
+ -- Julian Gilbey <jdg@debian.org>  Sun, 22 Jan 2023 14:15:32 +0000
+
+python-docutils (0.19+dfsg-4) unstable; urgency=medium
+
+  * Team upload.
+  * Do not try to use debian/tmp docutils.sty if it doesn't exist.
+    Fixes a build failure in celery's use of sphinx/docutils.
+
+ -- Paul Wise <pabs@debian.org>  Sun, 22 Jan 2023 11:29:26 +0800
+
+python-docutils (0.19+dfsg-3) unstable; urgency=medium
+
+  * Ignore DeprecationWarnings when running test_buildhtml.py
+    (closes: #1028478).
+  * Abort the build when getting --help of some command fails.
+  * Add a patch to fix FileNotFoundError when generating manpages.
+  * Break python3-m2r < 0.3 (see #1026288).
+  * Break ruby-github-markup < 1.7.0+dfsg-5 (see #1013383).
+  * Backport upstream patch to not pass empty "manual" argument to the .TH
+    macro (closes: #1018737).
+  * Bump Standards-Version to 4.6.2, no changes needed.
+  * Upload to unstable.
+
+ -- Dmitry Shachnev <mitya57@debian.org>  Sat, 21 Jan 2023 20:08:40 +0400
+
+python-docutils (0.19+dfsg-2) experimental; urgency=medium
+
+  [ Debian Janitor ]
+  * Remove constraints unnecessary since buster:
+    + Build-Depends-Indep: Drop versioned constraint on dh-python and
+      python3-all.
+
+ -- Jelmer Vernooĳ <jelmer@debian.org>  Mon, 17 Oct 2022 03:48:54 +0100
+
+python-docutils (0.19+dfsg-1) experimental; urgency=medium
+
+  [ Pino Toscano ]
+  * Drop docutils.xml: it provides only the text/x-rst MIME, which
+    shared-mime-info provides since version 1.11.
+
+  [ Dmitry Shachnev ]
+  * New upstream release.
+  * Rebase patches for the new release.
+  * Add manpage for docutils(1).
+  * Update Lintian overrides for pointed hints from Lintian 2.115.
+  * Override false-positive source-is-missing Lintian errors.
+  * Update debian/copyright.
+  * Bump Standards-Version to 4.6.1, no changes needed.
+  * Install math.css in docutils-doc.
+
+ -- Dmitry Shachnev <mitya57@debian.org>  Fri, 08 Jul 2022 23:55:40 +0300
+
+python-docutils (0.18.1+dfsg-1) experimental; urgency=medium
+
+  * New upstream release.
+  * Refresh patches for the new release.
+
+ -- Dmitry Shachnev <mitya57@debian.org>  Sun, 05 Dec 2021 15:31:44 +0300
+
+python-docutils (0.18+dfsg-1) experimental; urgency=medium
+
+  * New upstream release.
+  * Drop iepngfix-license.diff, iepngfix was removed in this release.
+  * Refresh and rebase other patches.
+  * Update debian/copyright.
+  * Simplify rst2odt_prepstyles-elementtree.diff to always use ElementTree.
+    It is available in Python ≥ 2.5.
+
+ -- Dmitry Shachnev <mitya57@debian.org>  Sun, 31 Oct 2021 13:18:08 +0300
+
 python-docutils (0.17.1+dfsg-2) unstable; urgency=medium
 
   * debian/rules: Minor cleanups.

@@ -1,25 +1,56 @@
-#! /usr/bin/env python
+#! /usr/bin/env python3
 
-# $Id: test_images.py 8481 2020-01-31 08:17:24Z milde $
+# $Id: test_images.py 9277 2022-11-26 23:15:13Z milde $
 # Author: David Goodger <goodger@python.org>
 # Copyright: This module has been placed in the public domain.
 
 """
 Tests for images.py image directives.
 """
-from __future__ import absolute_import
+
+from pathlib import Path
+import sys
+import unittest
 
 if __name__ == '__main__':
-    import __init__
-from test_parsers import DocutilsTestSupport
+    # prepend the "docutils root" to the Python library path
+    # so we import the local `docutils` package.
+    sys.path.insert(0, str(Path(__file__).resolve().parents[4]))
 
-from docutils.nodes import reprunicode
+from docutils.frontend import get_default_settings
+from docutils.parsers.rst import Parser
+from docutils.utils import new_document
 
 
-def suite():
-    s = DocutilsTestSupport.ParserTestSuite()
-    s.generateTests(totest)
-    return s
+class ParserTestCase(unittest.TestCase):
+    def test_parser(self):
+        parser = Parser()
+        settings = get_default_settings(Parser)
+        settings.warning_stream = ''
+        for name, cases in totest.items():
+            for casenum, (case_input, case_expected) in enumerate(cases):
+                with self.subTest(id=f'totest[{name!r}][{casenum}]'):
+                    document = new_document('test data', settings.copy())
+                    parser.parse(case_input, document)
+                    output = document.pformat()
+                    self.assertEqual(output, case_expected)
+
+
+try:
+    int(None)
+except TypeError as detail:
+    int_none = detail.args[0]
+else:
+    int_none = ''
+
+
+try:
+    int('fifty')
+except ValueError as detail:
+    invalid_literal = detail.args[0]
+else:
+    invalid_literal = ''
+
 
 totest = {}
 
@@ -222,7 +253,7 @@ totest['images'] = [
         <literal_block xml:space="preserve">
             .. image:: picture.png
                :scale:
-""" % DocutilsTestSupport.exception_data(int, None)[1][0]],
+""" % int_none],
 ["""\
 .. image:: picture.png
    :height: 100
@@ -281,7 +312,7 @@ totest['images'] = [
         <literal_block xml:space="preserve">
             .. image:: picture.png
                :scale: fifty
-""" % DocutilsTestSupport.exception_data(int, u"fifty")[1][0]],
+""" % invalid_literal],
 ["""\
 .. image:: picture.png
    :scale: 50
@@ -409,32 +440,32 @@ totest['images'] = [
             .. |img| image:: picture.png
                :align: left
 """],
-[u"""\
+["""\
 .. image:: picture.png
    :align: \xe4
 """,
-u"""\
+"""\
 <document source="test data">
     <system_message level="3" line="1" source="test data" type="ERROR">
         <paragraph>
             Error in "image" directive:
-            invalid option value: (option: "align"; value: %s)
+            invalid option value: (option: "align"; value: 'ä')
             "\xe4" unknown; choose from "top", "middle", "bottom", "left", "center", or "right".
         <literal_block xml:space="preserve">
             .. image:: picture.png
                :align: \xe4
-""" % repr(reprunicode(u'\xe4'))],
+"""],
 ["""
 .. image:: test.png
    :target: Uppercase_
 
-.. _Uppercase: http://docutils.sourceforge.net/
+.. _Uppercase: https://docutils.sourceforge.io/
 """,
 """\
 <document source="test data">
     <reference name="Uppercase" refname="uppercase">
         <image uri="test.png">
-    <target ids="uppercase" names="uppercase" refuri="http://docutils.sourceforge.net/">
+    <target ids="uppercase" names="uppercase" refuri="https://docutils.sourceforge.io/">
 """],
 [r"""
 .. image:: path\ with\ spaces/name\ with\ spaces.png
@@ -450,5 +481,4 @@ u"""\
 
 
 if __name__ == '__main__':
-    import unittest
-    unittest.main(defaultTest='suite')
+    unittest.main()

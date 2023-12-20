@@ -1,7 +1,7 @@
 PEP: 257
 Title: Docstring Conventions
-Version: $Revision: 4564 $
-Last-Modified: $Date: 2006-05-21 22:44:42 +0200 (So, 21. Mai 2006) $
+Version: $Revision: 8956 $
+Last-Modified: $Date: 2022-01-20 11:11:44 +0100 (Do, 20. Jän 2022) $
 Authors: David Goodger <goodger@python.org>,
          Guido van Rossum <guido@python.org>
 Discussions-To: doc-sig@python.org
@@ -294,7 +294,7 @@ References and Footnotes
 .. [3] Guido van Rossum, Python's creator and Benevolent Dictator For
    Life.
 
-.. _Docutils: http://docutils.sourceforge.net/
+.. _Docutils: https://docutils.sourceforge.io/
 
 .. _Python Style Guide:
    http://www.python.org/doc/essays/styleguide.html

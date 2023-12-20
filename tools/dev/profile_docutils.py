@@ -1,10 +1,9 @@
-#!/usr/bin/python -i
+#!/usr/bin/python3 -i
 
-# $Id: profile_docutils.py 8346 2019-08-26 12:11:32Z milde $
+# $Id: profile_docutils.py 9115 2022-07-28 17:06:24Z milde $
 # Author: Lea Wiemann <LeWiemann@gmail.com>
 # Copyright: This script has been placed in the public domain.
 
-from __future__ import print_function
 import os.path
 import docutils.core
 import hotshot.stats
@@ -36,5 +35,5 @@ stats.print_stats(40)
 
 try:
     exec(open(os.environ['PYTHONSTARTUP']).read())
-except:
+except Exception:
     pass
