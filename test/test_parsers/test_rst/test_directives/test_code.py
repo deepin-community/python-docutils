@@ -1,18 +1,18 @@
-#! /usr/bin/env python
+#! /usr/bin/env python3
 
-# $Id: test_code.py 8598 2021-01-03 21:05:04Z milde $
+# $Id: test_code.py 9037 2022-03-05 23:31:10Z milde $
 # Author: Guenter Milde
 # Copyright: This module has been placed in the public domain.
 
 """
 Test the 'code' directive in parsers/rst/directives/body.py.
 """
-from __future__ import absolute_import
 
 if __name__ == '__main__':
-    import __init__
+    import __init__  # noqa: F401
 from test_parsers import DocutilsTestSupport
 from docutils.utils.code_analyzer import with_pygments
+
 
 def suite():
     s = DocutilsTestSupport.ParserTestSuite()
@@ -20,6 +20,7 @@ def suite():
         del(totest['code-parsing'])
     s.generateTests(totest)
     return s
+
 
 totest = {}
 

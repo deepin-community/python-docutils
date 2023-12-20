@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf8 -*-
 # :Copyright: © 2020 Günter Milde.
 # :License: Released under the terms of the `2-Clause BSD license`_, in short:
 #
@@ -15,16 +14,16 @@ Test for bullet lists in CommonMark parsers.
 Cf. the `CommonMark Specification <https://spec.commonmark.org/>`__
 """
 
-from __future__ import absolute_import
-
 if __name__ == '__main__':
-    import __init__
+    import __init__  # noqa: F401
 from test_parsers import DocutilsTestSupport
+
 
 def suite():
     s = DocutilsTestSupport.RecommonmarkParserTestSuite()
     s.generateTests(totest)
     return s
+
 
 totest = {}
 
@@ -108,7 +107,7 @@ No blank line between:
                 item 2
 """],
 ["""\
-Different bullets start different lists: 
+Different bullets start different lists:
 
 - item 1
 
@@ -173,7 +172,7 @@ empty item above, no blank line
     <paragraph>
         empty item above, no blank line
 """],
-[u"""\
+["""\
 Unicode bullets are not supported by CommonMark.
 
 • BULLET
@@ -182,7 +181,7 @@ Unicode bullets are not supported by CommonMark.
 
 ⁃ HYPHEN BULLET
 """,
-u"""\
+"""\
 <document source="test data">
     <paragraph>
         Unicode bullets are not supported by CommonMark.

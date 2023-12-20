@@ -1,6 +1,6 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
-# $Id: test_publisher.py 8369 2019-08-27 12:10:26Z milde $
+# $Id: test_publisher.py 9025 2022-03-04 15:55:47Z milde $
 # Author: Martin Blais <blais@furius.ca>
 # Copyright: This module has been placed in the public domain.
 
@@ -9,16 +9,10 @@ Test the `Publisher` facade and the ``publish_*`` convenience functions.
 """
 
 import pickle
-import sys
 
 import DocutilsTestSupport              # must be imported before docutils
 import docutils
 from docutils import core, nodes, io
-
-if sys.version_info < (3, 0):
-    u_prefix = 'u'
-else:
-    u_prefix = b''
 
 
 test_document = """\
@@ -33,32 +27,30 @@ pseudoxml_output = b"""\
         Test Document
     <paragraph>
         This is a test document with a broken reference: \n\
-        <problematic ids="id2" refid="id1">
+        <problematic ids="problematic-1" refid="system-message-1">
             nonexistent_
     <section classes="system-messages">
         <title>
             Docutils System Messages
-        <system_message backrefs="id2" ids="id1" level="3" line="4" source="<string>" type="ERROR">
+        <system_message backrefs="problematic-1" ids="system-message-1" level="3" line="4" source="<string>" type="ERROR">
             <paragraph>
                 Unknown target name: "nonexistent".
 """
-exposed_pseudoxml_output = (b"""\
-<document ids="test-document" internal:refnames="{"""
-+ u_prefix
-+ b"""\'nonexistent\': [<reference: <#text: \'nonexistent\'>>]}" names="test\\ document" source="<string>" title="Test Document">
+exposed_pseudoxml_output = b"""\
+<document ids="test-document" internal:refnames="{'nonexistent': [<reference: <#text: 'nonexistent'>>]}" names="test\\ document" source="<string>" title="Test Document">
     <title>
         Test Document
     <paragraph>
         This is a test document with a broken reference: \n\
-        <problematic ids="id2" refid="id1">
+        <problematic ids="problematic-1" refid="system-message-1">
             nonexistent_
     <section classes="system-messages">
         <title>
             Docutils System Messages
-        <system_message backrefs="id2" ids="id1" level="3" line="4" source="<string>" type="ERROR">
+        <system_message backrefs="problematic-1" ids="system-message-1" level="3" line="4" source="<string>" type="ERROR">
             <paragraph>
                 Unknown target name: "nonexistent".
-""") # % u_prefix # %-expansion not supported in bytes in 3.3 and 3.4
+"""
 
 
 class PublisherTests(DocutilsTestSupport.StandardTestCase):
@@ -68,20 +60,15 @@ class PublisherTests(DocutilsTestSupport.StandardTestCase):
         # exits with a short message, if `traceback` is False,
 
         # pass IOErrors to calling application if `traceback` is True
-        try:
+        with self.assertRaises(IOError):
             core.publish_cmdline(argv=['nonexisting/path'],
-                                       settings_overrides={'traceback': True})
-        except IOError as e:
-            self.assertTrue(isinstance(e, io.InputError))
-
+                                 settings_overrides={'traceback': True})
 
     def test_output_error_handling(self):
         # pass IOErrors to calling application if `traceback` is True
-        try:
+        with self.assertRaises(io.OutputError):
             core.publish_cmdline(argv=['data/include.txt', 'nonexisting/path'],
-                                       settings_overrides={'traceback': True})
-        except IOError as e:
-            self.assertTrue(isinstance(e, io.OutputError))
+                                 settings_overrides={'traceback': True})
 
 
 class PublishDoctreeTestCase(DocutilsTestSupport.StandardTestCase, docutils.SettingsSpec):
@@ -124,9 +111,9 @@ class PublishDoctreeTestCase(DocutilsTestSupport.StandardTestCase, docutils.Sett
 
         # Test publishing parts using document as the source.
         parts = core.publish_parts(
-           reader_name='doctree', source_class=io.DocTreeInput,
-           source=doctree, source_path='test', writer_name='html',
-           settings_spec=self)
+            reader_name='doctree', source_class=io.DocTreeInput,
+            source=doctree, source_path='test', writer_name='html',
+            settings_spec=self)
         self.assertTrue(isinstance(parts, dict))
 
     def test_publish_pickle(self):

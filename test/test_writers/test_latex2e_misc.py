@@ -1,7 +1,5 @@
-#! /usr/bin/env python
-# coding: utf-8
-
-# $Id: test_latex2e_misc.py 8582 2020-12-01 09:38:02Z milde $
+#! /usr/bin/env python3
+# $Id: test_latex2e_misc.py 9037 2022-03-05 23:31:10Z milde $
 # Author: Günter Milde
 # Maintainer: docutils-develop@lists.sourceforge.net
 # :Copyright: 2020 Günter Milde,
@@ -17,12 +15,9 @@
 """
 Miscellaneous LaTeX writer tests.
 """
-from __future__ import absolute_import
-
-import os
 
 if __name__ == '__main__':
-    import __init__
+    import __init__  # noqa: F401
 from test_writers import DocutilsTestSupport
 from docutils import core
 
@@ -37,21 +32,45 @@ bar
 
 """
 
+
 class TocTestCase(DocutilsTestSupport.StandardTestCase):
 
     def test_publish_from_doctree(self):
         """Ignore the Docutils-generated ToC, when ``use_latex_toc``
         is True. (This did happen when publishing from a doctree.)
         """
-        settings_overrides={'output_encoding': 'unicode',
-                            '_disable_config': True,}
+        mysettings = {'output_encoding': 'unicode',
+                      '_disable_config': True,
+                      # avoid latex writer future warnings:
+                      'use_latex_citations': False,
+                      'legacy_column_widths': True,
+                     }
         doctree = core.publish_doctree(contents_test_input,
-                                       settings_overrides=settings_overrides)
+                                       settings_overrides=mysettings)
         result = core.publish_from_doctree(doctree,
-                                     writer_name='latex',
-                                     settings_overrides=settings_overrides)
+                                           writer_name='latex',
+                                           settings_overrides=mysettings)
         self.assertNotIn(r'\item \hyperref[foo]{foo}', result)
         # self.assertIn(r'\tableofcontents', result)
+
+
+class WarningsTestCase(DocutilsTestSupport.StandardTestCase):
+
+    def test_future_warnings(self):
+        """Warn about changing defaults."""
+        # Warn only if not set (uncommenting should make test fail):
+        mysettings = {'_disable_config': True,
+                      # 'use_latex_citations': False,
+                      # 'legacy_column_widths': True,
+                      }
+        with self.assertWarnsRegex(FutureWarning,
+                                   '"legacy_column_widths" will change'):
+            core.publish_string('warnings test', writer_name='latex',
+                                settings_overrides=mysettings)
+        with self.assertWarnsRegex(FutureWarning,
+                                   '"use_latex_citations" will change'):
+            core.publish_string('warnings test', writer_name='latex',
+                                settings_overrides=mysettings)
 
 
 if __name__ == '__main__':

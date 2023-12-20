@@ -1,6 +1,6 @@
-#! /usr/bin/env python
+#! /usr/bin/env python3
 
-# $Id: test_html5_polyglot_parts.py 8632 2021-03-09 12:53:57Z milde $
+# $Id: test_html5_polyglot_parts.py 9081 2022-06-19 20:23:12Z milde $
 # Author: reggie dugard <reggie@users.sourceforge.net>
 # Copyright: This module has been placed in the public domain.
 
@@ -11,31 +11,33 @@ Note: the 'body' and 'whole' entries have been removed from the parts
 dictionaries (redundant), along with 'meta' and 'stylesheet' entries with
 standard values, and any entries with empty values.
 """
-from __future__ import absolute_import
 
 if __name__ == '__main__':
-    import __init__
-from test_transforms import DocutilsTestSupport  # before importing docutils!
+    import __init__  # noqa: F401
 from DocutilsTestSupport import (HtmlWriterPublishPartsTestCase,
                                  HtmlPublishPartsTestSuite)
-from docutils import core, __version__
+from docutils import __version__
 
 
 class Html5WriterPublishPartsTestCase(HtmlWriterPublishPartsTestCase):
     """Test case for HTML5 writer via the publish_parts interface."""
 
     writer_name = 'html5'
-    standard_content_type_template = ('<meta charset="%s"/>\n')
-    standard_generator_template = ('<meta name="generator"'
-        ' content="Docutils %s: http://docutils.sourceforge.net/" />\n')
-    standard_viewport_template = ('<meta name="viewport"'
-        ' content="width=device-width, initial-scale=1" />\n')
+    settings_default_overrides = HtmlWriterPublishPartsTestCase.settings_default_overrides.copy()
+    settings_default_overrides['section_self_link'] = True
+
+    standard_content_type_template = '<meta charset="%s" />\n'
+    standard_generator_template = '<meta name="generator"' \
+        ' content="Docutils %s: https://docutils.sourceforge.io/" />\n'
+    standard_viewport_template = '<meta name="viewport"' \
+        ' content="width=device-width, initial-scale=1" />\n'
 
     standard_html_meta_value = (standard_content_type_template
                                 + standard_viewport_template
                                 + standard_generator_template % __version__)
     standard_meta_value = standard_html_meta_value % 'utf-8'
     standard_html_prolog = '<!DOCTYPE html>\n'
+
 
 class Html5PublishPartsTestSuite(HtmlPublishPartsTestSuite):
 
@@ -146,10 +148,10 @@ And even more stuff
 """\
 {'fragment': '''<p>Some stuff</p>
 <section id="section">
-<h2>Section</h2>
+<h2>Section<a class="self-link" title="link to this section" href="#section"></a></h2>
 <p>Some more stuff</p>
 <section id="another-section">
-<h3>Another Section</h3>
+<h3>Another Section<a class="self-link" title="link to this section" href="#another-section"></a></h3>
 <p>And even more stuff</p>
 </section>
 </section>\\n''',
@@ -158,10 +160,10 @@ And even more stuff
 <p class="subtitle" id="subtitle">Subtitle</p>
 <p>Some stuff</p>
 <section id="section">
-<h2>Section</h2>
+<h2>Section<a class="self-link" title="link to this section" href="#section"></a></h2>
 <p>Some more stuff</p>
 <section id="another-section">
-<h3>Another Section</h3>
+<h3>Another Section<a class="self-link" title="link to this section" href="#another-section"></a></h3>
 <p>And even more stuff</p>
 </section>
 </section>
@@ -183,14 +185,14 @@ Some stuff
 """,
 """\
 {'docinfo': '''<dl class="docinfo simple">
-<dt class="author">Author</dt>
+<dt class="author">Author<span class="colon">:</span></dt>
 <dd class="author"><p>me</p></dd>
 </dl>\\n''',
  'fragment': '''<p>Some stuff</p>\\n''',
  'html_body': '''<main id="title">
 <h1 class="title">Title</h1>
 <dl class="docinfo simple">
-<dt class="author">Author</dt>
+<dt class="author">Author<span class="colon">:</span></dt>
 <dd class="author"><p>me</p></dd>
 </dl>
 <p>Some stuff</p>
@@ -203,7 +205,7 @@ Some stuff
 """]
 ])
 
-totest['No title promotion'] = ({'doctitle_xform' : 0,
+totest['No title promotion'] = ({'doctitle_xform': 0,
                                  'stylesheet_path': '',
                                  'embed_stylesheet': 0}, [
 ["""\
@@ -285,15 +287,15 @@ And even more stuff
 """,
 """\
 {'fragment': '''<section id="title">
-<h2>Title</h2>
+<h2>Title<a class="self-link" title="link to this section" href="#title"></a></h2>
 <section id="not-a-subtitle">
-<h3>Not A Subtitle</h3>
+<h3>Not A Subtitle<a class="self-link" title="link to this section" href="#not-a-subtitle"></a></h3>
 <p>Some stuff</p>
 <section id="section">
-<h4>Section</h4>
+<h4>Section<a class="self-link" title="link to this section" href="#section"></a></h4>
 <p>Some more stuff</p>
 <section id="another-section">
-<h5>Another Section</h5>
+<h5>Another Section<a class="self-link" title="link to this section" href="#another-section"></a></h5>
 <p>And even more stuff</p>
 </section>
 </section>
@@ -301,15 +303,15 @@ And even more stuff
 </section>\\n''',
  'html_body': '''<main>
 <section id="title">
-<h2>Title</h2>
+<h2>Title<a class="self-link" title="link to this section" href="#title"></a></h2>
 <section id="not-a-subtitle">
-<h3>Not A Subtitle</h3>
+<h3>Not A Subtitle<a class="self-link" title="link to this section" href="#not-a-subtitle"></a></h3>
 <p>Some stuff</p>
 <section id="section">
-<h4>Section</h4>
+<h4>Section<a class="self-link" title="link to this section" href="#section"></a></h4>
 <p>Some more stuff</p>
 <section id="another-section">
-<h5>Another Section</h5>
+<h5>Another Section<a class="self-link" title="link to this section" href="#another-section"></a></h5>
 <p>And even more stuff</p>
 </section>
 </section>
@@ -347,10 +349,6 @@ And even more stuff
 """,
 """\
 {'fragment': '''<table class="align-right">
-<colgroup>
-<col style="width: 50%%" />
-<col style="width: 50%%" />
-</colgroup>
 <tbody>
 <tr><td><p>1</p></td>
 <td><p>2</p></td>
@@ -362,10 +360,6 @@ And even more stuff
 </table>\\n''',
  'html_body': '''<main>
 <table class="align-right">
-<colgroup>
-<col style="width: 50%%" />
-<col style="width: 50%%" />
-</colgroup>
 <tbody>
 <tr><td><p>1</p></td>
 <td><p>2</p></td>
@@ -391,28 +385,28 @@ Not a docinfo.
 """\
 {'fragment': '''<p>Not a docinfo.</p>
 <dl class="field-list simple">
-<dt>This</dt>
+<dt>This<span class="colon">:</span></dt>
 <dd><p id="target">is</p>
 </dd>
-<dt>a</dt>
+<dt>a<span class="colon">:</span></dt>
 <dd><p></p></dd>
-<dt>simple</dt>
+<dt>simple<span class="colon">:</span></dt>
 <dd><p></p></dd>
-<dt>field</dt>
+<dt>field<span class="colon">:</span></dt>
 <dd><p>list</p>
 </dd>
 </dl>\\n''',
  'html_body': '''<main>
 <p>Not a docinfo.</p>
 <dl class="field-list simple">
-<dt>This</dt>
+<dt>This<span class="colon">:</span></dt>
 <dd><p id="target">is</p>
 </dd>
-<dt>a</dt>
+<dt>a<span class="colon">:</span></dt>
 <dd><p></p></dd>
-<dt>simple</dt>
+<dt>simple<span class="colon">:</span></dt>
 <dd><p></p></dd>
-<dt>field</dt>
+<dt>field<span class="colon">:</span></dt>
 <dd><p>list</p>
 </dd>
 </dl>
@@ -429,10 +423,10 @@ Not a docinfo.
 {'fragment': '''\
 <p>Not a docinfo.</p>
 <dl class="field-list simple">
-<dt>This is</dt>
+<dt>This is<span class="colon">:</span></dt>
 <dd><p>a</p>
 </dd>
-<dt>simple field list with loooong field</dt>
+<dt>simple field list with loooong field<span class="colon">:</span></dt>
 <dd><p>names</p>
 </dd>
 </dl>\\n''',
@@ -440,11 +434,76 @@ Not a docinfo.
 <main>
 <p>Not a docinfo.</p>
 <dl class="field-list simple">
-<dt>This is</dt>
+<dt>This is<span class="colon">:</span></dt>
 <dd><p>a</p>
 </dd>
-<dt>simple field list with loooong field</dt>
+<dt>simple field list with loooong field<span class="colon">:</span></dt>
 <dd><p>names</p>
+</dd>
+</dl>
+</main>\\n''',
+ 'html_head': '''...<title>&lt;string&gt;</title>\\n'''}
+"""],
+["""\
+Not a docinfo.
+
+.. class:: field-indent-200
+
+:This: is a
+:simple: field list with custom indent.
+""",
+"""\
+{'fragment': '''<p>Not a docinfo.</p>
+<dl class="field-list simple" style="--field-indent: 200px;">
+<dt>This<span class="colon">:</span></dt>
+<dd><p>is a</p>
+</dd>
+<dt>simple<span class="colon">:</span></dt>
+<dd><p>field list with custom indent.</p>
+</dd>
+</dl>\\n''',
+ 'html_body': '''<main>
+<p>Not a docinfo.</p>
+<dl class="field-list simple" style="--field-indent: 200px;">
+<dt>This<span class="colon">:</span></dt>
+<dd><p>is a</p>
+</dd>
+<dt>simple<span class="colon">:</span></dt>
+<dd><p>field list with custom indent.</p>
+</dd>
+</dl>
+</main>\\n''',
+ 'html_head': '''...<title>&lt;string&gt;</title>\\n'''}
+"""],
+["""\
+Not a docinfo.
+
+.. class:: field-indent-200uf
+
+:This: is a
+:simple: field list without custom indent,
+         because the unit "uf" is invalid.
+""",
+"""\
+{'fragment': '''<p>Not a docinfo.</p>
+<dl class="field-indent-200uf field-list simple">
+<dt>This<span class="colon">:</span></dt>
+<dd><p>is a</p>
+</dd>
+<dt>simple<span class="colon">:</span></dt>
+<dd><p>field list without custom indent,
+because the unit &quot;uf&quot; is invalid.</p>
+</dd>
+</dl>\\n''',
+ 'html_body': '''<main>
+<p>Not a docinfo.</p>
+<dl class="field-indent-200uf field-list simple">
+<dt>This<span class="colon">:</span></dt>
+<dd><p>is a</p>
+</dd>
+<dt>simple<span class="colon">:</span></dt>
+<dd><p>field list without custom indent,
+because the unit &quot;uf&quot; is invalid.</p>
 </dd>
 </dl>
 </main>\\n''',
@@ -540,7 +599,6 @@ Not a docinfo.
 </main>\\n''',
  'html_head': '''...<title>&lt;string&gt;</title>\\n'''}
 """],
-])
 ["""\
 .. figure:: dummy.png
 
@@ -561,6 +619,110 @@ No caption nor legend.
 </main>\\n''',
  'html_head': '''...<title>&lt;string&gt;</title>\\n'''}
 """],
+])
+
+
+totest['lazy loading'] = ({'image_loading': 'lazy',
+                           'stylesheet_path': '',
+                           'embed_stylesheet': 0}, [
+
+["""\
+.. image:: dummy.png
+""",
+"""\
+{'fragment': '''\
+<img alt="dummy.png" loading="lazy" src="dummy.png" />\\n''',
+ 'html_body': '''\
+<main>
+<img alt="dummy.png" loading="lazy" src="dummy.png" />
+</main>\\n''',
+ 'html_head': '''...<title>&lt;string&gt;</title>\\n'''}
+"""],
+["""\
+.. figure:: dummy.png
+""",
+"""\
+{'fragment': '''\
+<figure>
+<img alt="dummy.png" loading="lazy" src="dummy.png" />
+</figure>\\n''',
+ 'html_body': '''\
+<main>
+<figure>
+<img alt="dummy.png" loading="lazy" src="dummy.png" />
+</figure>
+</main>\\n''',
+ 'html_head': '''...<title>&lt;string&gt;</title>\\n'''}
+"""],
+])
+
+
+totest['no backlinks'] = ({'footnote_backlinks': False,
+                           'stylesheet_path': '',
+                           'embed_stylesheet': 0}, [
+
+["""\
+Two footnotes [#f1]_ [#f2]_ and two citations [once]_ [twice]_.
+
+The latter are referenced a second time [#f2]_ [twice]_.
+
+.. [#f1] referenced once
+.. [#f2] referenced twice
+.. [once] citation referenced once
+.. [twice] citation referenced twice
+""",
+"""\
+{'fragment': '''\
+<p>Two footnotes <a class="footnote-reference brackets" href="#f1" id="footnote-reference-1" role="doc-noteref"><span class="fn-bracket">[</span>1<span class="fn-bracket">]</span></a> <a class="footnote-reference brackets" href="#f2" id="footnote-reference-2" role="doc-noteref"><span class="fn-bracket">[</span>2<span class="fn-bracket">]</span></a> and two citations <a class="citation-reference" href="#once" id="citation-reference-1" role="doc-biblioref">[once]</a> <a class="citation-reference" href="#twice" id="citation-reference-2" role="doc-biblioref">[twice]</a>.</p>
+<p>The latter are referenced a second time <a class="footnote-reference brackets" href="#f2" id="footnote-reference-3" role="doc-noteref"><span class="fn-bracket">[</span>2<span class="fn-bracket">]</span></a> <a class="citation-reference" href="#twice" id="citation-reference-3" role="doc-biblioref">[twice]</a>.</p>
+<aside class="footnote-list brackets">
+<aside class="footnote brackets" id="f1" role="note">
+<span class="label"><span class="fn-bracket">[</span>1<span class="fn-bracket">]</span></span>
+<p>referenced once</p>
+</aside>
+<aside class="footnote brackets" id="f2" role="note">
+<span class="label"><span class="fn-bracket">[</span>2<span class="fn-bracket">]</span></span>
+<p>referenced twice</p>
+</aside>
+</aside>
+<div role="list" class="citation-list">
+<div class="citation" id="once" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span>once<span class="fn-bracket">]</span></span>
+<p>citation referenced once</p>
+</div>
+<div class="citation" id="twice" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span>twice<span class="fn-bracket">]</span></span>
+<p>citation referenced twice</p>
+</div>
+</div>\\n''',
+ 'html_body': '''\
+<main>
+<p>Two footnotes <a class="footnote-reference brackets" href="#f1" id="footnote-reference-1" role="doc-noteref"><span class="fn-bracket">[</span>1<span class="fn-bracket">]</span></a> <a class="footnote-reference brackets" href="#f2" id="footnote-reference-2" role="doc-noteref"><span class="fn-bracket">[</span>2<span class="fn-bracket">]</span></a> and two citations <a class="citation-reference" href="#once" id="citation-reference-1" role="doc-biblioref">[once]</a> <a class="citation-reference" href="#twice" id="citation-reference-2" role="doc-biblioref">[twice]</a>.</p>
+<p>The latter are referenced a second time <a class="footnote-reference brackets" href="#f2" id="footnote-reference-3" role="doc-noteref"><span class="fn-bracket">[</span>2<span class="fn-bracket">]</span></a> <a class="citation-reference" href="#twice" id="citation-reference-3" role="doc-biblioref">[twice]</a>.</p>
+<aside class="footnote-list brackets">
+<aside class="footnote brackets" id="f1" role="note">
+<span class="label"><span class="fn-bracket">[</span>1<span class="fn-bracket">]</span></span>
+<p>referenced once</p>
+</aside>
+<aside class="footnote brackets" id="f2" role="note">
+<span class="label"><span class="fn-bracket">[</span>2<span class="fn-bracket">]</span></span>
+<p>referenced twice</p>
+</aside>
+</aside>
+<div role="list" class="citation-list">
+<div class="citation" id="once" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span>once<span class="fn-bracket">]</span></span>
+<p>citation referenced once</p>
+</div>
+<div class="citation" id="twice" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span>twice<span class="fn-bracket">]</span></span>
+<p>citation referenced twice</p>
+</div>
+</div>
+</main>\\n''',
+ 'html_head': '''...<title>&lt;string&gt;</title>\\n'''}
+"""],
+])
 
 
 if __name__ == '__main__':

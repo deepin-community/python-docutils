@@ -1,11 +1,11 @@
-# $Id: local_dummy_lang.py 8452 2020-01-09 10:50:44Z milde $
+# $Id: local_dummy_lang.py 9030 2022-03-05 23:28:32Z milde $
 # Author: David Goodger <goodger@python.org>
 # Copyright: This module has been placed in the public domain.
 
 # New language mappings are welcome.  Before doing a new translation, please
-# read <http://docutils.sf.net/docs/howto/i18n.html>.  Two files must be
-# translated for each language: one in docutils/languages, the other in
-# docutils/parsers/rst/languages.
+# read <https://docutils.sourceforge.io/docs/howto/i18n.html>.
+# Two files must be translated for each language: one in docutils/languages,
+# the other in docutils/parsers/rst/languages.
 
 """
 English-language mappings for language-dependent features of Docutils.
@@ -84,15 +84,15 @@ directives = {
       'dummy-pull-quote': 'pull-quote',
       'dummy-compound': 'compound',
       'dummy-container': 'container',
-      #'dummy-questions': 'questions',
+      # 'dummy-questions': 'questions',
       'dummy-table': 'table',
       'dummy-csv-table': 'csv-table',
       'dummy-list-table': 'list-table',
-      #'dummy-qa': 'questions',
-      #'dummy-faq': 'questions',
+      # 'dummy-qa': 'questions',
+      # 'dummy-faq': 'questions',
       'dummy-meta': 'meta',
       'dummy-math': 'math',
-      #'dummy-imagemap': 'imagemap',
+      # 'dummy-imagemap': 'imagemap',
       'dummy-image': 'image',
       'dummy-figure': 'figure',
       'dummy-include': 'include',
@@ -109,10 +109,11 @@ directives = {
       'dummy-section-numbering': 'sectnum',
       'dummy-header': 'header',
       'dummy-footer': 'footer',
-      #'dummy-footnotes': 'footnotes',
-      #'dummy-citations': 'citations',
+      # 'dummy-footnotes': 'footnotes',
+      # 'dummy-citations': 'citations',
       'dummy-target-notes': 'target-notes',
-      'dummy-restructuredtext-test-directive': 'restructuredtext-test-directive'}
+      'dummy-restructuredtext-test-directive': 'restructuredtext-test-directive',  # noqa: E501
+      }
 """English name to registered (in directives/__init__.py) directive name
 mapping."""
 
@@ -149,6 +150,6 @@ roles = {
     'dummy uri-reference': 'uri-reference',
     'dummy uri': 'uri-reference',
     'dummy url': 'uri-reference',
-    'dummy raw': 'raw',}
+    'dummy raw': 'raw'}
 """Mapping of English role names to canonical role names for interpreted text.
 """

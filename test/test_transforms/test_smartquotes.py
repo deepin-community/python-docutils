@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-# $Id: test_smartquotes.py 8554 2020-09-04 16:52:11Z milde $
-#
+# $Id: test_smartquotes.py 9037 2022-03-05 23:31:10Z milde $
 # :Copyright: © 2011 Günter Milde.
 # :Maintainer: docutils-develop@lists.sourceforge.net
 # :License: Released under the terms of the `2-Clause BSD license`_, in short:
@@ -16,10 +14,9 @@
 """
 Test module for universal.SmartQuotes transform.
 """
-from __future__ import absolute_import
 
 if __name__ == '__main__':
-    import __init__
+    import __init__  # noqa: F401
 from test_transforms import DocutilsTestSupport  # before importing docutils!
 from docutils.transforms.universal import SmartQuotes
 from docutils.parsers.rst import Parser
@@ -29,7 +26,7 @@ def suite():
     parser = Parser()
     settings = {'smart_quotes': True,
                 'trim_footnote_ref_space': True,
-                'report': 2} # TODO: why is this ignored when running as main?
+                'report': 2}  # TODO why is this ignored when running as main?
     s = DocutilsTestSupport.TransformTestSuite(
         parser, suite_settings=settings)
     s.generateTests(totest)
@@ -38,7 +35,7 @@ def suite():
     settings['smart_quotes'] = 'alternative'
     s.generateTests(totest_de_alt)
     settings['smart_quotes'] = True
-    settings['smartquotes_locales'] = [('de', u'«»()'), ('nl', u'„”’’')]
+    settings['smartquotes_locales'] = [('de', '«»()'), ('nl', '„”’’')]
     s.generateTests(totest_locales)
     return s
 
@@ -54,7 +51,7 @@ Test "smart quotes", 'secondary smart quotes',
 "'nested' smart" quotes
 -- and ---also long--- dashes.
 """,
-u"""\
+"""\
 <document source="test data">
     <paragraph>
         Test “smart quotes”, ‘secondary smart quotes’,
@@ -63,7 +60,7 @@ u"""\
 """],
 [r"""Escaped \"ASCII quotes\" and \'secondary ASCII quotes\'.
 """,
-u"""\
+"""\
 <document source="test data">
     <paragraph>
         Escaped "ASCII quotes" and 'secondary ASCII quotes'.
@@ -88,10 +85,10 @@ Keep quotes straight in code and math:
    f'(x) = df(x)/dx
 
 """,
-u"""\
+"""\
 <document source="test data">
     <paragraph>
-        Do not “educate” quotes 
+        Do not “educate” quotes \n\
         <literal>
             inside "literal" text
          and
@@ -101,10 +98,10 @@ u"""\
         Keep quotes straight in code and math:
         <literal classes="code">
             print "hello"
-         
+         \n\
         <literal classes="code python">
             print("hello")
-         
+         \n\
         <math>
             1' 12"
         .
@@ -113,7 +110,7 @@ u"""\
     <math_block xml:space="preserve">
         f'(x) = df(x)/dx
 """],
-[u"""\
+["""\
 Closing quotes, if preceded by
 wor"d char's
 or punctuation:"a",'a';'a' (TODO: opening quotes if followed by word-char?).
@@ -138,7 +135,7 @@ But not if followed by (optional punctuation and) whitespace:
 "-", "–", "—", "(", "a[", "{"
 '-', '–', '—', '((', '[', '{'
 """,
-u"""\
+"""\
 <document source="test data">
     <paragraph>
         Closing quotes, if preceded by
@@ -176,7 +173,7 @@ Quotes and inline-elements:
 Do not drop characters from intra-word inline markup like
 *re*\\ ``Structured``\\ *Text*.
 """,
-u"""\
+"""\
 <document source="test data">
     <paragraph>
         Quotes and inline-elements:
@@ -230,7 +227,7 @@ Do not convert context-character at inline-tag boundaries
   Do not drop characters from intra-word inline markup like
   *re*\\ ``Structured``\\ *Text*.
 """,
-u"""\
+"""\
 <document source="test data">
     <paragraph>
         Do not convert context-character at inline-tag boundaries
@@ -264,7 +261,7 @@ u"""\
         ), (
         <literal>
             'string'
-        ), 
+        ), \n\
         <emphasis>
             «\u202fbetont\u202f»
         , «\u202f
@@ -307,7 +304,7 @@ Test around inline elements:\ [*]_
 
 .. [*] and footnotes
 """,
-u"""\
+"""\
 <document source="test data">
     <paragraph>
         Docutils escape mechanism uses the backslash:
@@ -335,7 +332,7 @@ u"""\
         .
     <paragraph>
         Test around inline elements:
-        <footnote_reference auto="*" ids="id1">
+        <footnote_reference auto="*" ids="footnote-reference-1">
     <paragraph>
         <emphasis>
             emphasized
@@ -355,7 +352,7 @@ u"""\
             O and \n\
             <math>
                 x^2
-        <footnote auto="*" ids="id2">
+        <footnote auto="*" ids="footnote-1">
             <paragraph>
                 and footnotes
 """],
@@ -397,7 +394,7 @@ British "primary quotes" use single and
 
 Alternative German "smart quotes" and 'secondary smart quotes'.
 """,
-u"""\
+"""\
 <document source="test data">
     <paragraph classes="language-de">
         German „smart quotes“ and ‚secondary smart quotes‘.
@@ -422,7 +419,7 @@ German "smart quotes" and 'secondary smart quotes'.
 
 English "smart quotes" and 'secondary smart quotes'.
 """,
-u"""\
+"""\
 <document source="test data">
     <paragraph>
         German „smart quotes“ and ‚secondary smart quotes‘.
@@ -446,7 +443,7 @@ British "quotes" use single and 'secondary quotes' double quote signs
 
 Romanian "smart quotes" and 'secondary' smart quotes.
 """,
-u"""\
+"""\
 <document source="test data">
     <paragraph>
         Alternative German »smart quotes« and ›secondary smart quotes‹.
@@ -468,7 +465,7 @@ German "smart quotes" and 'secondary smart quotes'.
 
 Dutch "smart quotes" and 's Gravenhage (leading apostrophe).
 """,
-u"""\
+"""\
 <document source="test data">
     <paragraph>
         German «smart quotes» and (secondary smart quotes).

@@ -1,6 +1,6 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
-# $Id: test_language.py 8372 2019-08-27 12:11:15Z milde $
+# $Id: test_language.py 9047 2022-03-17 13:40:11Z milde $
 # Authors: Engelbert Gruber <grubert@users.sourceforge.net>;
 #          David Goodger <goodger@python.org>
 # Copyright: This module has been placed in the public domain.
@@ -15,19 +15,18 @@ that language.
 import sys
 import os
 import re
+
 import DocutilsTestSupport              # must be imported before docutils
 import docutils.languages
 import docutils.parsers.rst.languages
-from docutils.parsers.rst import states, directives, roles
-import docutils.utils, docutils.frontend
+from docutils.parsers.rst import directives, roles
+import docutils.utils
+import docutils.frontend
 
-_settings = docutils.frontend.OptionParser().get_default_values()
+_settings = docutils.frontend.get_default_settings()
 _reporter = docutils.utils.new_reporter('', _settings)
 
 reference_language = 'en'
-
-if sys.version_info >= (3, 0):
-    unicode = str  # noqa
 
 
 class LanguageTestSuite(DocutilsTestSupport.CustomTestSuite):
@@ -35,7 +34,7 @@ class LanguageTestSuite(DocutilsTestSupport.CustomTestSuite):
     language_module_pattern = re.compile(r'^([a-z]{2,3}(_[a-z]{2,8})*)\.py$')
 
     def __init__(self, languages=None):
-        DocutilsTestSupport.CustomTestSuite.__init__(self)
+        super().__init__()
         if languages:
             self.languages = languages
         else:
@@ -75,19 +74,29 @@ class LanguageTestCase(DocutilsTestSupport.CustomTestCase):
                     'test_directives', 'test_roles']
     """Names of methods used to test each language."""
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, language=None, **kwargs):
+        """
+        Set self.ref (from module variable) and self.language.
+
+        Requires keyword argument `language`.
+        Pass remaining arguments to parent __init__.
+
+        Note: the modified signature is incompatible with
+        the "pytest" and "nose" frameworks.
+        """  # cf. feature-request #81
+
         self.ref = docutils.languages.get_language(reference_language,
                                                    _reporter)
-        self.language = kwargs['language']
-        del kwargs['language']          # only wanted here
-        DocutilsTestSupport.CustomTestCase.__init__(self, *args, **kwargs)
+        assert language is not None, 'required argument'
+        self.language = language
+        super().__init__(*args, **kwargs)
 
     def _xor(self, ref_dict, l_dict):
         """
         Returns entries that are only in one dictionary.
         (missing_in_lang, more_than_in_ref).
         """
-        missing  = []   # in ref but not in l.
+        missing = []    # in ref but not in l.
         too_much = []   # in l but not in ref.
         for label in ref_dict.keys():
             if label not in l_dict:
@@ -95,7 +104,7 @@ class LanguageTestCase(DocutilsTestSupport.CustomTestCase):
         for label in l_dict.keys():
             if label not in ref_dict:
                 too_much.append(label)
-        return (missing, too_much)
+        return missing, too_much
 
     def _invert(self, adict):
         """Return an inverted (keys & values swapped) dictionary."""
@@ -158,29 +167,22 @@ class LanguageTestCase(DocutilsTestSupport.CustomTestCase):
         if failures:
             text = ('Module docutils.parsers.rst.languages.%s:\n    %s'
                     % (self.language, '\n    '.join(failures)))
-            if isinstance(text, unicode):
+            if isinstance(text, str):
                 text = text.encode('raw_unicode_escape')
             self.fail(text)
 
     def test_roles(self):
-        try:
-            module = docutils.parsers.rst.languages.get_language(
-                self.language)
-            if not module:
-                raise ImportError
-            module.roles
-        except ImportError:
+        module = docutils.parsers.rst.languages.get_language(self.language)
+        if not module:
             self.fail('No docutils.parsers.rst.languages.%s module.'
                       % self.language)
-        except AttributeError:
+        if not hasattr(module, "roles"):
             self.fail('No "roles" mapping in docutils.parsers.rst.languages.'
                       '%s module.' % self.language)
         failures = []
         for d in module.roles.values():
             try:
-                method = roles._role_registry[d]
-                #if not method:
-                #    failures.append('"%s": unknown role' % d)
+                roles._role_registry[d]
             except KeyError as error:
                 failures.append('"%s": %s' % (d, error))
         inverted = self._invert(module.roles)
@@ -192,16 +194,19 @@ class LanguageTestCase(DocutilsTestSupport.CustomTestCase):
         if failures:
             text = ('Module docutils.parsers.rst.languages.%s:\n    %s'
                     % (self.language, '\n    '.join(failures)))
-            if isinstance(text, unicode):
+            if isinstance(text, str):
                 text = text.encode('raw_unicode_escape')
             self.fail(text)
 
+
 languages_to_test = []
+
 
 def suite():
     s = LanguageTestSuite(languages_to_test)
     s.generateTests()
     return s
+
 
 def get_language_arguments():
     while len(sys.argv) > 1:

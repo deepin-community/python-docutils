@@ -1,6 +1,6 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
-# $Id: buildhtml.py 8643 2021-03-26 13:51:21Z milde $
+# $Id: buildhtml.py 9062 2022-05-30 21:09:09Z milde $
 # Author: David Goodger <goodger@python.org>
 # Copyright: This module has been placed in the public domain.
 
@@ -21,15 +21,15 @@ try:
 except:
     pass
 
-import sys
+from fnmatch import fnmatch
 import os
 import os.path
-import copy
-from fnmatch import fnmatch
+import sys
+import warnings
+
 import docutils
 from docutils import ApplicationError
-from docutils import core, frontend, utils
-from docutils.utils.error_reporting import ErrorOutput, ErrorString
+from docutils import core, frontend, io, utils
 from docutils.parsers import rst
 from docutils.readers import standalone, pep
 from docutils.writers import html4css1, html5_polyglot, pep_html
@@ -44,7 +44,7 @@ description = ('Generates .html from all the reStructuredText .txt files '
 class SettingsSpec(docutils.SettingsSpec):
 
     """
-    Runtime settings & command-line options for the front end.
+    Runtime settings & command-line options for the "buildhtml" front end.
     """
 
     prune_default = ['.hg', '.bzr', '.git', '.svn', 'CVS']
@@ -68,7 +68,7 @@ class SettingsSpec(docutils.SettingsSpec):
           ['--prune'],
           {'metavar': '<directory>', 'action': 'append',
            'validator': frontend.validate_colon_separated_string_list,
-           'default': prune_default,}),
+           'default': prune_default}),
          ('Recursively ignore files matching any of the given '
           'wildcard (shell globbing) patterns (separated by colons).',
           ['--ignore'],
@@ -80,12 +80,12 @@ class SettingsSpec(docutils.SettingsSpec):
           ['--writer'],
           {'metavar': '<writer>',
            'choices': ['html', 'html4', 'html5'],
-           'default': 'html'}),
-         ('Obsoleted by "--writer".',
+           # 'default': 'html' (set below)
+           }),
+         (frontend.SUPPRESS_HELP,  # Obsoleted by "--writer"
           ['--html-writer'],
-          {'dest': 'writer',
-           'metavar': '<writer>',
-           'choices': ['html', 'html4', 'html5'],}),
+          {'metavar': '<writer>',
+           'choices': ['html', 'html4', 'html5']}),
          ('Work silently (no progress messages).  Independent of "--quiet".',
           ['--silent'],
           {'action': 'store_true', 'validator': frontend.validate_boolean}),
@@ -105,20 +105,17 @@ class OptionParser(frontend.OptionParser):
     """
 
     def check_values(self, values, args):
-        frontend.OptionParser.check_values(self, values, args)
+        super().check_values(values, args)
         values._source = None
         return values
 
     def check_args(self, args):
-        source = destination = None
-        if args:
-            self.values._directories = args
-        else:
-            self.values._directories = [os.getcwd()]
-        return source, destination
+        self.values._directories = args or [os.getcwd()]
+        # backwards compatibility:
+        return None, None
 
 
-class Struct(object):
+class Struct:
 
     """Stores data attributes for dotted-attribute access."""
 
@@ -126,20 +123,20 @@ class Struct(object):
         self.__dict__.update(keywordargs)
 
 
-class Builder(object):
+class Builder:
 
     def __init__(self):
         self.publishers = {
             '': Struct(components=(pep.Reader, rst.Parser, pep_html.Writer,
                                    SettingsSpec)),
             'html4': Struct(components=(rst.Parser, standalone.Reader,
-                                       html4css1.Writer, SettingsSpec),
-                           reader_name='standalone',
-                           writer_name='html4'),
+                                        html4css1.Writer, SettingsSpec),
+                            reader_name='standalone',
+                            writer_name='html4'),
             'html5': Struct(components=(rst.Parser, standalone.Reader,
-                                       html5_polyglot.Writer, SettingsSpec),
-                           reader_name='standalone',
-                           writer_name='html5'),
+                                        html5_polyglot.Writer, SettingsSpec),
+                            reader_name='standalone',
+                            writer_name='html5'),
             'PEPs': Struct(components=(rst.Parser, pep.Reader,
                                        pep_html.Writer, SettingsSpec),
                            reader_name='pep',
@@ -162,19 +159,31 @@ class Builder(object):
         config file settings and command-line options by
         `self.get_settings()`.
         """
-        for name, publisher in self.publishers.items():
-            option_parser = OptionParser(
-                components=publisher.components, read_config_files=1,
-                usage=usage, description=description)
-            publisher.option_parser = option_parser
-            publisher.setting_defaults = option_parser.get_default_values()
-            frontend.make_paths_absolute(publisher.setting_defaults.__dict__,
-                                         option_parser.relative_path_settings)
-            publisher.config_settings = (
-                option_parser.get_standard_config_settings())
-        self.settings_spec = self.publishers[''].option_parser.parse_args(
-            values=frontend.Values())   # no defaults; just the cmdline opts
-        self.initial_settings = self.get_settings('')
+        with warnings.catch_warnings():
+            warnings.filterwarnings('ignore', category=DeprecationWarning)
+            for name, publisher in self.publishers.items():
+                option_parser = OptionParser(
+                    components=publisher.components, read_config_files=True,
+                    usage=usage, description=description)
+                publisher.option_parser = option_parser
+                publisher.setting_defaults = option_parser.get_default_values()
+                frontend.make_paths_absolute(
+                    publisher.setting_defaults.__dict__,
+                    option_parser.relative_path_settings)
+                publisher.config_settings = (
+                    option_parser.get_standard_config_settings())
+            self.settings_spec = self.publishers[''].option_parser.parse_args(
+                values=frontend.Values())  # no defaults; just the cmdline opts
+            self.initial_settings = self.get_settings('')
+
+        if self.initial_settings.html_writer is not None:
+            warnings.warn('The configuration setting "html_writer" '
+                          'will be removed in Docutils 2.0. '
+                          'Use setting "writer" instead.',
+                          FutureWarning, stacklevel=5)
+        if self.initial_settings.writer is None:
+            self.initial_settings.writer = (self.initial_settings.html_writer
+                                            or 'html')
 
     def get_settings(self, publisher_name, directory=None):
         """
@@ -185,7 +194,9 @@ class Builder(object):
         Assumes the current directory has been set.
         """
         publisher = self.publishers[publisher_name]
-        settings = frontend.Values(publisher.setting_defaults.__dict__)
+        with warnings.catch_warnings():
+            warnings.filterwarnings('ignore', category=DeprecationWarning)
+            settings = frontend.Values(publisher.setting_defaults.__dict__)
         settings.update(publisher.config_settings, publisher.option_parser)
         if directory:
             local_config = publisher.option_parser.get_config_file_settings(
@@ -215,7 +226,7 @@ class Builder(object):
 
     def visit(self, directory, names, subdirectories):
         settings = self.get_settings('', directory)
-        errout = ErrorOutput(encoding=settings.error_encoding)
+        errout = io.ErrorOutput(encoding=settings.error_encoding)
         if settings.prune and (os.path.abspath(directory) in settings.prune):
             errout.write('/// ...Skipping directory (pruned): %s\n' %
                          directory)
@@ -242,24 +253,23 @@ class Builder(object):
         else:
             publisher = self.initial_settings.writer
         settings = self.get_settings(publisher, directory)
-        errout = ErrorOutput(encoding=settings.error_encoding)
+        errout = io.ErrorOutput(encoding=settings.error_encoding)
         pub_struct = self.publishers[publisher]
         settings._source = os.path.normpath(os.path.join(directory, name))
-        settings._destination = settings._source[:-4]+'.html'
+        settings._destination = settings._source[:-4] + '.html'
         if not self.initial_settings.silent:
             errout.write('    ::: Processing: %s\n' % name)
             sys.stderr.flush()
-        try:
-            if not settings.dry_run:
+        if not settings.dry_run:
+            try:
                 core.publish_file(source_path=settings._source,
-                              destination_path=settings._destination,
-                              reader_name=pub_struct.reader_name,
-                              parser_name='restructuredtext',
-                              writer_name=pub_struct.writer_name,
-                              settings=settings)
-        except ApplicationError:
-            error = sys.exc_info()[1]  # get exception in Python 3.x
-            errout.write('        %s\n' % ErrorString(error))
+                                  destination_path=settings._destination,
+                                  reader_name=pub_struct.reader_name,
+                                  parser_name='restructuredtext',
+                                  writer_name=pub_struct.writer_name,
+                                  settings=settings)
+            except ApplicationError as err:
+                errout.write(f'        {type(err).__name__}: {err}\n')
 
 
 if __name__ == "__main__":

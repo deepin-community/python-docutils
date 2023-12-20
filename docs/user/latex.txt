@@ -1,11 +1,13 @@
+.. include:: ../header.txt
+
 ================================
  Generating LaTeX with Docutils
 ================================
 
-:Author: Engelbert Gruber, Guenter Milde
+:Author: Engelbert Gruber, Günter Milde
 :Contact: docutils-develop@lists.sourceforge.net
-:Revision: $Revision: 8625 $
-:Date: $Date: 2021-02-19 00:09:23 +0100 (Fr, 19. Feb 2021) $
+:Revision: $Revision: 9069 $
+:Date: $Date: 2022-06-13 14:05:18 +0200 (Mo, 13. Jun 2022) $
 :Copyright: This document has been placed in the public domain.
 :Abstract: This document covers topics specific to Docutils' LaTeX_ export.
 
@@ -19,7 +21,7 @@ LaTeX
 LaTeX__, is a document preparation system for high-quality typesetting. It
 is most often used for medium-to-large technical or scientific documents but
 it can be used for almost any form of publishing. There exists a wide
-selecton of `LaTeX Documentation on the net`_ and `books on LaTeX and
+selection of `LaTeX Documentation on the net`_ and `books on LaTeX and
 related topics`_. For an introduction to LaTeX see, e.g., `LaTeX2e for
 authors`_.
 
@@ -134,7 +136,7 @@ _`pdflatex`
 
 _`xelatex` or _`lualatex`
   The `XeTeX`_ and LuaTeX_ engines work with input files in UTF-8 encoding
-  and system fonts. Export your document with the _`XeTeX writer` (writer
+  and system fonts. Export your document with the _`XeLaTeX writer` (writer
   name "``xetex``", frontend tool rst2xetex.py_).
 
 You may need to call latex two or three times to get internal references
@@ -174,8 +176,7 @@ Options can be specified as
 Run ``rst2latex.py --help`` to get a list of available options;
 see `Docutils Configuration`_ for details.
 
-.. _Docutils Configuration:
-   config.html
+.. _Docutils Configuration: config.html
 
 Classes
 -------
@@ -238,7 +239,7 @@ Example 2:
   or ::
 
     \makeatletter
-    \@namedef{DUadmonitionadmonition-test}{…}
+    \@namedef{DUCLASSadmonition-test}{…}
     \makeatother
 
 * Elements can have multiple class arguments. In contrast to HTML/CSS, the
@@ -251,13 +252,11 @@ Example 2:
     ``language-`` set the elements language property.
 
   * The table element recognizes some special class values. See section
-    table_.
+    `table style`_.
 
-  * For "historical reasons", the special macros ``\DUadmonition`` and
-    ``\DUtitle`` are written with a comma separated list of class values as
-    optional argument if the legacy-class-functions_ setting is True.
-
-    See the sections on admonitions_ and titles_ for customization examples.
+  * If the legacy-class-functions_ setting is True, the special macros
+    ``\DUadmonition`` and ``\DUtitle`` are written with a comma separated
+    list of class values as optional argument.
 
 .. _"classes" attribute: ../ref/doctree.html#classes
 .. _legacy-class-functions: config.html#legacy-class-functions
@@ -276,11 +275,11 @@ expected output:
   standalone_rst_latex.tex_
 
 .. _standalone_rst_latex.txt:
-  https://sf.net/p/docutils/code/HEAD/tree/trunk/docutils/test/functional/input/standalone_rst_latex.txt
+  https://sourceforge.net/p/docutils/code/HEAD/tree/trunk/docutils/test/functional/input/standalone_rst_latex.txt
 .. _tests/functional/input/data:
-  https://sf.net/p/docutils/code/HEAD/tree/trunk/docutils/test/functional/input/data
+  https://sourceforge.net/p/docutils/code/HEAD/tree/trunk/docutils/test/functional/input/data
 .. _standalone_rst_latex.tex:
-   https://sf.net/p/docutils/code/HEAD/tree/trunk/docutils/test/functional/expected/standalone_rst_latex.tex?format=raw
+   https://sourceforge.net/p/docutils/code/HEAD/tree/trunk/docutils/test/functional/expected/standalone_rst_latex.tex
 
 
 .. _style sheet:
@@ -327,12 +326,9 @@ Stylesheet Repository
   There is a `repository of user-contributed style sheets`_ in the
   Docutils Sandbox_.
 
-.. _clsguide:
-   http://mirrors.ctan.org/macros/latex/base/clsguide.pdf
-.. _stylesheet:
-   config.html#stylesheet-latex-writers
-.. _embed-stylesheet:
-   config.html#embed-stylesheet-latex-writers
+.. _clsguide: https://mirrors.ctan.org/macros/latex/base/clsguide.pdf
+.. _stylesheet: config.html#stylesheet-latex-writers
+.. _embed-stylesheet: config.html#embed-stylesheet-latex-writers
 .. _repository of user-contributed style sheets:
    ../../../sandbox/stylesheets/
 .. _sandbox: ../../../sandbox/
@@ -360,12 +356,9 @@ Example:
                      \usepackage{mathptmx}          % Times
                      \usepackage[scaled=.92]{helvet}  % Helvetica
 
-.. _latex-preamble:
-   config.html#latex-preamble
-.. _PDF standard fonts:
-   http://en.wikipedia.org/wiki/PDF#Standard_Type_1_Fonts
-.. _Linux Libertine:
-   http://www.linuxlibertine.org/index.php?id=1&L=1
+.. _latex-preamble: config.html#latex-preamble
+.. _PDF standard fonts: https://en.wikipedia.org/wiki/PDF#Standard_Type_1_Fonts
+.. _Linux Libertine: http://www.linuxlibertine.org
 
 
 Templates
@@ -381,7 +374,7 @@ Option:
   template_
 
 In addition to the 'default.tex' template, the latex writer directory
-contains the alternatives 'titlepage.tex' (separete title page) and
+contains the alternatives 'titlepage.tex' (separate title page) and
 'titlingpage.tex'" (separate title page with the `memoir`_
 `document class`_).
 
@@ -428,11 +421,8 @@ See also:
   * Defining a macro for a `custom role`_.
   * Forcing `page breaks`_.
 
-.. _raw directive:
-   ../ref/rst/directives.html#raw
-.. _math directive:
-   ../ref/rst/directives.html#math
-
+.. _raw directive: ../ref/rst/directives.html#raw
+.. _math directive: ../ref/rst/directives.html#math
 
 
 How to configure the ...
@@ -446,13 +436,10 @@ ordinary body element can.
 
 __ ../ref/rst/directives.html#admonitions
 
-Command:
-  ``\DUadmonition`` (with legacy-class-functions_)
-
 Environment:
-  ``DUadmonition`` (with new-class-functions_)
+  ``DUadmonition``
 
-  .. _new-class-functions: legacy-class-functions_
+  (Command ``\DUadmonition`` with legacy-class-functions_.)
 
 Default:
   Typeset in a frame (90 % of text width).
@@ -462,49 +449,31 @@ The admonition title is typeset with the ``\DUtitle`` command (see `titles`_).
 Example 1:
   A lighter layout without the frame::
 
-    \newcommand{\DUadmonition}[2][class-arg]{%
-      % try \DUadmonition#1{#2}:
-      \ifcsname DUadmonition#1\endcsname%
-        \csname DUadmonition#1\endcsname{#2}%
-      \else
-        \begin{quote}
-          #2
-        \end{quote}
-      \fi
-    }
-
-  rsp with new-class-functions_::
-
     \newenvironment{DUadmonition}%
       {\begin{quote}}
       {\end{quote}}
 
-
 Example 2:
-  Print admonitions in the margin::
+  Print all admonitions in the margin::
 
-    \newcommand{\DUadmonition}[2][class-arg]{\marginpar{#2}}
-
-  Make sure there is enough space to fit the note.
-  See also the marginnote_ package.
+    \usepackage{environ}
+    \NewEnviron{DUadmonition}{\marginpar{\BODY}}
 
 Example 3:
   Use the ``.. note::`` admonition for a margin note::
 
-    \newcommand{\DUadmonitionnote}[1]{\marginpar{#1}}
-
-  rsp with new-class-functions_ we re-define the environment in the
-  class-wrapper::
-
+    \usepackage{environ}
     \newcommand{\DUCLASSnote}{%
-      \renewcommand{\DUadmonition}{\marginpar}
+      \RenewEnviron{DUadmonition}{\marginpar{\BODY}}%
+      \renewcommand{\DUtitle}[1]{}% suppress title ("Note")
+    }
 
-  Make sure there is enough space to fit the note.
+.. caution:: Make sure there is enough space in the margin.
+   ``\marginpar`` fails in some places or with some content. See also the
+   environ_ and marginnote_ packages.
 
-
-.. _marginnote:
-   http://ctan.org/pkg/marginnote
-   http://ctan.org/pkg/marginnote
+.. _environ: https://ctan.org/pkg/environ
+.. _marginnote: https://ctan.org/pkg/marginnote
 
 
 .. _custom role:
@@ -579,14 +548,9 @@ Example 3:
 .. [#] Leave out the ``\makeatletter`` - ``\makeatother`` pair if the style
    sheet is a LaTeX package (``*.sty``).
 
-.. _role directive:
-   ../ref/rst/directives.html#role
-
-.. _text roles:
-   ../ref/rst/roles.html
-
-.. _class directive:
-   ../ref/rst/directives.html#class
+.. _role directive: ../ref/rst/directives.html#role
+.. _text roles: ../ref/rst/roles.html
+.. _class directive: ../ref/rst/directives.html#class
 
 definition lists
 ----------------
@@ -625,12 +589,9 @@ Popular document classes:
 Option:
   documentclass_
 
-.. _KOMA-script:
-   http://ctan.org/pkg/koma-script
-.. _memoir:
-   http://ctan.org/pkg/memoir
-.. _documentclass:
-   config.html#documentclass
+.. _KOMA-script: https://ctan.org/pkg/koma-script
+.. _memoir: https://ctan.org/pkg/memoir
+.. _documentclass: config.html#documentclass
 
 
 document info
@@ -656,10 +617,8 @@ Example:
 
 __ ../ref/rst/restructuredtext.html#bibliographic-fields
 
-.. _use-latex-docinfo:
-   config.html#use-latex-docinfo
-.. _use-latex-abstract:
-   config.html#use-latex-abstract
+.. _use-latex-docinfo: config.html#use-latex-docinfo
+.. _use-latex-abstract: config.html#use-latex-abstract
 
 
 document title
@@ -712,9 +671,7 @@ Example:
    The `KOMA-script`_ classes provide a similar environment under the name
    `labeling`.
 
-.. _enumitem:
-   http://ctan.org/pkg/enumitem
-
+.. _enumitem: https://ctan.org/pkg/enumitem
 __ ../ref/rst/restructuredtext.html#field-lists
 
 
@@ -736,10 +693,8 @@ Example
     \usepackage{caption}
     \captionsetup{justification=raggedleft,singlelinecheck=false}
 
-.. _caption:
-   http://ctan.org/pkg/caption
-.. _chngcntr:
-   http://ctan.org/pkg/chngcntr
+.. _caption: https://ctan.org/pkg/caption
+.. _chngcntr: https://ctan.org/pkg/chngcntr
 __ http://www.tex.ac.uk/cgi-bin/texfaq2html?label=running-nos
 
 
@@ -777,10 +732,9 @@ Example 2:
         \floatplacement{figure}{tb}
 
 .. _figures: ../ref/rst/directives.html#figure
-.. _float:
-   http://ctan.org/pkg/float
-.. _float.pdf:
-   http://mirrors.ctan.org/macros/latex/contrib/float/float.pdf
+.. _float: https://ctan.org/pkg/float
+.. _float.pdf: https://mirrors.ctan.org/macros/latex/contrib/float/float.pdf
+
 
 .. _font setup:
 
@@ -803,7 +757,7 @@ XeTeX/LuaTeX
   can use system fonts and provides access to the full feature set of
   modern OpenType_ fonts.
 
-.. _OpenType: http://en.wikipedia.org/wiki/OpenType
+.. _OpenType: https://en.wikipedia.org/wiki/OpenType
 
 The default font setup is done in the latex-preamble_:
 
@@ -878,7 +832,7 @@ XeTeX/LuaTeX
       \setsansfont{DejaVu Sans}
       \setmonofont[HyphenChar=None]{DejaVu Sans Mono}
 
-.. _fontspec: http://ctan.org/pkg/fontspec
+.. _fontspec: https://ctan.org/pkg/fontspec
 .. _fontmatrix: http://fontmatrix.net/
 .. _DejaVu: http://dejavu-fonts.org/
 .. _documentoptions: config.html#documentoptions
@@ -1008,28 +962,21 @@ d) PSNFSS_ Postscript fonts
        which is part of, e.g., `TeX Live`_.
 
 
-.. _LaTeX Font Catalogue:
-   http://www.tug.dk/FontCatalogue/
-.. _Latin Modern:
-   http://ctan.org/pkg/lm
-.. _CM-Super:
-   http://ctan.org/pkg/cm-super
-.. _bera:
-   http://ctan.org/pkg/bera
+.. _LaTeX Font Catalogue: http://www.tug.dk/FontCatalogue/
+.. _Latin Modern: https://ctan.org/pkg/lm
+.. _CM-Super: https://ctan.org/pkg/cm-super
+.. _bera: https://ctan.org/pkg/bera
 .. _TeX Gyre: http://www.gust.org.pl/projects/e-foundry/tex-gyre
-.. _PSNFSS:
-   http://ctan.org/pkg/psnfss
+.. _PSNFSS: https://ctan.org/pkg/psnfss
 .. _Using common PostScript fonts with LaTeX:
-   http://mirrors.ctan.org/macros/latex/required/psnfss/psnfss2e.pdf
+   https://mirrors.ctan.org/macros/latex/required/psnfss/psnfss2e.pdf
 .. _TeX Live: http://tug.org/texlive/
-.. _txfonts:
-   http://ctan.org/pkg/txfonts
+.. _txfonts: https://ctan.org/pkg/txfonts
 .. _PDF Standard Font:
-   http://en.wikipedia.org/wiki/PDF#Standard_Type_1_Fonts
+   https://en.wikipedia.org/wiki/PDF#Standard_Type_1_Fonts
 .. _testflow:
    http://www.tex.ac.uk/tex-archive/help/Catalogue/entries/testflow.html
-.. _Good Libre Fonts:
-   http://typophile.com/node/18207
+.. _Good Libre Fonts: http://typophile.com/node/18207
 .. _25 Best Free Quality Fonts:
    http://www.alvit.de/blog/article/20-best-license-free-official-fonts
 .. _19 More Free Quality Fonts:
@@ -1069,12 +1016,9 @@ Example 2:
 
     --font-encoding=LGR,T1 --stylesheet=lmodern
 
-.. _encguide:
-   http://mirrors.ctan.org/macros/latex/base/encguide.pdf
-.. _font-encoding:
-   config.html#font-encoding
-.. _fontenc:
-   http://ctan.org/pkg/fontenc
+.. _encguide: https://mirrors.ctan.org/macros/latex/base/encguide.pdf
+.. _font-encoding: config.html#font-encoding
+.. _fontenc: https://ctan.org/pkg/fontenc
 
 
 font size
@@ -1084,8 +1028,7 @@ Add font size in points to the document options, e.g.
 ``--documentoptions=12``, use e.g. the document classes provided by
 extsizes_ for values other than [10,11,12].
 
-.. _extsizes:
-   http://ctan.org/pkg/extsizes
+.. _extsizes: https://ctan.org/pkg/extsizes
 
 
 footnotes
@@ -1148,10 +1091,8 @@ Example 3:
        \hangpara{\parindent}{1}#4%
      }
 
-.. _footmisc:
-   http://ctan.org/pkg/footmisc
-.. _hanging:
-   http://ctan.org/pkg/hanging
+.. _footmisc: https://ctan.org/pkg/footmisc
+.. _hanging: https://ctan.org/pkg/hanging
 
 
 hyphenation
@@ -1183,7 +1124,7 @@ presence in a `style sheet`_ or the `LaTeX preamble`_ (see example
 below). This will ignore options set with hyperlink-color_ and
 hyperref-options_.
 
-URLs are typeset with the "url" package (loaded implicitely by "hyperref").
+URLs are typeset with the "url" package (loaded implicitly by "hyperref").
 The font of URLs can be defined with the ``\urlstyle`` command. Valid
 arguments are
 
@@ -1202,10 +1143,8 @@ Example:
 
 See also `non-breaking hyperlinks`_.
 
-.. _hyperlink-color:
-   config.html#hyperlink-color
-.. _hyperref-options:
-   config.html#hyperref-options
+.. _hyperlink-color: config.html#hyperlink-color
+.. _hyperref-options: config.html#hyperref-options
 
 
 disable hyperlinks
@@ -1224,8 +1163,19 @@ Option:
   \usepackage{nohyperref,url}
   \urlstyle{same}
 
-.. _hyperref:
-   http://ctan.org/pkg/hyperref
+.. _hyperref: https://ctan.org/pkg/hyperref
+
+
+language
+--------
+
+The global document language can be set with the language-code_
+configuration setting. The language of text parts can be set adding the
+language tag prefixed by "language-" to an element's classes_
+attribute, e.g. ``language-el`` for a Greek text part.
+
+.. _language-code: config.html#language-code
+
 
 line blocks
 -----------
@@ -1239,7 +1189,7 @@ Length:
   ``\DUlineblockindent``: indentation of indented lineblock parts.
 
 Default:
-   2.5 times the font hight: ``2.5em``
+   2.5 times the font height: ``2.5em``
 
 Example:
   set to the paragraph indentation::
@@ -1315,10 +1265,9 @@ Example:
     \lstset{xleftmargin=-2em}
 
 __ ../ref/rst/restructuredtext.html#literal-blocks
-.. _literal-block-env:
-   config.html#literal-block-env
+.. _literal-block-env: config.html#literal-block-env
 .. _listings.pdf:
-   http://mirrors.ctan.org/macros/latex/contrib/listings/listings.pdf
+   https://mirrors.ctan.org/macros/latex/contrib/listings/listings.pdf
 
 
 lists
@@ -1445,14 +1394,12 @@ Example 2:
     \geometry{hmargin={3cm,0.8in},height=8in}
     \geometry{height=10in}.
 
-.. _typearea:
-   http://ctan.org/pkg/typearea
+.. _typearea: https://ctan.org/pkg/typearea
+.. _geometry: https://ctan.org/pkg/geometry
 .. _KOMA-Script Guide:
-   http://mirrors.ctan.org/macros/latex/contrib/koma-script/doc/scrguien.pdf
-.. _geometry:
-   http://ctan.org/pkg/geometry
+   https://mirrors.ctan.org/macros/latex/contrib/koma-script/doc/scrguien.pdf
 .. _geometry manual:
-   http://mirrors.ctan.org/macros/latex/contrib/geometry/geometry.pdf
+   https://mirrors.ctan.org/macros/latex/contrib/geometry/geometry.pdf
 
 
 page headers and footers
@@ -1490,10 +1437,9 @@ Example:
 
   See the `chappg documentation`_ for details.
 
-.. _chappg:
-   http://ctan.org/pkg/chappg
+.. _chappg: https://ctan.org/pkg/chappg
 .. _chappg documentation:
-   http://mirrors.ctan.org/macros/latex/contrib/chappg/chappg.pdf
+   https://mirrors.ctan.org/macros/latex/contrib/chappg/chappg.pdf
 
 
 paper size
@@ -1576,7 +1522,7 @@ Example1:
 
 .. note::
   Class attribute values are ignored because the "classes_ wrapper"
-  interferes with LaTeX's formatting (spacing/indendation) of text following
+  interferes with LaTeX's formatting (spacing/indentation) of text following
   a section heading. Consider using a `topic element`_ or a container_.
 
 __ ../ref/rst/directives.html#rubric
@@ -1623,7 +1569,7 @@ and can be configured in a LaTeX `style sheet`_, e.g.::
 
   \setcounter{secnumdepth}{5}
 
-.. note:: The LaTeX name is 'secnumdepth' (whithout 't').
+.. note:: The LaTeX name is 'secnumdepth' (without 't').
 
 .. _sectnum directive: ../ref/rst/directives.html#sectnum
 .. _sectnum_xform: config.html#sectnum-xform
@@ -1653,7 +1599,7 @@ Example:
     \marginpar cannot be used, e.g., inside floats, footnotes, or in frames
     made with the framed package (see marginnote_).
 
-__ http://docutils.sf.net/docutils/docs/ref/rst/directives.html#sidebar
+__ https://docutils.sourceforge.io/docutils/docs/ref/rst/directives.html#sidebar
 
 size of a pixel
 ---------------
@@ -1677,61 +1623,57 @@ Example:
 
 .. [#] The `CSS length unit ``px```_ defaults to 1/96 inch.
 
-__ http://tex.stackexchange.com/questions/41370/
+__ https://tex.stackexchange.com/questions/41370/
    what-are-the-possible-dimensions-sizes-units-latex-understands
-.. _CSS length unit ``px``: http://www.w3.org/TR/css-values-3/#px
-.. _reference pixel: http://www.w3.org/TR/css-values-3/#reference-pixel
+.. _CSS length unit ``px``: https://www.w3.org/TR/css-values-3/#px
+.. _reference pixel: https://www.w3.org/TR/css-values-3/#reference-pixel
 
-table
------
+table style
+------------
 
-A pre-configured table style can be globally selected via the table-style_
+A pre-configured *table style* can be globally selected via the table_style_
 setting or set for individual tables via a `class directive`_ or the class
 option of the `table directive`_.
 
-.. _table-style: config.html#table-style-latex-writers
+Supported values:
+
+standard
+  Borders around all cells.
+
+booktabs
+  A line above and below the table and one after the head.
+
+borderless
+  No borders.
+
+colwidths-auto
+  Column width determination by LaTeX.
+  Overridden by the `table directive`_'s "widths" option.
+
+  .. warning::
+
+    ``colwidths-auto`` is only suited for tables with simple cell content.
+
+    LaTeX puts the content of auto-sized columns on one line (merging
+    paragraphs) and may fail with complex content.
+
+.. eventually in future
+
+   align-left, align-center, align-right
+     Align tables.
+
+By default, *column widths* are computed from the source column widths.
+The `legacy_column_widths`_ setting selects the conversion algorithm.
+Custom column widths can be set with the "widths" option of the `table
+directive`_.
+
+See also the section on problems with tables_ below.
+
+.. _new_column_widths:
+.. _legacy_column_widths: config.html#legacy-column-widths
+.. _table_style: config.html#table-style-latex-writers
+.. _"widths" option:
 .. _table directive: ../ref/rst/directives.html#table
-
-topic element
--------------
-
-A topic_ is like a block quote with a title, or a self-contained section
-with no subsections. Topics and rubrics can be used at places where a
-`section title`_ is not allowed (e.g. inside a directive).
-
-Example:
-  Use a standard paragraph for a topic::
-
-    \newcommand{\DUCLASStopic}{%
-      \renewenvironment{quote}{}{}%
-    }
-
-.. _topic: ../ref/rst/directives.html#topic
-.. _section title: ../ref/rst/restructuredtext.html#sections
-
-
-titles
-------
-
-The titles of admonitions_, sidebar_, and `topic element`_ are defined with
-the ``\DUtitle`` command that also takes a "class" argument.
-
-Example 1:
-  a centered and somewhat larger title for topcis::
-
-     \newcommand*{\DUtitletopic}[1]{\subsection*{\centering #1}
-
-Example 2:
-  a right-pointing hand as title for the "attention" directive::
-
-    \usepackage{pifont}
-    \newcommand{\DUtitleattention}[1]{\ding{43}}
-
-  The title argument is "swallowed" by the command.
-  To have both, hand and title use::
-
-    \usepackage{pifont}
-    \newcommand{\DUtitleattention}[1]{\ding{43} #1}
 
 
 table of contents
@@ -1746,7 +1688,7 @@ With use-latex-toc (default since release 0.6):
 
 * The ToC is generated by LaTeX (via the ``\tableofcontents`` command).
 
-  The layout depends on the choosen document class and can be configured in
+  The layout depends on the chosen document class and can be configured in
   a custom `style sheet`_ (see e.g. the `KOMA-Script Guide`_ for the
   `KOMA-script`_ classes).
 
@@ -1769,10 +1711,9 @@ With use-latex-toc (default since release 0.6):
 
 .. _use-latex-toc: config.html#use-latex-toc
 .. _contents directive: ../ref/rst/directives.html#contents
-.. _minitoc:
-   http://ctan.org/pkg/minitoc
+.. _minitoc: https://ctan.org/pkg/minitoc
 .. _minitoc documentation:
-   http://mirrors.ctan.org/macros/latex/contrib/minitoc/minitoc.pdf
+   https://mirrors.ctan.org/macros/latex/contrib/minitoc/minitoc.pdf
 
 
 title reference role
@@ -1791,12 +1732,40 @@ Example:
 
     \newcommand{\DUroletitlereference}[1]{\texttt{\textbf{#1}}}
 
-.. _title reference:
-   ../ref/rst/roles.html#title-reference
+.. _title reference: ../ref/rst/roles.html#title-reference
 .. _default role:
    ../ref/rst/directives.html#setting-the-default-interpreted-text-role
-.. _interpreted text:
-   ../ref/rst/restructuredtext.html#interpreted-text
+.. _interpreted text: ../ref/rst/restructuredtext.html#interpreted-text
+
+
+titles
+------
+
+The titles of admonitions_, sidebar_, and `topic element`_ use
+the ``\DUtitle`` command.
+
+Example 1:
+  a centered and somewhat larger title for topcis::
+
+     \newcommand*{\DUCLASStopic}{
+       \renewcommand*{\DUtitle}[1]{\subsection*{\centering #1}
+     }
+
+Example 2:
+  a right-pointing hand as title for the "attention" directive::
+
+    \usepackage{pifont}
+    \newcommand*{\DUCLASSattention}{
+      \renewcommand*{\DUtitle}[1]{\ding{43}}
+    }
+
+  The title argument is "swallowed" by the command.
+  To have both, hand and title use::
+
+    \usepackage{pifont}
+    \newcommand*{\DUCLASSattention}{
+      \newcommand*{\DUtitle}[1]{\ding{43} #1}
+    }
 
 
 text encoding
@@ -1809,7 +1778,7 @@ Option: output-encoding_
     ``--output-encoding=OUTPUT-ENCODING``
 
 Default:
-  "utf8"
+  "utf-8"
 
 Example:
   Encode the LaTeX source file with the ISO `latin-1` (west european)
@@ -1818,7 +1787,7 @@ Example:
     --output-encoding=latin-1
 
 Note:
-  LaTeX comes with two options for UTF-8 support,
+  8-bit LaTeX comes with two options for UTF-8 support,
 
   :utf8:  by the standard `inputenc`_ package with only limited coverage
           (mainly accented characters).
@@ -1827,8 +1796,8 @@ Note:
           characters than does "utf8".  It is, however, a non-standard
           extension and no longer developed.
 
-  Currently (in version 0.6), "utf8" is used if the output-encoding is
-  any of "utf_8", "U8", "UTF", or "utf8".
+  Currently, the "latex2e" writer inserts ``\usepackage[utf8]{inputenc}``
+  into the LaTeX source if it is UTF-8 encoded.
 
 .. with utf8x:
    If LaTeX issues a Warning about unloaded/unknown characters adding ::
@@ -1839,10 +1808,26 @@ Note:
 
 .. _LaTeX Unicode: http://www.unruh.de/DniQ/latex/unicode/
 .. _output-encoding: config.html#output-encoding
-.. _inputenc:
-   http://ctan.org/pkg/inputenc
-.. _ucs:
-   http://ctan.org/pkg/unicode
+.. _inputenc: https://ctan.org/pkg/inputenc
+.. _ucs: https://ctan.org/pkg/unicode
+
+
+topic element
+-------------
+
+A topic_ is like a block quote with a title, or a self-contained section
+with no subsections. Topics and rubrics can be used at places where a
+`section title`_ is not allowed (e.g. inside a directive).
+
+Example:
+  Use a standard paragraph for a topic::
+
+    \newcommand{\DUCLASStopic}{%
+      \renewenvironment{quote}{}{}%
+    }
+
+.. _topic: ../ref/rst/directives.html#topic
+.. _section title: ../ref/rst/restructuredtext.html#sections
 
 
 transition element
@@ -1871,8 +1856,7 @@ Example 2:
 
     \newcommand*{\DUtransition}{\vspace{2ex}}
 
-__ http://docutils.sf.net/docutils/docs/ref/rst/restructuredtext.html#transitions
-
+__ https://docutils.sourceforge.io/docutils/docs/ref/rst/restructuredtext.html#transitions
 .. _transition-stars.sty: ../../../sandbox/stylesheets/transition-stars.sty
 
 
@@ -1896,7 +1880,7 @@ Bad looking PDF output
 ``````````````````````
 
   What I am looking for when I try Docutils is if the PDF files I can get
-  are of high quality. Unfortunaltely that never is the case.
+  are of high quality. Unfortunately that never is the case.
 
   So am I just stupid or is there a way to get really high quality pdf from
   Docutils?
@@ -1917,7 +1901,7 @@ footnote is put at the bottom of the page where the footnote text is located,
 maybe far away from the footnote mark (see e.g. `<rst/demo.txt>`_).
 
 To get footnote mark and text at the same page, keep footnote mark and
-footnote text close together!
+footnote text close together.
 
 
 non-breaking hyperlinks
@@ -1945,9 +1929,7 @@ Right:
 
 See also the `Link text doesn’t break at end line`_ LaTeX FAQ entry.
 
-.. _breakurl:
-   http://ctan.org/pkg/breakurl
-
+.. _breakurl: https://ctan.org/pkg/breakurl
 .. _Link text doesn’t break at end line:
    http://www.tex.ac.uk/cgi-bin/texfaq2html?label=breaklinks
 
@@ -1978,7 +1960,8 @@ image inclusion
 Images__ are included in LaTeX with the help of the `graphicx` package. The
 supported file formats depend on the used driver:
 
-* pdflatex_ and xelatex_ work with PNG, JPG, or PDF, but **not EPS**.
+* pdflatex_, lualatex, and xelatex_ work with PNG, JPG, or PDF,
+  but **not EPS**.
 * Standard latex_ can include **only EPS** graphics, no other format.
 * latex + dvipdfmx works with EPS and JPG (add 'dvipdfmx' to the
   documentoptions_ or graphicx-option_ setting
@@ -1999,10 +1982,9 @@ can help.
 
 __ ../ref/rst/directives.html#images
 .. _grfguide.pdf:
-   http://mirrors.ctan.org/macros/latex/required/graphics/grfguide.pdf
-.. _grffile: http://ctan.org/pkg/grffile
+   https://mirrors.ctan.org/macros/latex/required/graphics/grfguide.pdf
+.. _grffile: https://ctan.org/pkg/grffile
 .. _graphicx-option: config.html#graphicx-option
-
 
 
 Why are my images too big?
@@ -2017,7 +1999,7 @@ The CSS specification suggests:
   pixel on a device with a pixel density of 96 DPI and a distance from the
   reader of an arm's length.
 
-  -- http://www.w3.org/TR/CSS2/syndata.html#length-units
+  -- https://www.w3.org/TR/CSS2/syndata.html#length-units
 
 This is why pixmap images without size specification or objects with a size
 specified in ``px`` tend to come too large in the PDF.
@@ -2025,6 +2007,7 @@ specified in ``px`` tend to come too large in the PDF.
 Solution:
   Specify the image size in fixed units (``pt``, ``cm``, ``in``) or
   configure the `size of a pixel`_ (length unit px).
+
 
 Error ``illegal unit px``
 `````````````````````````
@@ -2039,6 +2022,7 @@ distributions (since ca. 2006).
 If updating LaTeX is not an option, just remove the "px" from the length
 specification. HTML/CSS will default to "px" while the `latexe2` writer
 will add the fallback unit "bp".
+
 
 Error ``Symbol \textcurrency not provided`` ...
 ```````````````````````````````````````````````
@@ -2058,21 +2042,37 @@ an Euro sign at its place). You might see an error like::
 
 to the document options or use a different font package.
 
+
+Warning: language … not supported
+`````````````````````````````````
+
+The "latex" writer uses the LaTeX package Babel_ and the "xetex" writer
+uses Polyglossia_ for language_ support (hyphenation rules, auto-text
+localisations and typographic rules). Polyglossia_ supports more
+languages, so switching to the "xetex_" writer may help.
+
+For short quotes or if language support is provided by the user via other
+`LaTeX document classes and packages`_, the warning can be ignored.
+
+.. _Babel: https://ctan.org/pkg/babel
+.. _Polyglossia: https://ctan.org/pkg/polyglossia
+
+
 Search and text extraction
 ``````````````````````````
 
-Search for text that contains characters outside the ASCII range (e.g.
-umlauts) might fail.  See font_ and `font encoding`_ (as well as
-`Searching PDF files`_ for background information).
+Search for text that contains characters outside the ASCII range might
+fail.  See font_ and `font encoding`_ (as well as `Searching PDF files`_
+for background information).
 
 It may help to load the `cmap` package (via `style sheets`_ or the custom
 `LaTeX preamble`_ (see also `Proper use of cmap and mmmap`_).
 
 .. _Searching PDF files:
    http://www.tex.ac.uk/cgi-bin/texfaq2html?label=srchpdf
-
 .. _Proper use of cmap and mmmap:
    https://tex.stackexchange.com/questions/64409/proper-use-of-cmap-and-mmap
+
 
 Unicode box drawing and block characters
 ````````````````````````````````````````
@@ -2089,11 +2089,10 @@ With "traditional" TeX engines (e.g. pdflatex_):
 Unfortunately, this defines only a subset of the characters
 (see pmboxdraw.pdf_ for a list).
 
-.. _pmboxdraw:
-   http://ctan.org/pkg/pmboxdraw
-
+.. _pmboxdraw: https://ctan.org/pkg/pmboxdraw
 .. _pmboxdraw.pdf:
-   http://mirrors.ctan.org/macros/latex/contrib/pmboxdraw/pmboxdraw.pdf
+   https://mirrors.ctan.org/macros/latex/contrib/pmboxdraw/pmboxdraw.pdf
+
 
 Bugs and open issues
 --------------------
@@ -2105,8 +2104,7 @@ the BUGS_ documentation and the `SourceForge Bug Tracker`_.
 
 .. _Docutils TODO list: ../dev/todo.html#latex-writer
 .. _bugs: ../../BUGS.html
-.. _SourceForge Bug Tracker:
-   http://sf.net/tracker/?group_id=38414&atid=422030
+.. _SourceForge Bug Tracker: https://sourceforge.net/p/docutils/bugs/
 
 
 Footnotes and citations
@@ -2120,8 +2118,7 @@ This results in footnotes, citations, and figures possibly being mixed at
 page foot.
 
 Workaround:
-  Select footnote and citation handling with the docutils-footnotes_ and
-  use-latex-citations_ options.
+  Select citation handling with the use_latex_citations_ option.
 
 If ``use-latex-citations`` is used, a bibliography is inserted right at
 the end of the document. *This should be customizable*.
@@ -2131,34 +2128,20 @@ only by a single space or a newline) are combined to a single citation
 group, i.e. ``[cite1]_ [cite2]_`` results in ``\cite{cite1,cite2}``.
 The appearance in the output can be configured in a `style sheet`_.
 
-.. _docutils-footnotes: config.html#docutils-footnotes
-.. _use-latex-citations: config.html#use-latex-citations
+.. _use_latex_citations: config.html#use-latex-citations
 
 
 Tables
 ``````
 
-* reST-documents line length is assumed to be 80 characters. The
-  *tablewidth* is set relative to this value. If someone produces documents
-  with line length of 132 this will lead to suboptimal results.
+* Too wide tables (cf. `bug #422`_):
 
-  You may use the `:width:` option to manually set the table column widths.
-
-* Table: multicol cells are always left aligned.
+  Try the new_column_widths_ algorithm or use the `"widths" option`_ to
+  manually set the table column widths.
 
 * Table cells with both multirow and multicolumn are currently not possible.
 
-* literal-blocks in table cells:
-
-  - If verbatim or flushleft is used one gets vertical space above and below.
-  - This is bad for the topmost paragraph in a cell, therefore the writer
-    uses raggedright.
-  - Ragged right fails on followup paragraphs as the vertical space would be
-    missing.
-
-* ``--table-style=booktabs``, ``..class:: booktab``: `booktabs` version
-  1.00 does not work with `longtable`. This is solved in newer versions
-  (current is 2005/04/14 v1.61803).
+.. _bug #422: https://sourceforge.net/p/docutils/bugs/422/
 
 
 Figures
@@ -2171,8 +2154,7 @@ Figures
 * Wrapping text around figures is currently not supported. (Requires the
   `wrapfig`_ package.)
 
-.. _wrapfig:
-   http://ctan.org/pkg/wrapfig
+.. _wrapfig: https://ctan.org/pkg/wrapfig
 
 
 Miscellaneous

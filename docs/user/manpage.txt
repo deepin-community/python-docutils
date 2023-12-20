@@ -1,14 +1,16 @@
+.. include:: ../header.txt
+
 ==============================
  manpage writer for Docutils_
 ==============================
 
 :Author: Engelbert Gruber
 :Contact: docutils-develop@lists.sourceforge.net
-:Revision: $Revision: 8631 $
-:Date: $Date: 2021-03-05 22:14:40 +0100 (Fr, 05. Mär 2021) $
+:Revision: $Revision: 9059 $
+:Date: $Date: 2022-05-30 18:54:24 +0200 (Mo, 30. Mai 2022) $
 :Copyright: This document has been placed in the public domain.
 
-This writer explores the posibilities to generate man-pages from
+This writer explores the possibilities to generate man-pages from
 reStructuredText. Man pages are the way for Unix systems to provide
 help to the user. GNU does this with (TeX)info-pages.
 
@@ -20,10 +22,10 @@ Module information
 
 Unix man page belong into a numbered section, 1 is user commands, 8 contains
 administrator commands, the headlines of all manpages are collected into a
-database, queryable with the programm ``apropos``, therefore the headline
+database, queryable with the program ``apropos``, therefore the headline
 should contain a short text describing into which group this command belongs.
 
-These informations are collected from title, subtitle and the docinfo.
+That information is collected from the title, subtitle and docinfo.
 
 Also man pages have a defined set of sections, that are more or less
 mandatory, see References_.
@@ -63,7 +65,7 @@ References
 
 man pages from section 7, ``man`` and ``man-pages``.
 
-.. [LMHT] Linux Man Page Howto.
+.. [LMHT] `Linux Man Page Howto <https://tldp.org/HOWTO/Man-Page/>`__.
 
 Conventions
 '''''''''''
@@ -146,9 +148,11 @@ Conventions
 * Tables are possible, via the external processor tbl, although one should
   avoid them.
 
-Open issues
-'''''''''''
+TODO - Open issues
+''''''''''''''''''
 
+* How to escape double quotes in macro arguments ?
+* Typeset URLs : ``man 7 man`` on linux says use ``.UR`` and ``.UE``.
 * How to typeset command/manpage names in text.
 * How to write long syntax lines.
 * Line ends around email or web addresses in texts.
@@ -163,4 +167,4 @@ Open issues
 
 * Input and output encoding are problematic at least.
 
-.. _Docutils: http://docutils.sourceforge.net/
+.. _Docutils: https://docutils.sourceforge.io/

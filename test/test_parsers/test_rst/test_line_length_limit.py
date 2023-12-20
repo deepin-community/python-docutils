@@ -1,5 +1,4 @@
-#!/usr/bin/env python
-# -*- coding: utf8 -*-
+#!/usr/bin/env python3
 # :Copyright: © 2020 Günter Milde.
 # :License: Released under the terms of the `2-Clause BSD license`_, in short:
 #
@@ -14,10 +13,9 @@
 Tests for inline markup in docutils/parsers/rst/states.py.
 Interpreted text tests are in a separate module, test_interpreted.py.
 """
-from __future__ import absolute_import
 
 if __name__ == '__main__':
-    import __init__
+    import __init__  # noqa: F401
 from test_parsers import DocutilsTestSupport
 
 
@@ -26,6 +24,7 @@ def suite():
             suite_settings={'line_length_limit': 80})
     s.generateTests(totest)
     return s
+
 
 totest = {}
 

@@ -1,16 +1,15 @@
-#! /usr/bin/env python
+#! /usr/bin/env python3
 
-# $Id: test_inline_markup.py 8481 2020-01-31 08:17:24Z milde $
+# $Id: test_inline_markup.py 9045 2022-03-13 18:04:05Z milde $
 # Author: David Goodger <goodger@python.org>
 # Copyright: This module has been placed in the public domain.
 
 """
 Tests for inline markup in PEPs (readers/pep.py).
 """
-from __future__ import absolute_import
 
 if __name__ == '__main__':
-    import __init__
+    import __init__  # noqa: F401
 from test_readers import DocutilsTestSupport
 
 
@@ -31,20 +30,20 @@ and RFC 2822 (which obsoletes RFC822 and RFC-733).
 <document source="test data">
     <paragraph>
         See \n\
-        <reference refuri="http://www.python.org/dev/peps/pep-0287">
+        <reference refuri="https://peps.python.org/pep-0287">
             PEP 287
          (
-        <reference refuri="http://www.python.org/dev/peps/pep-0287">
+        <reference refuri="https://peps.python.org/pep-0287">
             pep-0287.txt
         ),
         and \n\
-        <reference refuri="http://tools.ietf.org/html/rfc2822.html">
+        <reference refuri="https://tools.ietf.org/html/rfc2822.html">
             RFC 2822
          (which obsoletes \n\
-        <reference refuri="http://tools.ietf.org/html/rfc822.html">
+        <reference refuri="https://tools.ietf.org/html/rfc822.html">
             RFC822
          and \n\
-        <reference refuri="http://tools.ietf.org/html/rfc733.html">
+        <reference refuri="https://tools.ietf.org/html/rfc733.html">
             RFC-733
         ).
 """],
@@ -62,31 +61,31 @@ RFC
     <paragraph>
         References split across lines:
     <paragraph>
-        <reference refuri="http://www.python.org/dev/peps/pep-0287">
+        <reference refuri="https://peps.python.org/pep-0287">
             PEP
             287
     <paragraph>
-        <reference refuri="http://tools.ietf.org/html/rfc2822.html">
+        <reference refuri="https://tools.ietf.org/html/rfc2822.html">
             RFC
             2822
 """],
 ["""\
 Test PEP-specific implicit references before a URL:
 
-PEP 287 (http://www.python.org/dev/peps/pep-0287), RFC 2822.
+PEP 287 (https://peps.python.org/pep-0287), RFC 2822.
 """,
 """\
 <document source="test data">
     <paragraph>
         Test PEP-specific implicit references before a URL:
     <paragraph>
-        <reference refuri="http://www.python.org/dev/peps/pep-0287">
+        <reference refuri="https://peps.python.org/pep-0287">
             PEP 287
          (
-        <reference refuri="http://www.python.org/dev/peps/pep-0287">
-            http://www.python.org/dev/peps/pep-0287
+        <reference refuri="https://peps.python.org/pep-0287">
+            https://peps.python.org/pep-0287
         ), \n\
-        <reference refuri="http://tools.ietf.org/html/rfc2822.html">
+        <reference refuri="https://tools.ietf.org/html/rfc2822.html">
             RFC 2822
         .
 """],
@@ -97,7 +96,7 @@ totest['miscellaneous'] = [
 For *completeness*, _`let's` ``test`` **other** forms_
 |of| `inline markup` [*]_.
 
-.. [*] See http://docutils.sf.net/docs/ref/rst/restructuredtext.html.
+.. [*] See https://docutils.sourceforge.io/docs/ref/rst/restructuredtext.html.
 """,
 """\
 <document source="test data">
@@ -124,13 +123,13 @@ For *completeness*, _`let's` ``test`` **other** forms_
         <title_reference>
             inline markup
          \n\
-        <footnote_reference auto="*" ids="id1">
+        <footnote_reference auto="*" ids="footnote-reference-1">
         .
-    <footnote auto="*" ids="id2">
+    <footnote auto="*" ids="footnote-1">
         <paragraph>
             See \n\
-            <reference refuri="http://docutils.sf.net/docs/ref/rst/restructuredtext.html">
-                http://docutils.sf.net/docs/ref/rst/restructuredtext.html
+            <reference refuri="https://docutils.sourceforge.io/docs/ref/rst/restructuredtext.html">
+                https://docutils.sourceforge.io/docs/ref/rst/restructuredtext.html
             .
 """],
 ]

@@ -1,14 +1,16 @@
+.. include:: ../header.txt
+
 ===============================
  Docutils_ Distributor's Guide
 ===============================
 
 :Author: Lea Wiemann
 :Contact: docutils-develop@lists.sourceforge.net
-:Revision: $Revision: 8631 $
-:Date: $Date: 2021-03-05 22:14:40 +0100 (Fr, 05. Mär 2021) $
+:Revision: $Revision: 9051 $
+:Date: $Date: 2022-04-02 23:59:06 +0200 (Sa, 02. Apr 2022) $
 :Copyright: This document has been placed in the public domain.
 
-.. _Docutils: http://docutils.sourceforge.net/
+.. _Docutils: https://docutils.sourceforge.io/
 
 .. contents::
 
@@ -20,7 +22,7 @@ First, please download the most current `release tarball`_ and unpack
 it.
 
 .. _Docutils-develop: ../user/mailing-lists.html#docutils-develop
-.. _release tarball: http://docutils.sourceforge.net/#download
+.. _release tarball: https://docutils.sourceforge.io/#download
 
 
 Dependencies
@@ -28,12 +30,12 @@ Dependencies
 
 Docutils has the following dependencies:
 
-* Python 2.7 or later is required.  Use ">= Python 2.7" in the
-  dependencies.
+* Python 3.7 or later is required.
+  Use ">= Python 3.7" in the dependencies.
 
 * Docutils may optionally make use of the PIL (`Python Imaging
   Library`_ or Pillow_).  If PIL is present, it is automatically
-  detected by Docutils.  
+  detected by Docutils.
 
 * Docutils recommends the `Pygments`_ syntax hightlighter. If available, it
   is used for highlighting the content of `code directives`_ and roles as
@@ -43,10 +45,10 @@ Docutils has the following dependencies:
 * Docutils can use the `recommonmark`_ parser to parse input in
   the Markdown format (new in 0.17).
 
-.. _Python Imaging Library: 
+.. _Python Imaging Library:
     https://en.wikipedia.org/wiki/Python_Imaging_Library
 .. _Pillow: https://pypi.org/project/Pillow/
-.. _Pygments: http://pygments.org/
+.. _Pygments: https://pygments.org/
 .. _recommonmark: https://pypi.org/project/recommonmark/
 
 .. _code directives: ../ref/rst/directives.html#code
@@ -146,4 +148,4 @@ tarball.
 
 For more information on testing, view the `Docutils Testing`_ page.
 
-.. _Docutils Testing: http://docutils.sourceforge.net/docs/dev/testing.html
+.. _Docutils Testing: https://docutils.sourceforge.io/docs/dev/testing.html

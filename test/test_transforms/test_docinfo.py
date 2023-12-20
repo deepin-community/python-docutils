@@ -1,17 +1,14 @@
-#! /usr/bin/env python
-# -*- coding: utf-8 -*-
-
-# $Id: test_docinfo.py 8481 2020-01-31 08:17:24Z milde $
+#! /usr/bin/env python3
+# $Id: test_docinfo.py 9037 2022-03-05 23:31:10Z milde $
 # Author: David Goodger <goodger@python.org>
 # Copyright: This module has been placed in the public domain.
 
 """
 Tests for docutils.transforms.frontmatter.DocInfo.
 """
-from __future__ import absolute_import
 
 if __name__ == '__main__':
-    import __init__
+    import __init__  # noqa: F401
 from test_transforms import DocutilsTestSupport
 from docutils.transforms.frontmatter import DocInfo
 from docutils.parsers.rst import Parser
@@ -28,6 +25,7 @@ def suite():
     settings['language_code'] = 'ru'
     s.generateTests(totest_ru)
     return s
+
 
 totest = {}
 totest_de = {}
@@ -360,7 +358,7 @@ totest['bibliographic_field_lists'] = ((DocInfo,), [
 ["""\
 .. RCS keyword extraction.
 
-:Status: (some text) $""" + """RCSfile: test_docinfo.py,v $ (more text) 
+:Status: (some text) $""" + """RCSfile: test_docinfo.py,v $ (more text)
 :Date: (some text) $""" + """Date: 2002/10/08 01:34:23 $ (more text)
 :Date: (some text) $""" + """Date: 2005-03-26T16:21:28.693201Z $ (more text)
 :Version: (some text) $""" + """Revision: 1.1 $ (more text)
@@ -382,7 +380,7 @@ totest['bibliographic_field_lists'] = ((DocInfo,), [
 ])
 
 totest_de['bibliographic_field_lists'] = ((DocInfo,), [
-[u"""\
+["""\
 .. Bibliographic element extraction for a German document.
 
 :Zusammenfassung: Abstract 1.
@@ -394,7 +392,7 @@ totest_de['bibliographic_field_lists'] = ((DocInfo,), [
 :Datum: 2001-08-11
 :Parameter i: integer
 """,
-u"""\
+"""\
 <document source="test data">
     <docinfo>
         <author>
@@ -422,10 +420,11 @@ u"""\
             Abstract 1.
     <comment xml:space="preserve">
         Bibliographic element extraction for a German document.
-"""],])
+"""]
+])
 
 totest_ru['bibliographic_field_lists'] = ((DocInfo,), [
-[u"""\
+["""\
 .. Bibliographic element extraction for a Russian document.
 
 :аннотация: Abstract 1.
@@ -437,7 +436,7 @@ totest_ru['bibliographic_field_lists'] = ((DocInfo,), [
 :дата: 2001-08-11
 :Parameter i: integer
 """,
-u"""\
+"""\
 <document source="test data">
     <docinfo>
         <author>
@@ -465,7 +464,8 @@ u"""\
             Abstract 1.
     <comment xml:space="preserve">
         Bibliographic element extraction for a Russian document.
-"""],])
+"""]
+])
 
 
 if __name__ == '__main__':

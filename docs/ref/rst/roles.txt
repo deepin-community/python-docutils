@@ -1,11 +1,13 @@
+.. include:: ../../header2.txt
+
 =========================================
  reStructuredText Interpreted Text Roles
 =========================================
 
 :Author: David Goodger
 :Contact: docutils-develop@lists.sourceforge.net
-:Revision: $Revision: 8588 $
-:Date: $Date: 2020-12-09 16:34:10 +0100 (Mi, 09. Dez 2020) $
+:Revision: $Revision: 9051 $
+:Date: $Date: 2022-04-02 23:59:06 +0200 (Sa, 02. Apr 2022) $
 :Copyright: This document has been placed in the public domain.
 
 This document describes the interpreted text roles implemented in the
@@ -137,8 +139,8 @@ In addition to "class_", the following option is recognized:
     See `supported languages and markup formats`_ for recognized values.
 
 .. _code directive: directives.html#code
-.. _Pygments: http://pygments.org/
-.. _supported languages and markup formats: http://pygments.org/languages/
+.. _Pygments: https://pygments.org/
+.. _supported languages and markup formats: https://pygments.org/languages/
 
 
 ``:math:``
@@ -185,7 +187,7 @@ This is equivalent to::
 
     See `PEP 287`__ for more information about reStructuredText.
 
-    __ http://www.python.org/peps/pep-0287.html
+    __ https://peps.python.org/pep-0287
 
 
 ``:rfc-reference:``
@@ -207,12 +209,12 @@ This is equivalent to::
 
     See `RFC 2822`__ for information about email headers.
 
-    __ http://tools.ietf.org/html/rfc2822.html
+    __ https://tools.ietf.org/html/rfc2822.html
 
 .. [#] You can link to a specific section by saying
    ``:rfc:`number#anchor```. (New in Docutils 0.15.)
 
-   .. Warning:: The anchor (anything follwing a ``#``) is appended to
+   .. Warning:: The anchor (anything following a ``#``) is appended to
       the reference without any checks and not shown in the link text.
 
       It is recommended to use `hyperlink references`_ for

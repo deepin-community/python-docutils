@@ -1,28 +1,20 @@
-#! /usr/bin/env python
+#! /usr/bin/env python3
 
-# $Id: test_tables.py 8497 2020-03-03 20:45:54Z milde $
+# $Id: test_tables.py 9037 2022-03-05 23:31:10Z milde $
 # Author: David Goodger <goodger@python.org>
 # Copyright: This module has been placed in the public domain.
 
 """
 Tests for tables.py directives.
 """
-from __future__ import absolute_import
 
 import os
-import sys
 import csv
 import platform
 
 if __name__ == '__main__':
-    import __init__
+    import __init__  # noqa: F401
 from test_parsers import DocutilsTestSupport
-from docutils.parsers.rst.directives import tables
-
-
-if sys.version_info >= (3, 0):
-    unicode = str  # noqa
-    unichr = chr  # noqa
 
 
 def suite():
@@ -30,41 +22,121 @@ def suite():
     s.generateTests(totest)
     return s
 
+
 mydir = 'test_parsers/test_rst/test_directives/'
 utf_16_csv = os.path.join(mydir, 'utf-16.csv')
 utf_16_csv_rel = DocutilsTestSupport.utils.relative_path(None, utf_16_csv)
 empty_txt = os.path.join(mydir, 'empty.txt')
 
 unichr_exception = DocutilsTestSupport.exception_data(
-    unichr, int("9999999999999", 16))[0]
+    chr, int("9999999999999", 16))[0]
 if isinstance(unichr_exception, OverflowError):
     unichr_exception_string = 'code too large (%s)' % unichr_exception
 else:
     unichr_exception_string = str(unichr_exception)
 
-# some error messages changed in Python 3.3, CPython has backported to 2.7.4,
-# PyPy has not
 csv_eod_error_str = 'unexpected end of data'
-if sys.version_info < (2,7,4) or (platform.python_implementation() == 'PyPy'
-                                  and sys.version_info < (3,0)):
-    csv_eod_error_str = 'newline inside string'
 # pypy adds a line number
 if platform.python_implementation() == 'PyPy':
     csv_eod_error_str = 'line 1: ' + csv_eod_error_str
 csv_unknown_url = "'bogus.csv'"
-if sys.version_info < (3, 0):
-    csv_unknown_url = "bogus.csv"
 
 
 def null_bytes():
     with open(utf_16_csv, 'rb') as f:
         csv_data = f.read()
-    csv_data = unicode(csv_data, 'latin1').splitlines()
-    reader = csv.reader([tables.CSVTable.encode_for_csv(line + '\n')
-                         for line in csv_data])
+    csv_data = str(csv_data, 'latin1').splitlines()
+    reader = csv.reader([line + '\n' for line in csv_data])
     next(reader)
 
+
 null_bytes_exception = DocutilsTestSupport.exception_data(null_bytes)[0]
+# Null bytes are valid in Python 3.11+:
+if null_bytes_exception is None:
+    bad_encoding_result = """\
+<document source="test data">
+    <table>
+        <title>
+            bad encoding
+        <tgroup cols="4">
+            <colspec colwidth="25">
+            <colspec colwidth="25">
+            <colspec colwidth="25">
+            <colspec colwidth="25">
+            <tbody>
+                <row>
+                    <entry>
+                        <paragraph>
+                            \xfe\xff"Treat"
+                    <entry>
+                        <paragraph>
+                            "Quantity"
+                    <entry>
+                        <paragraph>
+                            "Description"
+                    <entry>
+                <row>
+                    <entry>
+                        <paragraph>
+                            "Albatr\u00b0\u00df"
+                    <entry>
+                        <paragraph>
+                            2.99
+                    <entry>
+                        <paragraph>
+                            "\u00a1Ona\x03\xc3\x03\xc4\x03\xb9\x03\xba!"
+                    <entry>
+                <row>
+                    <entry>
+                        <paragraph>
+                            "CrunchyFrog"
+                    <entry>
+                        <paragraph>
+                            1.49
+                    <entry>
+                        <paragraph>
+                            "Ifwetooktheb\u00f6nesout
+                    <entry>
+                        <paragraph>
+                            itwouldn\x20\x19tbe
+                <row>
+                    <entry>
+                        <paragraph>
+                            crunchy
+                    <entry>
+                        <paragraph>
+                            nowwouldit?"
+                    <entry>
+                    <entry>
+                <row>
+                    <entry>
+                        <paragraph>
+                            "GannetRipple"
+                    <entry>
+                        <paragraph>
+                            1.99
+                    <entry>
+                        <paragraph>
+                            "\xbfOna\x03\xc3\x03\xc4\x03\xb9\x03\xba?"
+                    <entry>
+    <paragraph>
+        (7- and 8-bit text encoded as UTF-16 has lots of null/zero bytes.)
+"""
+else:
+    bad_encoding_result = """\
+<document source="test data">
+    <system_message level="3" line="1" source="test data" type="ERROR">
+        <paragraph>
+            Error with CSV data in "csv-table" directive:
+            %s
+        <literal_block xml:space="preserve">
+            .. csv-table:: bad encoding
+               :file: %s
+               :encoding: latin-1
+    <paragraph>
+        (7- and 8-bit text encoded as UTF-16 has lots of null/zero bytes.)
+""" % (null_bytes_exception, utf_16_csv)
+
 
 totest = {}
 
@@ -155,7 +227,7 @@ totest['table'] = [
     <table>
         <title>
             title with an \n\
-            <problematic ids="id2" refid="id1">
+            <problematic ids="problematic-1" refid="system-message-1">
                 *
             error
         <tgroup cols="2">
@@ -169,7 +241,7 @@ totest['table'] = [
                     <entry>
                         <paragraph>
                             table
-    <system_message backrefs="id2" ids="id1" level="2" line="1" source="test data" type="WARNING">
+    <system_message backrefs="problematic-1" ids="system-message-1" level="2" line="1" source="test data" type="WARNING">
         <paragraph>
             Inline emphasis start-string without end-string.
 """],
@@ -630,12 +702,12 @@ totest['csv-table'] = [
                     <entry>
                     <entry>
 """],
-[u"""\
+["""\
 .. csv-table:: non-ASCII characters
 
    Heiz\xf6lr\xfccksto\xdfabd\xe4mpfung
 """,
-u"""\
+"""\
 <document source="test data">
     <table>
         <title>
@@ -766,7 +838,7 @@ u"""\
     <table>
         <title>
             error in the \n\
-            <problematic ids="id2" refid="id1">
+            <problematic ids="problematic-1" refid="system-message-1">
                 *
             title
         <tgroup cols="3">
@@ -784,7 +856,7 @@ u"""\
                     <entry>
                         <paragraph>
                             data
-    <system_message backrefs="id2" ids="id1" level="2" line="1" source="test data" type="WARNING">
+    <system_message backrefs="problematic-1" ids="system-message-1" level="2" line="1" source="test data" type="WARNING">
         <paragraph>
             Inline emphasis start-string without end-string.
 """],
@@ -812,11 +884,11 @@ u"""\
     <system_message level="4" line="1" source="test data" type="SEVERE">
         <paragraph>
             Problems with "csv-table" directive URL "bogus.csv":
-            unknown url type: %s.
+            unknown url type: 'bogus.csv'.
         <literal_block xml:space="preserve">
             .. csv-table:: bad URL
                :url: bogus.csv
-""" % csv_unknown_url],
+"""],
 ["""\
 .. csv-table:: column mismatch
    :widths: 10,20
@@ -867,7 +939,7 @@ u"""\
                :widths: 0 0 0
             \n\
                some, csv, data
-""" % DocutilsTestSupport.exception_data(int, u"y")[1][0]],
+""" % DocutilsTestSupport.exception_data(int, "y")[1][0]],
 ["""\
 .. csv-table:: good delimiter
    :delim: /
@@ -1031,26 +1103,15 @@ u"""\
 
 (7- and 8-bit text encoded as UTF-16 has lots of null/zero bytes.)
 """ % utf_16_csv,
-"""\
-<document source="test data">
-    <system_message level="3" line="1" source="test data" type="ERROR">
-        <paragraph>
-            Error with CSV data in "csv-table" directive:
-            %s
-        <literal_block xml:space="preserve">
-            .. csv-table:: bad encoding
-               :file: %s
-               :encoding: latin-1
-    <paragraph>
-        (7- and 8-bit text encoded as UTF-16 has lots of null/zero bytes.)
-""" % (null_bytes_exception, utf_16_csv)],
+bad_encoding_result
+],
 ["""\
 .. csv-table:: good encoding
    :file: %s
    :encoding: utf-16
    :header-rows: 1
 """ % utf_16_csv,
-u"""\
+"""\
 <document source="test data">
     <table>
         <title>

@@ -4,8 +4,8 @@
 ======================================================================
 :Author: David Goodger
 :Contact: docutils-develop@lists.sourceforge.net
-:Revision: $Revision: 7302 $
-:Date: $Date: 2012-01-03 20:23:53 +0100 (Di, 03. Jän 2012) $
+:Revision: $Revision: 8956 $
+:Date: $Date: 2022-01-20 11:11:44 +0100 (Do, 20. Jän 2022) $
 :Copyright: This DTD has been placed in the public domain.
 :Filename: pysource.dtd
 
@@ -13,9 +13,9 @@ This DTD (document type definition) extends the Generic DTD (see
 below).
 
 More information about this DTD and the Docutils project can be found
-at http://docutils.sourceforge.net/.  The latest version of this DTD
+at https://docutils.sourceforge.io/.  The latest version of this DTD
 is available from
-http://docutils.sourceforge.net/docs/dev/pysource.dtd.
+https://docutils.sourceforge.io/docs/dev/pysource.dtd.
 
 The formal public identifier for this DTD is::
 
@@ -46,7 +46,7 @@ The formal public identifier for this DTD is::
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 This DTD extends the Docutils Generic DTD, available from
-http://docutils.sourceforge.net/docs/ref/docutils.dtd.
+https://docutils.sourceforge.io/docs/ref/docutils.dtd.
 -->
 
 <!ENTITY % docutils PUBLIC

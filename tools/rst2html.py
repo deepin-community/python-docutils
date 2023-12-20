@@ -1,6 +1,6 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
-# $Id: rst2html.py 4564 2006-05-21 20:44:42Z wiemann $
+# $Id: rst2html.py 8927 2022-01-03 23:50:05Z milde $
 # Author: David Goodger <goodger@python.org>
 # Copyright: This module has been placed in the public domain.
 

@@ -1,11 +1,13 @@
+.. include:: ../header.txt
+
 ========================
  The Docutils Publisher
 ========================
 
 :Author: David Goodger
 :Contact: docutils-develop@lists.sourceforge.net
-:Date: $Date: 2021-03-05 22:14:40 +0100 (Fr, 05. Mär 2021) $
-:Revision: $Revision: 8631 $
+:Date: $Date: 2022-04-02 23:59:06 +0200 (Sa, 02. Apr 2022) $
+:Revision: $Revision: 9051 $
 :Copyright: This document has been placed in the public domain.
 
 .. contents::
@@ -23,7 +25,7 @@ of a typical Docutils front-end tool, including how the Publisher
 class is used.
 
 .. _PEP 258: ../peps/pep-0258.html
-.. _Inside A Docutils Command-Line Front-End Tool: ./cmdline-tool.html
+.. _Inside A Docutils Command-Line Front-End Tool: ../howto/cmdline-tool.html
 
 
 Publisher Convenience Functions
@@ -34,41 +36,41 @@ then call its ``publish`` method.  ``docutils.core.Publisher.publish``
 handles everything else.  There are several convenience functions in
 the ``docutils.core`` module:
 
-:_`publish_cmdline`: for command-line front-end tools, like
+:_`publish_cmdline()`: for command-line front-end tools, like
   ``rst2html.py``.  There are several examples in the ``tools/``
   directory.  A detailed analysis of one such tool is in `Inside A
   Docutils Command-Line Front-End Tool`_
 
-:_`publish_file`: for programmatic use with file-like I/O.  In
+:_`publish_file()`: for programmatic use with file-like I/O.  In
   addition to writing the encoded output to a file, also returns the
   encoded output as a string.
 
-:_`publish_string`: for programmatic use with string I/O.  Returns
+:_`publish_string()`: for programmatic use with string I/O.  Returns
   the encoded output as a string.
 
-:_`publish_parts`: for programmatic use with string input; returns a
+:_`publish_parts()`: for programmatic use with string input; returns a
   dictionary of document parts.  Dictionary keys are the names of
   parts, and values are Unicode strings; encoding is up to the client.
   Useful when only portions of the processed document are desired.
-  See `publish_parts Details`_ below.
+  See `publish_parts() Details`_ below.
 
   There are usage examples in the `docutils/examples.py`_ module.
 
-:_`publish_doctree`: for programmatic use with string input; returns a
+:_`publish_doctree()`: for programmatic use with string input; returns a
   Docutils document tree data structure (doctree).  The doctree can be
   modified, pickled & unpickled, etc., and then reprocessed with
-  `publish_from_doctree`_.
+  `publish_from_doctree()`_.
 
-:_`publish_from_doctree`: for programmatic use to render from an
+:_`publish_from_doctree()`: for programmatic use to render from an
   existing document tree data structure (doctree); returns the encoded
   output as a string.
 
-:_`publish_programmatically`: for custom programmatic use.  This
+:_`publish_programmatically()`: for custom programmatic use.  This
   function implements common code and is used by ``publish_file``,
   ``publish_string``, and ``publish_parts``.  It returns a 2-tuple:
   the encoded string output and the Publisher object.
 
-.. _Inside A Docutils Command-Line Front-End Tool: ./cmdline-tool.html
+.. _Inside A Docutils Command-Line Front-End Tool: ../howto/cmdline-tool.html
 .. _docutils/examples.py: ../../docutils/examples.py
 
 
@@ -85,11 +87,11 @@ a dictionary of setting names & values, like this::
 
 Settings from command-line options override configuration file
 settings, and they override application defaults.  For details, see
-`Docutils Runtime Settings`_.  See `Docutils Configuration Files`_ for
+`Docutils Runtime Settings`_.  See `Docutils Configuration`_ for
 details about individual settings.
 
 .. _Docutils Runtime Settings: ./runtime-settings.html
-.. _Docutils Configuration Files: ../user/tools.html
+.. _Docutils Configuration: ../user/config.html
 
 
 Encodings
@@ -105,10 +107,10 @@ Docutils may introduce some non-ASCII text if you use
    ../ref/rst/directives.html#table-of-contents
 
 
-``publish_parts`` Details
-=========================
+``publish_parts()`` Details
+===========================
 
-The ``docutils.core.publish_parts`` convenience function returns a
+The ``docutils.core.publish_parts()`` convenience function returns a
 dictionary of document parts.  Dictionary keys are the names of parts,
 and values are Unicode strings.
 

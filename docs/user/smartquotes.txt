@@ -1,3 +1,5 @@
+.. include:: ../header.txt
+
 =========================
 Smart Quotes for Docutils
 =========================
@@ -5,8 +7,8 @@ Smart Quotes for Docutils
 :Author: Günter Milde,
          based on SmartyPants by John Gruber, Brad Choate, and Chad Miller
 :Contact: docutils-develop@lists.sourceforge.net
-:Revision: $Revision: 8631 $
-:Date: $Date: 2021-03-05 22:14:40 +0100 (Fr, 05. Mär 2021) $
+:Revision: $Revision: 9051 $
+:Date: $Date: 2022-04-02 23:59:06 +0200 (Sa, 02. Apr 2022) $
 :License: Released under the terms of the `2-Clause BSD license`_
 :Abstract: This document describes the Docutils `smartquotes` module.
 
@@ -263,7 +265,7 @@ There is built-in support for the following languages:\ [#smartquotes-locales]_
 
     "'Dutch' alternative quotes"
 
-    .. # 'nl-x-altquot2': u'””’’',
+    .. # 'nl-x-altquot2': '””’’',
 
 :pl: .. class:: language-pl
 
@@ -337,7 +339,7 @@ There is built-in support for the following languages:\ [#smartquotes-locales]_
 
     "'Turkish' alternative quotes"
 
-.. 'tr-x-altquot2': u'“„‘‚', # antiquated?
+.. 'tr-x-altquot2': '“„‘‚', # antiquated?
 
 :uk: .. class:: language-uk
 
@@ -453,7 +455,7 @@ the source:
 
 .. _right single quotation mark:
     http://www.fileformat.info/info/unicode/char/2019/index.htm
-.. _Unicode: http://www.unicode.org/charts/PDF/U2000.pdf
+.. _Unicode: https://www.unicode.org/charts/PDF/U2000.pdf
 
 History
 =======

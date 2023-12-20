@@ -1,16 +1,15 @@
-#! /usr/bin/env python
+#! /usr/bin/env python3
 
-# $Id: test_messages.py 8481 2020-01-31 08:17:24Z milde $
+# $Id: test_messages.py 9037 2022-03-05 23:31:10Z milde $
 # Author: David Goodger <goodger@python.org>
 # Copyright: This module has been placed in the public domain.
 
 """
 Tests for docutils.transforms.universal.Messages.
 """
-from __future__ import absolute_import
 
 if __name__ == '__main__':
-    import __init__
+    import __init__  # noqa: F401
 from test_transforms import DocutilsTestSupport
 from docutils.transforms.universal import Messages
 from docutils.transforms.references import Substitutions
@@ -22,6 +21,7 @@ def suite():
     s = DocutilsTestSupport.TransformTestSuite(parser)
     s.generateTests(totest)
     return s
+
 
 totest = {}
 
@@ -38,7 +38,7 @@ document by the test framework.)
 <document source="test data">
     <paragraph>
         This \n\
-        <problematic ids="id2" refid="id1">
+        <problematic ids="problematic-1" refid="system-message-1">
             |unknown substitution|
          will generate a system message, thanks to
         the \n\
@@ -55,7 +55,7 @@ document by the test framework.)
     <section classes="system-messages">
         <title>
             Docutils System Messages
-        <system_message backrefs="id2" ids="id1" level="3" line="1" source="test data" type="ERROR">
+        <system_message backrefs="problematic-1" ids="system-message-1" level="3" line="1" source="test data" type="ERROR">
             <paragraph>
                 Undefined substitution referenced: "unknown substitution".
 """],

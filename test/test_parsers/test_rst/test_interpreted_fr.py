@@ -1,4 +1,4 @@
-#! /usr/bin/env python
+#! /usr/bin/env python3
 
 # $Id: test_interpreted.py 6424 2010-09-18 10:43:52Z smerten $
 # Author: David Goodger <goodger@python.org>
@@ -8,17 +8,18 @@
 Tests for interpreted text in docutils/parsers/rst/states.py.
 Test not default/fallback language french.
 """
-from __future__ import absolute_import
 
 if __name__ == '__main__':
-    import __init__
+    import __init__  # noqa: F401
 from test_parsers import DocutilsTestSupport
 
 
 def suite():
-    s = DocutilsTestSupport.ParserTestSuite(suite_settings={'language_code':'fr'})
+    s = DocutilsTestSupport.ParserTestSuite(
+            suite_settings={'language_code': 'fr'})
     s.generateTests(totest)
     return s
+
 
 totest = {}
 

@@ -1,10 +1,12 @@
+.. include:: ../header.txt
+
 ======================
  Python Source Reader
 ======================
 :Author: David Goodger
 :Contact: docutils-develop@lists.sourceforge.net
-:Revision: $Revision: 7302 $
-:Date: $Date: 2012-01-03 20:23:53 +0100 (Di, 03. Jän 2012) $
+:Revision: $Revision: 9051 $
+:Date: $Date: 2022-04-02 23:59:06 +0200 (Sa, 02. Apr 2022) $
 :Copyright: This document has been placed in the public domain.
 
 This document explores issues around extracting and processing
@@ -54,7 +56,7 @@ goes something like this:
 
 I've had trouble reconciling the roles of input parser and output
 writer with the idea of modes ("readers" or "directors").  Does the
-mode govern the tranformation of the input, the output, or both?
+mode govern the transformation of the input, the output, or both?
 Perhaps the mode should be split into two.
 
 For example, say the source of our input is a Python module.  Our
@@ -120,6 +122,7 @@ roles may be defined.
 
 .. _pysource.dtd: pysource.dtd
 .. _docutils.dtd: ../ref/docutils.dtd
+
 
 
 ..

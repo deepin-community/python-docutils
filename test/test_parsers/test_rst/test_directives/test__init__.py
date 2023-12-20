@@ -1,7 +1,6 @@
-#! /usr/bin/env python
-# -*- coding: utf-8 -*-
-# $Id: test__init__.py 8595 2020-12-15 23:06:58Z milde $
-# Author: Günter Milde <milde@users.sourceforge.net>,
+#! /usr/bin/env python3
+# $Id: test__init__.py 9037 2022-03-05 23:31:10Z milde $
+# Author: Günter Milde <milde@users.sf.net>,
 # :License: Released under the terms of the `2-Clause BSD license`_, in short:
 #
 #    Copying and distribution of this file, with or without modification,
@@ -14,16 +13,16 @@
 Test module for `docutils.parsers.rst.directives`.
 """
 
-from __future__ import absolute_import
+import unittest
+
 
 if __name__ == '__main__':
-    import __init__
+    import __init__  # noqa: F401
 from test_parsers import DocutilsTestSupport
 
 import docutils
 import docutils.parsers.null
 from docutils.parsers.rst import directives
-
 
 
 class DirectiveOptionConversionTestCase(DocutilsTestSupport.StandardTestCase):
@@ -43,21 +42,17 @@ class DirectiveOptionConversionTestCase(DocutilsTestSupport.StandardTestCase):
         self.assertTrue('something' == directives.unchanged('something'))
         self.assertEqual(3, directives.unchanged(3))
         self.assertEqual([3], directives.unchanged([3]))
-        
-    # ... 13 more direcive option conversion functions.
+
+    # TODO: 13 more directive option conversion functions.
 
     def test_parser_name(self):
-        self.assertEqual(None, directives.parser_name(None))
-        self.assertEqual(docutils.parsers.null.Parser, 
-                         directives.parser_name('null'))
-        self.assertEqual(docutils.parsers.rst.Parser, 
-                         directives.parser_name('rst'))
-        self.assertEqual(docutils.parsers.recommonmark_wrapper.Parser, 
-                         directives.parser_name('markdown'))
+        self.assertEqual(directives.parser_name(None), None)
+        self.assertEqual(directives.parser_name('null'),
+                         docutils.parsers.null.Parser)
+        self.assertEqual(directives.parser_name('rst'),
+                         docutils.parsers.rst.Parser)
         self.assertRaises(ValueError, directives.parser_name, 'fantasy')
 
 
 if __name__ == '__main__':
-    import unittest
     unittest.main()
-

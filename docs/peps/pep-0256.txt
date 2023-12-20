@@ -1,7 +1,7 @@
 PEP: 256
 Title: Docstring Processing System Framework
-Version: $Revision: 8644 $
-Last-Modified: $Date: 2021-03-26 14:51:36 +0100 (Fr, 26. Mär 2021) $
+Version: $Revision: 8956 $
+Last-Modified: $Date: 2022-01-20 11:11:44 +0100 (Do, 20. Jän 2022) $
 Author: David Goodger <goodger@python.org>
 Discussions-To: <doc-sig@python.org>
 Status: Rejected
@@ -235,7 +235,7 @@ Project Web Site
 ================
 
 A SourceForge project has been set up for this work at
-http://docutils.sourceforge.net/.
+https://docutils.sourceforge.io/.
 
 
 References and Footnotes
@@ -273,7 +273,7 @@ References and Footnotes
 
 .. _docutils: http://www.tibsnjoan.co.uk/docutils.html
 
-.. _Docutils project: http://docutils.sourceforge.net/
+.. _Docutils project: https://docutils.sourceforge.io/
 
 .. _STMinus: http://www.cis.upenn.edu/~edloper/pydoc/
 

@@ -1,5 +1,4 @@
-# -*- coding: utf-8 -*-
-# $Id: local-writer.py 7500 2012-08-22 19:38:14Z grubert $
+# $Id: local-writer.py 9037 2022-03-05 23:31:10Z milde $
 # Author: Engelbert Gruber <grubert@users.sourceforge.net>
 # Copyright: This module is put into the public domain.
 
@@ -7,12 +6,8 @@
 mini-writer to test get_writer_class with local writer
 """
 
-import docutils
-from docutils import nodes, writers, languages
-try:
-    import roman
-except ImportError:
-    import docutils.utils.roman as roman
+from docutils import nodes, writers
+
 
 class Writer(writers.Writer):
 
@@ -31,8 +26,7 @@ class Writer(writers.Writer):
         self.document.walkabout(visitor)
         self.output = visitor.astext()
 
+
 class Translator(nodes.NodeVisitor):
     def __init__(self, document):
         nodes.NodeVisitor.__init__(self, document)
-
-

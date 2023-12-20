@@ -1,15 +1,17 @@
+.. include:: ../header.txt
+
 ===================
  Docutils Web Site
 ===================
 
 :Author: David Goodger; open to all Docutils developers
 :Contact: docutils-develop@lists.sourceforge.net
-:Date: $Date: 2017-07-05 16:33:33 +0200 (Mi, 05. Jul 2017) $
-:Revision: $Revision: 8133 $
+:Date: $Date: 2022-04-02 23:59:06 +0200 (Sa, 02. Apr 2022) $
+:Revision: $Revision: 9051 $
 :Copyright: This document has been placed in the public domain.
 
-The Docutils web site, <http://docutils.sourceforge.net/>, is
-maintained by the ``docutils-update.local`` script, run by project 
+The Docutils web site, <https://docutils.sourceforge.io/>, is
+maintained by the ``docutils-update.local`` script, run by project
 maintainers on their local machines.  The script
 will process any .txt file which is newer than the corresponding .html
 file in the local copy of the project's web directory and upload the changes
@@ -17,7 +19,7 @@ to the web site at SourceForge.
 
 ..  .. old instructions, for cron job:
 
-    The Docutils web site, <http://docutils.sourceforge.net/>, is
+    The Docutils web site, <https://docutils.sourceforge.io/>, is
     maintained automatically by the ``docutils-update`` script, run as an
     hourly cron job on shell.berlios.de (by user "wiemann").  The script
     will process any .txt file which is newer than the corresponding .html
@@ -34,13 +36,13 @@ __ `Adding .txt Files`_
 The docutils-update.local__ script is located at
 ``sandbox/infrastructure/docutils-update.local``.
 
-__ http://docutils.sf.net/sandbox/infrastructure/docutils-update.local
+__ https://docutils.sourceforge.io/sandbox/infrastructure/docutils-update.local
 
 If you want to share files via the web, you can upload them using the
 uploaddocutils.sh__ script
 (``sandbox/infrastructure/uploaddocutils.sh``).
 
-__ http://docutils.sf.net/sandbox/infrastructure/uploaddocutils.sh
+__ https://docutils.sourceforge.io/sandbox/infrastructure/uploaddocutils.sh
 
 
 Setting Up
@@ -48,7 +50,7 @@ Setting Up
 
 (TBA)
 
-.. hint:: 
+.. hint::
   Anyone with checkin privileges can be a web-site maintainer. You need to
   set up the directories for a local website build.
 
@@ -92,10 +94,10 @@ Removing Files & Directories
 
 #. Remove to-be-generated HTML files from
    ``sandbox/infrastructure/htmlfiles.lst``.
-  
+
 #. Removing files and directories from SVN will not trigger their removal
    from the web site.  Files and directories must be manually removed from
-   sourceforge.net (under ``/home/project-web/docutils/htdocs/``). 
+   sourceforge.net (under ``/home/project-web/docutils/htdocs/``).
 
 
 ..

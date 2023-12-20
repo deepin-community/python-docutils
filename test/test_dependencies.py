@@ -1,6 +1,6 @@
-#! /usr/bin/env python
+#! /usr/bin/env python3
 
-# $Id: test_dependencies.py 8357 2019-08-26 16:44:51Z milde $
+# $Id: test_dependencies.py 9068 2022-06-13 12:05:08Z milde $
 # Author: Lea Wiemann <LeWiemann@gmail.com>
 # Copyright: This module has been placed in the public domain.
 
@@ -8,7 +8,6 @@
 Test module for the --record-dependencies option.
 """
 
-import csv
 import os.path
 import unittest
 import DocutilsTestSupport              # must be imported before docutils
@@ -19,12 +18,16 @@ from docutils.parsers.rst.directives.images import PIL
 
 # docutils.utils.DependencyList records POSIX paths,
 # i.e. "/" as a path separator even on Windows (not os.path.join).
-paths = {'include': u'data/include.txt',  # included rst file
-         'raw':     u'data/raw.txt',      # included raw "HTML file"
-         'scaled-image': u'../docs/user/rst/images/biohazard.png',
-         'figure-image': u'../docs/user/rst/images/title.png',
-         'stylesheet':   u'data/stylesheet.txt',
-        }
+paths = {'include': 'data/include.txt',  # included rst file
+         'raw': 'data/raw.txt',      # included raw "HTML file"
+         'scaled-image': '../docs/user/rst/images/biohazard.png',
+         'figure-image': '../docs/user/rst/images/title.png',
+         'stylesheet': 'data/stylesheet.txt',
+         }
+
+# avoid latex writer future warnings:
+latex_settings_overwrites = {'legacy_column_widths': False,
+                             'use_latex_citations': True}
 
 
 class RecordDependenciesTests(unittest.TestCase):
@@ -43,10 +46,10 @@ class RecordDependenciesTests(unittest.TestCase):
         recorder.close()
         # Read the record file:
         record = docutils.io.FileInput(source_path=recordfile,
-                                       encoding='utf8')
+                                       encoding='utf-8')
         return record.read().splitlines()
 
-    def test_dependencies(self):
+    def test_dependencies_xml(self):
         # Note: currently, raw input files are read (and hence recorded) while
         # parsing even if not used in the chosen output format.
         # This should change (see parsers/rst/directives/misc.py).
@@ -66,7 +69,8 @@ class RecordDependenciesTests(unittest.TestCase):
         expected = [paths[key] for key in keys]
         # stylesheets are tested separately in test_stylesheet_dependencies():
         so = {'stylesheet_path': None, 'stylesheet': None}
-        record = sorted(self.get_record(writer_name='html', settings_overrides=so))
+        record = sorted(self.get_record(writer_name='html',
+                                        settings_overrides=so))
         # the order of the files is arbitrary
         expected.sort()
         self.assertEqual(record, expected)
@@ -80,7 +84,9 @@ class RecordDependenciesTests(unittest.TestCase):
         if PIL:
             keys += ['figure-image']
         expected = [paths[key] for key in keys]
-        record = sorted(self.get_record(writer_name='latex'))
+        record = sorted(self.get_record(
+                            writer_name='latex',
+                            settings_overrides=latex_settings_overwrites))
         # the order of the files is arbitrary
         expected.sort()
         self.assertEqual(record, expected)
@@ -94,22 +100,23 @@ class RecordDependenciesTests(unittest.TestCase):
         stylesheet = paths['stylesheet']
         so = {'stylesheet_path': paths['stylesheet'],
               'stylesheet': None}
-
+        so.update(latex_settings_overwrites)
         so['embed_stylesheet'] = False
         record = self.get_record(writer_name='html', settings_overrides=so)
         self.assertTrue(stylesheet not in record,
-                     '%r should not be in %r' % (stylesheet, record))
+                        '%r should not be in %r' % (stylesheet, record))
         record = self.get_record(writer_name='latex', settings_overrides=so)
         self.assertTrue(stylesheet not in record,
-                     '%r should not be in %r' % (stylesheet, record))
+                        '%r should not be in %r' % (stylesheet, record))
 
         so['embed_stylesheet'] = True
         record = self.get_record(writer_name='html', settings_overrides=so)
         self.assertTrue(stylesheet in record,
-                     '%r should be in %r' % (stylesheet, record))
+                        '%r should be in %r' % (stylesheet, record))
+        so['embed_stylesheet'] = True
         record = self.get_record(writer_name='latex', settings_overrides=so)
         self.assertTrue(stylesheet in record,
-                     '%r should be in %r' % (stylesheet, record))
+                        '%r should be in %r' % (stylesheet, record))
 
 
 if __name__ == '__main__':

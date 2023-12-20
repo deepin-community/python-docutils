@@ -1,8 +1,7 @@
 #!/bin/sh
-''''exec python -u "$0" "$@" #'''
-from __future__ import print_function
+''''exec python3 -u "$0" "$@" #'''
 
-# $Id: alltests.py 8346 2019-08-26 12:11:32Z milde $
+# $Id: alltests.py 9072 2022-06-15 11:31:09Z milde $
 # Author: David Goodger <goodger@python.org>
 # Copyright: This module has been placed in the public domain.
 
@@ -15,22 +14,24 @@ are run.
 import time
 # Start point for actual elapsed time, including imports
 # and setup outside of unittest.
-start = time.time()  # noqa
+start = time.time()
 
-import sys
-import atexit
-import os
-import platform
-import DocutilsTestSupport              # must be imported before docutils
-import docutils
+import sys                  # noqa: E402
+import atexit               # noqa: E402
+import os                   # noqa: E402
+import platform             # noqa: E402
+
+import DocutilsTestSupport  # noqa: E402 must be imported before docutils
+import docutils             # noqa: E402
 
 
-class Tee(object):
+class Tee:
 
     """Write to a file and a stream (default: stdout) simultaneously."""
 
     def __init__(self, filename, stream=sys.__stdout__):
-        self.file = open(filename, 'w')
+        self.file = open(filename, 'w', encoding='utf-8',
+                         errors='backslashreplace')
         atexit.register(self.close)
         self.stream = stream
         self.encoding = getattr(stream, 'encoding', None)
@@ -42,13 +43,11 @@ class Tee(object):
     def write(self, string):
         try:
             self.stream.write(string)
-            if self.file:
-                self.file.write(string)
-        except UnicodeEncodeError:   # Py3k writing to "ascii" stream/file
-            string = string.encode('raw_unicode_escape').decode('ascii')
-            self.stream.write(string)
-            if self.file:
-                self.file.write(string)
+        except UnicodeEncodeError:
+            bstring = string.encode(self.encoding, errors='backslashreplace')
+            self.stream.write(bstring.decode())
+        if self.file:
+            self.file.write(string)
 
     def flush(self):
         self.stream.flush()

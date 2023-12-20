@@ -1,25 +1,15 @@
-#! /usr/bin/env python
-# -*- coding: utf-8 -*-
-
-# $Id: test_east_asian_text.py 8481 2020-01-31 08:17:24Z milde $
+#! /usr/bin/env python3
+# $Id: test_east_asian_text.py 9037 2022-03-05 23:31:10Z milde $
 # Author: David Goodger <goodger@python.org>
 # Copyright: This module has been placed in the public domain.
 
 """
 Tests for East Asian text with double-width characters.
 """
-from __future__ import absolute_import
 
 if __name__ == '__main__':
-    import __init__
+    import __init__  # noqa: F401
 from test_parsers import DocutilsTestSupport
-
-import unicodedata
-
-try:
-    east_asian_width = unicodedata.east_asian_width
-except AttributeError:
-    east_asian_width = None
 
 
 def suite():
@@ -27,22 +17,23 @@ def suite():
     s.generateTests(totest)
     return s
 
+
 totest = {}
 
 totest['double-width'] = [
-[u"""\
+["""\
 タイトル1
 =========
 
 タイトル2
 ========
 """,
-u"""\
+"""\
 <document source="test data">
-    <section ids="id1" names="タイトル1">
+    <section ids="section-1" names="タイトル1">
         <title>
             タイトル1
-    <section ids="id2" names="タイトル2">
+    <section ids="section-2" names="タイトル2">
         <title>
             タイトル2
         <system_message level="2" line="5" source="test data" type="WARNING">
@@ -52,7 +43,7 @@ u"""\
                 タイトル2
                 ========
 """],
-[u"""
+["""
 +-----------------------+
 | * ヒョウ:ダイ1ギョウ  |
 | * ダイ2ギョウ         |
@@ -61,7 +52,7 @@ u"""\
 | * ダイ2ギョウ         |
 +-----------------------+
 """,
-u"""\
+"""\
 <document source="test data">
     <table>
         <tgroup cols="1">
@@ -82,7 +73,7 @@ u"""\
                             * ダイ1ギョウ
                             * ダイ2ギョウ
 """],
-[u"""\
+["""\
 Complex spanning pattern (no edge knows all rows/cols):
 
 +--------+---------------------+
@@ -93,7 +84,7 @@ Complex spanning pattern (no edge knows all rows/cols):
 | 南西・南セル          | セル |
 +-----------------------+------+
 """,
-u"""\
+"""\
 <document source="test data">
     <paragraph>
         Complex spanning pattern (no edge knows all rows/cols):
@@ -125,7 +116,7 @@ u"""\
                         <paragraph>
                             南西・南セル
 """],
-[u"""\
+["""\
 =========  =========
 ダイ1ラン  ダイ2ラン
 =========  =========
@@ -134,7 +125,7 @@ u"""\
 ダイ1ラン ダイ2ラン
 ========  =========
 """,
-u"""\
+"""\
 <document source="test data">
     <table>
         <tgroup cols="2">
@@ -157,7 +148,7 @@ u"""\
             ダイ1ラン ダイ2ラン
             ========  =========
 """],
-[u"""\
+["""\
 Some ambiguous-width characters:
 
 = ===================================
@@ -167,12 +158,12 @@ Some ambiguous-width characters:
 » right pointing guillemet
 – en-dash
 — em-dash
-‘ single turned comma quotation mark 
-’ single comma quotation mark 
-‚ low single comma quotation mark 
-“ double turned comma quotation mark 
-” double comma quotation mark 
-„ low double comma quotation mark 
+‘ single turned comma quotation mark
+’ single comma quotation mark
+‚ low single comma quotation mark
+“ double turned comma quotation mark
+” double comma quotation mark
+„ low double comma quotation mark
 † dagger
 ‡ double dagger
 … ellipsis
@@ -311,9 +302,9 @@ b"""\
 """.decode('raw_unicode_escape')],
 ]
 '''
-[u"""\
+["""\
 """,
-u"""\
+"""\
 """],
 '''
 

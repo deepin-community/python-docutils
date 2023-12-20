@@ -1,14 +1,17 @@
+.. include:: ../header.txt
+
 ===================
  Docutils_ Testing
 ===================
 
 :Authors: Lea Wiemann <LeWiemann@gmail.com>;
-          David Goodger <goodger@python.org>
-:Revision: $Revision: 8491 $
-:Date: $Date: 2020-02-06 16:10:46 +0100 (Do, 06. Feb 2020) $
+          David Goodger <goodger@python.org>;
+          Docutils developers <docutils-developers@lists.sourceforge.net>
+:Revision: $Revision: 9051 $
+:Date: $Date: 2022-04-02 23:59:06 +0200 (Sa, 02. Apr 2022) $
 :Copyright: This document has been placed in the public domain.
 
-.. _Docutils: http://docutils.sourceforge.net/
+.. _Docutils: https://docutils.sourceforge.io/
 
 .. contents::
 
@@ -24,81 +27,87 @@ Running the Test Suite
 ======================
 
 Before checking in any changes, run the entire Docutils test suite to
-be sure that you haven't broken anything.  From a shell::
+be sure that you haven't broken anything.  From a shell do [#]_::
 
     cd docutils/test
-    ./alltests.py
+    python -u alltests.py
 
-You should run this with multiple Python versions. You can use ``tox`` for
-this purpose. To run tests against all supported versions of Python, run::
+Before `checking in`__ changes to the Docutils core, run the tests on
+all `supported Python versions`_ (see below for details).
+In a pinch, the edge cases should cover most of it.
 
-    tox
+__ policies.html#check-ins
 
-To run against a specific version of Python, use the ``pyNN`` environment.
-For example::
+.. note::
+   Due to incompatible customization of the standard unittest_
+   framework, the test suite does not work with popular test frameworks
+   like pytest_ or nose_.
 
-    tox -e py37
+   .. _unittest: https://docs.python.org/3/library/unittest.html
+   .. _pytest: https://pypi.org/project/pytest/
+   .. _nose: https://pypi.org/project/nose3/
 
+   .. cf. https://sourceforge.net/p/docutils/feature-requests/81/
 
-Python Versions
-===============
+.. [#] When using the `Python launcher for Windows`__, make sure to
+   specify a Python version, e.g., ``py -3.9 -u alltests.py`` for
+   Python 3.9.
 
-A docutils release has a commitment to support a minimum version and beyond.
-Before a release is cut, tests must pass in all supported Python versions.
+   __ https://docs.python.org/3/using/windows.html#python-launcher-for-windows
 
-Docutils 0.16 supports Python 2.7 and Python 3.5 or later.
-
-Therefore, you should install Python 2.7 as well as 3.5 up to the latest Python
-(3.7 at the time of this writing) and always run the tests on all of
-them (see `Testing across multiple python versions`_).
-In a pinch, the edge cases (2.7, and 3.7) should cover most of it.
-
-Good resources covering the differences between Python versions:
-
-* `What's New in Python 2.7`__
-* `What's New in Python 3.5`__
-* `What's New in Python 3.6`__
-* `What's New in Python 3.7`__
-* `PEP 290 - Code Migration and Modernization`__
-
-__ https://docs.python.org/whatsnew/2.7.html
-__ https://docs.python.org/3/whatsnew/3.5.html
-__ https://docs.python.org/3/whatsnew/3.6.html
-__ https://docs.python.org/3/whatsnew/3.7.html
-__ http://www.python.org/peps/pep-0290.html
-
-.. _Python Check-in Policies: http://www.python.org/dev/tools.html
-.. _sandbox directory:
-   http://docutils.svn.sourceforge.net/svnroot/docutils/trunk/sandbox/
+   .. cf. https://sourceforge.net/p/docutils/bugs/434/
 
 
-Testing across multiple python versions
+.. _Python versions:
+
+Testing across multiple Python versions
 ---------------------------------------
 
-`pyenv`_ can be installed and configured (see `installing pyenv`_) to
-test multiple python versions::
+A Docutils release has a commitment to support a minimum Python version [#]_
+and beyond. Before a release is cut, tests must pass in all
+`supported versions`_.
 
-    # assuming your system runs 2.7.x
-    pyenv install 3.5.7
-    pyenv install 3.6.9
-    pyenv install 3.7.3
-    pyenv global system 3.5.7 3.6.9 3.7.3
-
-    # reset your shims
-    rm -rf ~/.pyenv/shims && pyenv rehash
-
-This will give you ``python2.7`` and ``python3.5`` through ``python3.7``.
-You will also get ``pip2.7``, ``pip3.5``, etc.
-
-To save time, you can use `tox`_. To install tox, run ``pip install tox``.
-Once installed, from shell::
+You can use `tox`_ to test with all supported versions in one go.
+From the shell::
 
     cd docutils
     tox
 
-.. _tox: https://tox.readthedocs.org/en/latest/
+To test a specific version, use the ``pyNN`` environment. For example::
+
+    tox -e py37
+
+`pyenv`_ can be installed and configured (see `installing pyenv`_) to
+get multiple Python versions::
+
+    # assuming your system runs 3.9.x
+    pyenv install 3.7.12
+    pyenv install 3.8.12
+    pyenv install 3.10.1
+    pyenv global system 3.7.12 3.8.12 3.10.1
+
+    # reset your shims
+    rm -rf ~/.pyenv/shims && pyenv rehash
+
+This will give you ``python3.7`` through ``python3.10``.
+Then run::
+
+    python3.7 -u alltests.py
+    [...]
+    python3.10 -u alltests.py
+
+.. [#] Good resources covering the differences between Python versions
+   are the `What's New` documents (`What's New in Python 3.10`__ and
+   similar).
+
+__ https://docs.python.org/3/whatsnew/3.10.html
+
+
+.. _supported versions:
+.. _supported Python versions: ../../README.html#requirements
 .. _pyenv: https://github.com/yyuu/pyenv
 .. _installing pyenv: https://github.com/yyuu/pyenv#installation
+.. _tox: https://pypi.org/project/tox/
 
 
 Unit Tests
@@ -130,7 +139,7 @@ look at the following imaginary ``test_square.py``::
 
     #! /usr/bin/env python
 
-    # $Id: testing.txt 8491 2020-02-06 15:10:46Z milde $
+    # $Id: testing.txt 9051 2022-04-02 21:59:06Z milde $
     # Author: Your Name <your_email_address@example.org>
     # Copyright: This module has been placed in the public domain.
 
@@ -277,7 +286,7 @@ commit the change.
 
 .. [#] The validity of `Docutils XML` can be tested with
    ``xmllint <document-referencing-local-Docutils-DTD>.xml --valid --noout``.
-     
+
    .. note: the ``--dtdvalid`` and ``--nonet`` options did not help override
      a reference to the PUBLIC "docutils.dtd" if there is a local version
      on the system (e.g. /usr/share/xml/docutils/docutils.dtd in Debian).

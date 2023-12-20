@@ -1,6 +1,6 @@
-#! /usr/bin/env python
+#! /usr/bin/env python3
 
-# $Id: test_html4css1_parts.py 8481 2020-01-31 08:17:24Z milde $
+# $Id: test_html4css1_parts.py 9037 2022-03-05 23:31:10Z milde $
 # Author: reggie dugard <reggie@users.sourceforge.net>
 # Copyright: This module has been placed in the public domain.
 
@@ -11,12 +11,10 @@ Note: the 'body' and 'whole' entries have been removed from the parts
 dictionaries (redundant), along with 'meta' and 'stylesheet' entries with
 standard values, and any entries with empty values.
 """
-from __future__ import absolute_import
 
 if __name__ == '__main__':
-    import __init__
+    import __init__  # noqa: F401
 from test_writers import DocutilsTestSupport
-from docutils import core
 
 
 def suite():
@@ -198,7 +196,7 @@ Some stuff
 """]
 ])
 
-totest['No title promotion'] = ({'doctitle_xform' : 0,
+totest['No title promotion'] = ({'doctitle_xform': 0,
                                  'stylesheet_path': '',
                                  'embed_stylesheet': 0}, [
 ["""\

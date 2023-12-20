@@ -1,15 +1,15 @@
-#!/usr/bin/env python
-
-# $Id: test_functional.py 8534 2020-08-10 09:47:47Z grubert $
+#!/usr/bin/env python3
+# $Id: test_functional.py 9077 2022-06-17 11:31:28Z milde $
 # Author: Lea Wiemann <LeWiemann@gmail.com>
 # Copyright: This module has been placed in the public domain.
 
 """
 Perform tests with the data in the functional/ directory.
 
-Read README.txt for details on how this is done.
+Please see the documentation on `functional testing`__ for details.
+
+__ ../../docs/dev/testing.html#functional
 """
-from __future__ import print_function
 
 import sys
 import os
@@ -36,7 +36,7 @@ class FunctionalTestSuite(DocutilsTestSupport.CustomTestSuite):
 
     def __init__(self):
         """Process all config files in functional/tests/."""
-        DocutilsTestSupport.CustomTestSuite.__init__(self)
+        super().__init__()
         os.chdir(DocutilsTestSupport.testroot)
         self.clear_output_directory()
         self.added = 0
@@ -90,11 +90,19 @@ expected output and check it in:
   svn add %(exp)s
   svn commit -m "<comment>" %(exp)s"""
 
-    def __init__(self, *args, **kwargs):
-        """Set self.configfile, pass arguments to parent __init__."""
-        self.configfile = kwargs['configfile']
-        del kwargs['configfile']
-        DocutilsTestSupport.CustomTestCase.__init__(self, *args, **kwargs)
+    def __init__(self, *args, configfile=None, **kwargs):
+        """
+        Set self.configfile, pass remaining arguments to parent.
+
+        Requires keyword argument `configfile`.
+
+        Note: the modified signature is incompatible with
+        the "pytest" and "nose" frameworks.
+        """  # cf. feature-request #81
+
+        assert configfile is not None, 'required argument'
+        self.configfile = configfile
+        super().__init__(*args, **kwargs)
 
     def shortDescription(self):
         return 'test_functional.py: ' + self.configfile
@@ -109,10 +117,11 @@ expected output and check it in:
         namespace['settings_overrides'] = {'_disable_config': True}
         # Read the variables set in the default config file and in
         # the current config file into namespace:
-        with open(join_path(datadir, 'tests', '_default.py')) as f:
+        with open(join_path(datadir, 'tests', '_default.py'),
+                  encoding='utf-8') as f:
             defaultpy = f.read()
             exec(defaultpy, namespace)
-        with open(self.configfile) as f:
+        with open(self.configfile, encoding='utf-8') as f:
             exec(f.read(), namespace)
         # Check for required settings:
         assert 'test_source' in namespace,\
@@ -142,32 +151,17 @@ expected output and check it in:
         # Get output (automatically written to the output/ directory
         # by publish_file):
         output = docutils.core.publish_file(**params)
-        # ensure output is unicode
-        output_encoding = params.get('output_encoding', 'utf-8')
-        if sys.version_info < (3, 0):
-            try:
-                output = output.decode(output_encoding)
-            except UnicodeDecodeError:
-                # failsafe
-                output = output.decode('latin1', 'replace')
         # Normalize line endings:
         output = '\n'.join(output.splitlines())
         # Get the expected output *after* writing the actual output.
         no_expected = self.no_expected_template % {
             'exp': expected_path, 'out': params['destination_path']}
         self.assertTrue(os.access(expected_path, os.R_OK), no_expected)
-        if sys.version_info < (3, 0):
-            f = open(expected_path, 'r')
-        else: # samples are UTF8 encoded. 'rb' leads to errors with Python 3!
-            f = open(expected_path, 'r', encoding='utf-8')
+        # samples are UTF-8 encoded. 'rb' leads to errors with Python 3!
+        f = open(expected_path, 'r', encoding='utf-8')
         # Normalize line endings:
         expected = '\n'.join(f.read().splitlines())
         f.close()
-        if sys.version_info < (3, 0):
-            try:
-                expected = expected.decode(output_encoding)
-            except UnicodeDecodeError:
-                expected = expected.decode('latin1', 'replace')
 
         diff = self.expected_output_differs_template % {
             'exp': expected_path, 'out': params['destination_path']}
@@ -177,8 +171,6 @@ expected output and check it in:
             diff = ''.join(difflib.unified_diff(
                 expected.splitlines(True), output.splitlines(True),
                 expected_path, params['destination_path']))
-            if sys.version_info < (3, 0):
-                diff = diff.encode(sys.stderr.encoding or 'ascii', 'replace')
             print('\n%s:' % (self,), file=sys.stderr)
             print(diff, file=sys.stderr)
             raise

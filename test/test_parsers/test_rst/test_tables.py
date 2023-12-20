@@ -1,18 +1,17 @@
-#! /usr/bin/env python
+#! /usr/bin/env python3
 
-# $Id: test_tables.py 8481 2020-01-31 08:17:24Z milde $
+# $Id: test_tables.py 9037 2022-03-05 23:31:10Z milde $
 # Author: David Goodger <goodger@python.org>
 # Copyright: This module has been placed in the public domain.
 
 """
 Tests for states.py.
 """
-from __future__ import absolute_import
 
 import os
 
 if __name__ == '__main__':
-    import __init__
+    import __init__  # noqa: F401
 from test_parsers import DocutilsTestSupport
 
 
@@ -20,6 +19,7 @@ def suite():
     s = DocutilsTestSupport.ParserTestSuite()
     s.generateTests(totest)
     return s
+
 
 mydir = 'test_parsers/test_rst/'
 include2 = os.path.join(mydir, 'test_directives/include2.txt')
@@ -572,8 +572,8 @@ No blank line after table.
 | (The first cell of this table may expand                                     |
 | to accommodate long filesystem paths.)                                       |
 +------------------------------------------------------------------------------+
-""") % ('\n'.join(['|    %-70s    |' % include2[part * 70 : (part + 1) * 70]
-                   for part in range(len(include2) // 70 + 1)])),
+""") % ('\n'.join('|    %-70s    |' % include2[part * 70 : (part + 1) * 70]  # noqa: E203
+                  for part in range(len(include2) // 70 + 1))),
 """\
 <document source="test data">
     <table>
@@ -607,8 +607,8 @@ Something before.
 Something afterwards.
 
 And more.
-""") % ('\n'.join(['|    %-70s    |' % include2[part * 70 : (part + 1) * 70]
-                   for part in range(len(include2) // 70 + 1)])),
+""") % ('\n'.join('|    %-70s    |' % include2[part * 70 : (part + 1) * 70]  # noqa: E203
+                  for part in range(len(include2) // 70 + 1))),
 """\
 <document source="test data">
     <paragraph>
@@ -1275,8 +1275,8 @@ Inclusion  .. include::
 Note       The first row of this table may expand
            to accommodate long filesystem paths.
 =========  =====================================================================
-""" % ('\n'.join(['              %-65s' % include2[part * 65 : (part + 1) * 65]
-                  for part in range(len(include2) // 65 + 1)])),
+""" % ('\n'.join('              %-65s' % include2[part * 65 : (part + 1) * 65]  # noqa: E203
+                 for part in range(len(include2) // 65 + 1))),
 """\
 <document source="test data">
     <table>

@@ -1,10 +1,12 @@
+.. include:: ../header.txt
+
 =====================
  Docstring Semantics
 =====================
 :Author: David Goodger
 :Contact: docutils-develop@lists.sourceforge.net
-:Revision: $Revision: 7302 $
-:Date: $Date: 2012-01-03 20:23:53 +0100 (Di, 03. Jän 2012) $
+:Revision: $Revision: 9051 $
+:Date: $Date: 2022-04-02 23:59:06 +0200 (Sa, 02. Apr 2022) $
 :Copyright: This document has been placed in the public domain.
 
 These are notes for a possible future PEP providing the final piece of
@@ -53,7 +55,7 @@ prescribes a methodology.
             default).
 
       :Return:
-          - a list of indented lines with mininum indent removed;
+          - a list of indented lines with minimum indent removed;
           - the amount of the indent;
           - whether or not the block finished with a blank line or at
             the end of `lines`.
@@ -101,13 +103,13 @@ Other Ideas
   an attachment to his Doc-SIG post of 2001-05-30.
 
 
-.. _PEP 257: http://www.python.org/peps/pep-0257.html
+.. _PEP 257: https://peps.python.org/pep-0257
 .. _JavaDoc: http://java.sun.com/j2se/javadoc/
 .. _pythondoc: http://starship.python.net/crew/danilo/pythondoc/
 .. _Grouch: http://www.mems-exchange.org/software/grouch/
-.. _epydoc: http://epydoc.sf.net/
+.. _epydoc: http://epydoc.sourceforge.net/
 .. _iPhrase Python documentation conventions:
-   http://mail.python.org/pipermail/doc-sig/2001-May/001840.html
+   https://mail.python.org/pipermail/doc-sig/2001-May/001840.html
 
 
 ..

@@ -1,25 +1,26 @@
-#! /usr/bin/env python
+#! /usr/bin/env python3
 
-# $Id: test_date.py 8481 2020-01-31 08:17:24Z milde $
+# $Id: test_date.py 9078 2022-06-17 11:31:40Z milde $
 # Author: David Goodger <goodger@python.org>
 # Copyright: This module has been placed in the public domain.
 
 """
 Tests for the misc.py "date" directive.
 """
-from __future__ import absolute_import
 
 if __name__ == '__main__':
-    import __init__
+    import __init__  # noqa: F401
 from test_parsers import DocutilsTestSupport
 import time
 
-from docutils.utils.error_reporting import locale_encoding
+from docutils.io import _locale_encoding  # noqa
+
 
 def suite():
     s = DocutilsTestSupport.ParserTestSuite()
     s.generateTests(totest)
     return s
+
 
 totest = {}
 
@@ -61,15 +62,16 @@ Today's date is |date|.
 ]
 
 # some locales return non-ASCII characters for names of days or months
-if locale_encoding in ['utf8', 'utf-8', 'latin-1']:
+# ensure the directive handles them correctly
+if _locale_encoding in ('utf-8', 'utf8', 'latin-1', 'iso-8859-1'):
     totest['decode date'] = [
-    [u"""\
-.. |date| date:: t\xc3glich
+    ["""\
+.. |date| date:: täglich
 """,
-    u"""\
+    """\
 <document source="test data">
     <substitution_definition names="date">
-        t\xc3glich
+        täglich
 """],
     ]
 

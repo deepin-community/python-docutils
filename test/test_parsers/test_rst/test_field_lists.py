@@ -1,16 +1,15 @@
-#! /usr/bin/env python
+#! /usr/bin/env python3
 
-# $Id: test_field_lists.py 8481 2020-01-31 08:17:24Z milde $
+# $Id: test_field_lists.py 9037 2022-03-05 23:31:10Z milde $
 # Author: David Goodger <goodger@python.org>
 # Copyright: This module has been placed in the public domain.
 
 """
 Tests for states.py.
 """
-from __future__ import absolute_import
 
 if __name__ == '__main__':
-    import __init__
+    import __init__  # noqa: F401
 from test_parsers import DocutilsTestSupport
 
 
@@ -18,6 +17,7 @@ def suite():
     s = DocutilsTestSupport.ParserTestSuite()
     s.generateTests(totest)
     return s
+
 
 totest = {}
 
@@ -446,11 +446,11 @@ Nested field lists on one line:
         <field>
             <field_name>
                 Field name with \n\
-                <problematic ids="id2" refid="id1">
+                <problematic ids="problematic-1" refid="system-message-1">
                     *
                 bad inline markup
             <field_body>
-                <system_message backrefs="id2" ids="id1" level="2" line="1" source="test data" type="WARNING">
+                <system_message backrefs="problematic-1" ids="system-message-1" level="2" line="1" source="test data" type="WARNING">
                     <paragraph>
                         Inline emphasis start-string without end-string.
                 <paragraph>
@@ -661,7 +661,7 @@ Not recognized as field list items:
                     works only when the role follows the text
         <field>
             <field_name>
-                a 
+                a \n\
                 <literal classes="code">
                     complex
                  field name

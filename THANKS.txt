@@ -5,8 +5,8 @@ Acknowledgements
 
 :Author: David Goodger
 :Contact: goodger@python.org
-:Date: $Date: 2015-02-09 00:21:18 +0100 (Mo, 09. Feb 2015) $
-:Revision: $Revision: 7784 $
+:Date: $Date: 2022-01-21 14:45:42 +0100 (Fr, 21. Jän 2022) $
+:Revision: $Revision: 8959 $
 :Copyright: This document has been placed in the public domain.
 
 I would like to acknowledge the people who have made a direct impact
@@ -162,8 +162,8 @@ donations, tasty treats, and related projects:
 
 Thank you!
 
-Special thanks to `SourceForge <http://sourceforge.net>`__ and the
-`Python Software Foundation <http://www.python.org/psf/>`__.
+Special thanks to `SourceForge <https://sourceforge.net>`__ and the
+`Python Software Foundation <https://www.python.org/psf/>`__.
 
 Hopefully I haven't forgotten anyone or misspelled any names;
 apologies (and please let me know!) if I have.

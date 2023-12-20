@@ -1,16 +1,15 @@
-#! /usr/bin/env python
+#! /usr/bin/env python3
 
-# $Id: test_line_blocks.py 8481 2020-01-31 08:17:24Z milde $
+# $Id: test_line_blocks.py 9037 2022-03-05 23:31:10Z milde $
 # Author: David Goodger <goodger@python.org>
 # Copyright: This module has been placed in the public domain.
 
 """
 Tests for the body.py 'line-block' directive.
 """
-from __future__ import absolute_import
 
 if __name__ == '__main__':
-    import __init__
+    import __init__  # noqa: F401
 from test_parsers import DocutilsTestSupport
 
 
@@ -18,6 +17,7 @@ def suite():
     s = DocutilsTestSupport.ParserTestSuite()
     s.generateTests(totest)
     return s
+
 
 totest = {}
 
@@ -47,7 +47,7 @@ totest['line_blocks'] = [
 .. line-block::
    :class: linear
    :name:  cit:short
-   
+
    This is a line block with options.
 """,
 """\
@@ -67,13 +67,13 @@ totest['line_blocks'] = [
     <line_block>
         <line>
             Inline markup \n\
-            <problematic ids="id2" refid="id1">
+            <problematic ids="problematic-1" refid="system-message-1">
                 *
             may not span
         <line_block>
             <line>
                 multiple lines* of a line block.
-    <system_message backrefs="id2" ids="id1" level="2" line="3" source="test data" type="WARNING">
+    <system_message backrefs="problematic-1" ids="system-message-1" level="2" line="3" source="test data" type="WARNING">
         <paragraph>
             Inline emphasis start-string without end-string.
 """],

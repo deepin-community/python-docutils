@@ -1,4 +1,4 @@
-#! /usr/bin/env python
+#! /usr/bin/env python3
 
 # $Id: test_replace.py 4667 2006-07-12 21:40:56Z wiemann $
 # Author: David Goodger <goodger@python.org>
@@ -8,17 +8,18 @@
 Tests for misc.py "replace" directive.
 Test in french (not default/fallback language).
 """
-from __future__ import absolute_import
 
 if __name__ == '__main__':
-    import __init__
+    import __init__  # noqa: F401
 from test_parsers import DocutilsTestSupport
 
 
 def suite():
-    s = DocutilsTestSupport.ParserTestSuite(suite_settings={'language_code':'fr'})
+    s = DocutilsTestSupport.ParserTestSuite(
+            suite_settings={'language_code': 'fr'})
     s.generateTests(totest)
     return s
+
 
 totest = {}
 

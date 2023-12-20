@@ -6,8 +6,8 @@
 
 :Contact: grubert@users.sourceforge.net
 :Maintainer: docutils-develop@lists.sourceforge.net
-:Date: $Date: 2021-04-17 14:41:26 +0200 (Sa, 17. Apr 2021) $
-:Revision: $Revision: 8705 $
+:Date: $Date: 2022-07-05 22:04:21 +0200 (Di, 05. Jul 2022) $
+:Revision: $Revision: 9103 $
 :Web site: https://docutils.sourceforge.io/
 :Copyright: This document has been placed in the public domain.
 
@@ -20,66 +20,88 @@ For a more detailed list of changes, please see the Docutils `HISTORY`_.
 Future changes
 ==============
 
-* `latex` writer: The default for the configuration setting
-  `legacy_class_functions`_ will change to "False". Adapt stylesheets
-  modifying ``\DUadmonition`` and/or ``\DUtitle`` or set to "True".
+* Setup:
+
+  - Do not install the auxilliary script ``tools/rst2odt_prepstyles.py``
+    in the binary PATH.
+
+  - Remove file ``install.py``. There are better ways, see README.txt__.
+
+    __ README.html#installation
+
+* Input encoding:
+
+  - Reduce chances of unrecognised character mix-ups (mojibake).
+
+    Stop using the hard-coded fallback "latin-1" if the
+    `input-encoding`_ is not specified and decoding with UTF-8 fails.
+
+    Don't use the locale encoding as fallback in `UTF-8 mode`_.
+
+  - Only remove BOM (U+FEFF ZWNBSP at start of data), no other ZWNBSPs.
+
+  .. _input-encoding: docs/user/config.html#input-encoding
+  .. _UTF-8 mode: https://docs.python.org/3/library/os.html#utf8-mode
 
 * `html5` writer:
 
-  - Use semantic tags <aside> for footnote text, citations, for topics
-    (except abstract), admonitions, and system messages, and <nav> for
-    the Table of Contents.
+  - Stop setting the "footnote-reference" class value for footnote
+    references. Since 0.18, you can use the CSS selector
+    ``[role="doc-noteref"]`` instead of ``.footnote-reference``
+    (see minimal.css for examples).
 
-  - Use <summary> and <details> tags for term and definition of a
-    definition list with class value "details".
+  - Use dpub-ARIA role "doc-footnote" (instead of ARIA role "note")
+    for footnotes in Docutils 0.20.
 
-  - Write footnote brackets and field term colons to HTML, so that
-    they are present also without CSS and when copying text.
-    Hide with CSS if required.
+  - Move attribution behind the blockquote to comply with the `"living
+    standard"`__. (HTML5__ allows <cite> elements inside a blockquote.)
 
-  - Move attribution behind the blockquote to comply with
-    https://html.spec.whatwg.org/#the-blockquote-element.
+    __ https://html.spec.whatwg.org/#the-blockquote-element
+    __ https://www.w3.org/TR/2014/REC-html5-20141028/grouping-content.html
+       #the-blockquote-element
 
-* `htm4css1` writer: Support the embed_images_ option.
+  - Remove option ``--embed-images`` (obsoleted by "image_loading_")
+    in Docutils 2.0.
 
-* `s5_html` writer: Remove the IE PNG Fix by Angus Turnbull. IE has
-  native PNG support since version 7.
+    .. _image_loading: docs/user/config.html#image-loading
 
-* Make <meta> a standard Docutils doctree node.
+* `latex2e` writer:
 
-  The `meta directive`__ will insert <meta> instead of pending nodes.
-  Writers may ignore some or all <meta> elements if they are not
-  supported by the output format.
+  - Change default of use_latex_citations_ setting to True
+    in Docutils 1.0.
 
-  The ``transforms/components.Filter`` class will become obsolete by
-  this change and may be removed in future.
+  - Change default of legacy_column_widths_ setting to False
+    in Docutils 1.0.
 
-  __ docs/ref/rst/directives.html#meta
+  - Remove ``use_verbatim_when_possible`` setting
+    (use literal_block_env_: verbatim) in Docutils 2.0.
 
-* ``Node.traverse()`` will return an iterator instead of a list.
+  - Do not insert ``\usepackage[utf8]{inputenc}`` into UTF-8 encoded
+    LaTeX sources. UTF-8 is the default encoding for LaTeX2e since 2018.
 
-* Remove ``utils.unique_combinations``
-  (obsoleted by ``itertools.combinations``).
+* `xetex` writer:
 
-* Eventually remove the "rawsource" attribute and argument from nodes.Text:
-  we store the null-escaped text in Text nodes since 0.16 so there is no
-  additional information in the rawsource.
+  - Settings in the "latex2e writer" `configuration file section`__ will
+    be ignored in Docutils 0.20. Move settings intended for both, `xetex`
+    and `latex2e` writers to section "latex writers".
 
-* If the id_prefix_ setting is non-empty, leading number and hyphen characters
-  will not be stripped from a `reference name`_ during `identifier
-  normalization`_. This may change generated `identifier keys`.
+    __ docs/user/config.html#configuration-file-sections-entries
 
-  Example: with ``--id-prefix="DU-"``, a section with title "34. May"
-  currently gets the identifier key ``DU-may`` and after the change the
-  identifier key ``DU-34-may``.
+* Remove the "rawsource" argument from nodes.Text.__init__()
+  (deprecated and ignored since Docutils 0.18) in Docutils 2.0.
 
-* The default value for auto_id_prefix_ will change to "%". This means
-  auto-generated IDs will use the tag name as prefix. Set auto_id_prefix_ to
-  "id" if you want unchanged auto-IDs or to "%" if you want the new
-  feature already in 0.17.
+* Remove the compatibility hacks `nodes.reprunicode` and `nodes.ensure_str()`
+  in Docutils 0.21 or later. They are not required with Python 3.x.
 
-* The default HTML writer "html" with frontend ``rst2html.py`` may change
-  from "html4css1" to "html5".
+* Drop support for `old-format configuration files`_ in Docutils 2.0.
+
+* Move math format conversion from docutils/utils/math (called from
+  docutils/writers/_html_base.py) to a transform__.
+
+  __ docs/ref/transforms.html
+
+* The default HTML writer "html" with frontend ``rst2html.py`` will change
+  from "html4css1" to "html5" in Docutils 2.0.
 
   Use ``get_writer_by_name('html')`` or the rst2html.py_ front end, if you
   want the output to be up-to-date automatically.
@@ -88,18 +110,183 @@ Future changes
   stability of the generated HTML code, e.g. because you use a custom
   style sheet or post-processing that may break otherwise.
 
-.. _id_prefix: docs/user/config.html#id-prefix
-.. _auto_id_prefix: docs/user/config.html#auto-id-prefix
+* Remove the ``--html-writer`` option of the ``buildhtml.py`` application
+  (obsoleted by the `"writer" option`_) in Docutils 2.0.
+
+.. _old-format configuration files:
+   docs/user/config.html#old-format-configuration-files
 .. _rst2html.py: docs/user/tools.html#rst2html-py
 .. _reference name: docs/ref/rst/restructuredtext.html#reference-names
+.. _literal_block_env: docs/user/config.html#literal-block-env
+.. _use_latex_citations: docs/user/config.html#use-latex-citations
+
+
+Release 0.19 (2022-07-05)
+=========================
+
+(Release 0.19b1 (2022-06-21))
+
+* Drop support for Python 2.7, 3.5, and 3.6.
+
+* Output changes:
+
+  HTML5:
+    Wrap groups of footnotes in an ``<aside>`` for easier styling.
+
+    The CSS rule ``.footnote-list { display: contents; }`` can be used to
+    restore the behaviour of custom CSS styles.
+
+* After package installation, the CLI commands ``python -m docutils`` and
+  ``docutils`` start the `generic command line front end tool`__.
+
+  __ docs/user/tools.html#generic-command-line-front-end
+
+* Support parsing "Markdown" input with 3rd party parsers
+  myst_, pycmark_, or recommonmark_.
+
+* The default values for the "pep-references", "rfc-base-url",
+  and "python-home" `configuration settings`_ now use the "https:" scheme.
+  The PEP-writer template's header is updated to fix links and
+  resemble the header of official PEPs.
+
+* Various bugfixes and improvements (see HISTORY_).
+
+.. _myst: https://pypi.org/project/myst-docutils
+.. _pycmark: https://pypi.org/project/pycmark/
+.. _recommonmark: https://pypi.org/project/recommonmark/
+.. _configuration settings: docs/user/config.html
+
+
+Release 0.18.1 (2021-12-23)
+===========================
+
+.. Note::
+
+   Docutils 0.18.x is the last version supporting Python 2.7, 3.5, and 3.6.
+
+* ``nodes.Node.traverse()`` returns a list again to restore backwards
+  compatibility (fixes bug #431).
+  Use ``nodes.Node.findall()`` to get an iterator.
+
+* re-add module ``parsers.rst.directives.html``
+  (stub, emits deprecation warning and loads
+  "Meta" directive from ist new place at ``parsers.rst.directives.misc``.)
+
+* Small bugfixes (see HISTORY_).
+
+
+Release 0.18 (2021-10-26)
+=========================
+
+* Output changes:
+
+  Identifiers:
+    - During `identifier normalization`_, leading number and hyphen
+      characters are no longer stripped from a `reference name`_, if the
+      id_prefix_ setting is non-empty.
+
+      Example:
+        with ``--id-prefix="DU-"``, a section with title "34. May"
+        currently gets the identifier key ``DU-may`` and after the
+        change the identifier key ``DU-34-may``.
+
+    - The default value for the auto_id_prefix_ setting changed to ``%``:
+      "use the tag name as prefix for auto-generated IDs".
+      Set auto_id_prefix_ to ``id`` for unchanged auto-IDs.
+
+  HTML5:
+    - Use the semantic tag <aside> for footnote text and citations, topics
+      (except abstract and toc), admonitions, and system messages.
+      Use <nav> for the Table of Contents.
+
+    - Make "auto" table column widths the default: Only specify column
+      widths, if the `"widths" option`_ is set and not "auto".
+      The table-style__ setting "colwidths-grid" restores the current default.
+
+      .. _"widths" option: __ docs/ref/rst/directives.html#table
+      __ docs/user/config.html#table-style
+
+    - Items of a definition list with class argument "details" are
+      converted to `details disclosure elements`_. Example::
+
+        ..class:: details
+
+        Summary
+          This additional information should be hidden.
+
+    - Do not add "compound-first", "compound-middle", or "compound-last" to
+      elements nested in a compound. Use child selector and ":first-child",
+      ":last-child" pseudo classes instead.
+
+    - Use class value "backrefs" instead of "fn-backref" for a span of
+      back-references.
+
+    - Write footnote brackets and field term colons to HTML, so that they
+      are present also without CSS and when copying text.
+
+    - Move space character between section number and heading into
+      "sectnum" span.
+
+  `math-output`_: html
+    - Support more commands, fix mapping of commands to Unicode characters.
+    - Scale variable sized operators and big delimiters with CSS.
+    - Don't use <tt> element (deprecated in HTML5).
+    - Use STIX fonts if available.
+
+  LaTeX:
+     `legacy_class_functions`_ setting default changed to "False",
+     admonitions are now environments.
+
+* New standard Docutils doctree node: <meta__>.
+
+* New configuration settings:
+
+  - [latex writers] legacy_column_widths_ and
+  - [html5 writer] image_loading_.
+
+* Removed files:
+  ``iepngfix.htc`` and ``blank.gif`` (IE 6 workaround for `s5_html`).
+
+* Removed sub-module:
+  ``parsers.rst.directives.html``
+  (reversed in release 0.18.1).
+
+* Removed function: utils.unique_combinations()
+  (obsoleted by itertools.combinations()).
+
+* Removed attributes:
+
+  - ``HTMLTranslator.topic_classes``: check ``node.parent.classes`` instead.
+  - ``nodes.Text.rawsource``: we store the null-escaped text in Text
+    nodes since 0.16 so there is no additional information in the
+    rawsource.
+
+* Major refactoring and fixes/additions in
+  ``docutils/utils/math/math2html.py`` and
+  ``docutils/utils/math/latex2mathml.py``
+  (mathematical notation in HTML, cf. `LaTeX syntax for mathematics`_).
+
+* nodes.Node.traverse() returns an iterator instead of a list
+  (reversed in release 0.18.1).
+
+* Various bugfixes and improvements (see HISTORY_).
+
+  Fix spelling errors in documentation and docstrings.
+  Thanks to Dimitri Papadopoulos.
+
+__ docs/ref/doctree.html#meta
 .. _identifier normalization:
    docs/ref/rst/directives.html#identifier-normalization
+.. _id_prefix: docs/user/config.html#id-prefix
+.. _auto_id_prefix: docs/user/config.html#auto-id-prefix
+.. _details disclosure elements:
+    https://www.w3.org/TR/html52/interactive-elements.html#the-details-element
+.. _LaTeX syntax for mathematics: docs/ref/rst/mathematics.html
+.. _legacy_column_widths: docs/user/config.html#legacy-column-widths
 
 
 Release 0.17.1 (2021-04-16)
 ===========================
-
-(Release 0.17.1b.dev)
 
 * Bug fixes (for details see the Docutils `HISTORY`_).
 
@@ -188,7 +375,7 @@ Release 0.16 (2020-01-12)
   - Keep `backslash escapes`__ in the document tree. This allows, e.g.,
     escaping of author-separators in `bibliographic fields`__.
 
-  __ http://docutils.sourceforge.net/docs/ref/rst/restructuredtext.html#escaping-mechanism
+  __ https://docutils.sourceforge.io/docs/ref/rst/restructuredtext.html#escaping-mechanism
   __ docs/ref/rst/restructuredtext.html#bibliographic-fields
 
 * LaTeX writer:
@@ -203,14 +390,16 @@ Release 0.16 (2020-01-12)
 
 * tools/buildhtml.py
 
-  - New option "--html-writer" allows to select "html__" (default),
-    "html4" or "html5".
+  - New option ``--html-writer`` allows to select "html" (default),
+    "html4" or "html5" (deprecated in favour of the `"writer" option`_
+    in release 0.18).
 
-  __ html: docs/user/html.html#html
+  .. _"writer" option:
+     docs/user/config.html#writer-buildhtml-application
 
 * docutils/io.py
 
-  - Remove the `handle_io_errors` option from io.FileInput/Output.
+  - Remove the `handle_io_errors` argument from io.FileInput/Output.
 
 * docutils/nodes.py
 
@@ -298,7 +487,7 @@ Release 0.13.1 (2016-12-09)
 
   - New HTML writer generating `HTML 5`_.
 
-  .. _HTML 5: http://www.w3.org/TR/html5/
+  .. _HTML 5: https://www.w3.org/TR/html5/
 
 * tools/
 
@@ -327,7 +516,7 @@ Release 0.11 (2013-07-22)
 
 * General
 
-  - Apply [ 2714873 ] Fix for the overwritting of document attributes.
+  - Apply [ 2714873 ] Fix for the overwriting of document attributes.
   - Support embedded aliases within hyperlink references.
   - Fix [ 228 ] try local import of docutils components (reader, writer, parser,
     language module) before global search.
@@ -398,7 +587,7 @@ Release 0.10 (2012-12-16)
 * docutils/io.py
 
   - FileInput/FileOutput: no system-exit on IOError.
-    The `handle_io_errors` option is ignored.
+    The `handle_io_errors` argument is ignored.
 
 * docutils/writers/html4css1/__init__.py
 
@@ -443,7 +632,7 @@ Release 0.9 (2012-05-02)
     by Pygments_.
   - "code" option of the "include" directive.
 
-  .. _Pygments: http://pygments.org/
+  .. _Pygments: https://pygments.org/
 
   - Fix [ 3402314 ] allow non-ASCII whitespace, punctuation
     characters and "international" quotes around inline markup.
@@ -495,13 +684,13 @@ Release 0.8 (2011-07-07)
 * General:
 
   - Handle language codes according to `BCP 47`_.
-  - If the specified langauage is not supported by Docutils,
+  - If the specified language is not supported by Docutils,
     warn and fall back to English.
   - Math support: reStructuredText "math" role and directive,
     ``math`` and ``math_block`` doctree elements.
   - Orphaned "python" reader and "newlatex2e" writer moved to the sandbox.
 
-  .. _BCP 47: http://www.rfc-editor.org/rfc/bcp/bcp47.txt
+  .. _BCP 47: https://www.rfc-editor.org/rfc/bcp/bcp47.txt
 
 * reStructuredText:
 
@@ -603,7 +792,7 @@ Release 0.6 (2009-10-11)
 
    The recommended way to generate PDF output is to use either the
    LaTeX2e writer or one of the alternatives listed at
-   http://docutils.sourceforge.net/docs/user/links.html#pdf.
+   https://docutils.sourceforge.io/docs/user/links.html#pdf.
 
 * reStructuredText:
 
@@ -625,7 +814,7 @@ Release 0.6 (2009-10-11)
 * LaTeX2e writer:
 
   - New defaults:
-    - font-encoding: "T1" (formerly implicitely set by 'ae').
+    - font-encoding: "T1" (formerly implicitly set by 'ae').
     - use-latex-toc: true (ToC with page numbers).
     - use-latex-footnotes: true (no mixup with figures).
     - Float placement defaults to "here definitely" (configurable).

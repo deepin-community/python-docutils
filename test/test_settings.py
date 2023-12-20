@@ -1,14 +1,11 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-
-# $Id: test_settings.py 8346 2019-08-26 12:11:32Z milde $
+#!/usr/bin/env python3
+# $Id: test_settings.py 9047 2022-03-17 13:40:11Z milde $
 # Author: David Goodger <goodger@python.org>
 # Copyright: This module has been placed in the public domain.
 
 """
 Tests of runtime settings.
 """
-from __future__ import print_function
 
 import sys
 import os
@@ -16,14 +13,10 @@ import difflib
 import pprint
 import warnings
 import unittest
-import DocutilsTestSupport              # must be imported before docutils
+
 from docutils import frontend, utils
-from docutils.writers import html4css1, pep_html
+from docutils.writers import pep_html, html5_polyglot
 from docutils.parsers import rst
-
-
-warnings.filterwarnings(action='ignore',
-                        category=frontend.ConfigDeprecationWarning)
 
 
 def fixpath(path):
@@ -37,62 +30,96 @@ class ConfigFileTests(unittest.TestCase):
                     'two': fixpath('data/config_2.txt'),
                     'list': fixpath('data/config_list.txt'),
                     'list2': fixpath('data/config_list_2.txt'),
-                    'error': fixpath('data/config_error_handler.txt')}
+                    'error': fixpath('data/config_encoding.txt'),
+                    'error2': fixpath('data/config_encoding_2.txt'),
+                    'syntax_error': fixpath('data/config_syntax_error.txt'),
+                    }
 
+    # expected settings after parsing the equally named config_file:
     settings = {
-        'old': {u'datestamp': u'%Y-%m-%d %H:%M UTC',
-                u'generator': True,
-                u'no_random': True,
-                u'python_home': u'http://www.python.org',
-                u'source_link': True,
+        'old': {'datestamp': '%Y-%m-%d %H:%M UTC',
+                'generator': True,
+                'no_random': True,
+                'python_home': 'http://www.python.org',
+                'source_link': True,
                 'stylesheet': None,
-                u'stylesheet_path': [u'stylesheets/pep.css'],
-                'template': fixpath(u'data/pep-html-template')},
-        'one': {u'datestamp': u'%Y-%m-%d %H:%M UTC',
-                u'generator': True,
-                u'no_random': True,
-                u'python_home': u'http://www.python.org',
-                u'raw_enabled': False,
+                'stylesheet_path': ['stylesheets/pep.css'],
+                'template': fixpath('data/pep-html-template'),
+                },
+        'one': {'datestamp': '%Y-%m-%d %H:%M UTC',
+                'generator': True,
+                'no_random': True,
+                'python_home': 'http://www.python.org',
+                'raw_enabled': False,
                 'record_dependencies': utils.DependencyList(),
-                u'source_link': True,
+                'source_link': True,
                 'stylesheet': None,
-                u'stylesheet_path': [u'stylesheets/pep.css'],
-                u'tab_width': 8,
-                u'template': fixpath(u'data/pep-html-template'),
-                u'trim_footnote_reference_space': True,
-               },
-        'two': {u'footnote_references': u'superscript',
-                u'generator': False,
+                'stylesheet_path': ['stylesheets/pep.css'],
+                'tab_width': 8,
+                'template': fixpath('data/pep-html-template'),
+                'trim_footnote_reference_space': True,
+                'output_encoding': 'ascii',
+                'output_encoding_error_handler': 'xmlcharrefreplace',
+                },
+        'two': {'footnote_references': 'superscript',
+                'generator': False,
                 'record_dependencies': utils.DependencyList(),
-                u'stylesheet': None,
-                u'stylesheet_path': [u'test.css'],
-                'trim_footnote_reference_space': None},
-        'list': {u'expose_internals': [u'a', u'b', u'c', u'd', u'e'],
-                 u'strip_classes': [u'spam', u'pan', u'fun', u'parrot'],
-                 u'strip_elements_with_classes': [u'sugar', u'flour', u'milk',
-                                                  u'safran']},
-        'list2': {u'expose_internals': [u'a', u'b', u'c', u'd', u'e', u'f'],
-                  u'strip_classes': [u'spam', u'pan', u'fun', u'parrot',
-                                     u'ham', u'eggs'],
-                  u'strip_elements_with_classes': [u'sugar', u'flour',
-                                                   u'milk', u'safran',
-                                                   u'eggs', u'salt']},
-        'error': {u'error_encoding': u'ascii',
-                  u'error_encoding_error_handler': u'strict'},
+                'stylesheet': None,
+                'stylesheet_path': ['test.css'],
+                'trim_footnote_reference_space': None,
+                'output_encoding_error_handler': 'namereplace',
+                },
+        'two (html5)': {
+                # use defaults from html5_polyglot writer component
+                # ignore settings in [html4css1 writer] section,
+                'generator': True,
+                'raw_enabled': False,
+                'record_dependencies': utils.DependencyList(),
+                'source_link': False,
+                'tab_width': 8,
+                'trim_footnote_reference_space': True,
+                'output_encoding_error_handler': 'namereplace',
+                },
+        'list': {'expose_internals': ['a', 'b', 'c', 'd', 'e'],
+                 'smartquotes_locales': [('de', '«»‹›')],
+                 'strip_classes': ['spam', 'pan', 'fun', 'parrot'],
+                 'strip_elements_with_classes': ['sugar', 'flour', 'milk',
+                                                 'safran']
+                 },
+        'list2': {'expose_internals': ['a', 'b', 'c', 'd', 'e', 'f'],
+                  'smartquotes_locales': [('de', '«»‹›'),
+                                          ('nl', '„”’’'),
+                                          ('cs', '»«›‹'),
+                                          ('fr', ['« ', ' »', '‹ ', ' ›'])
+                                          ],
+                  'strip_classes': ['spam', 'pan', 'fun', 'parrot',
+                                    'ham', 'eggs'],
+                  'strip_elements_with_classes': ['sugar', 'flour', 'milk',
+                                                  'safran', 'eggs', 'salt'],
+                  'stylesheet': ['style2.css', 'style3.css'],
+                  'stylesheet_path': None,
+                  },
+        'error': {'error_encoding': 'ascii',
+                  'error_encoding_error_handler': 'strict'},
+        'error2': {'error_encoding': 'latin1'},
         }
 
     compare = difflib.Differ().compare
     """Comparison method shared by all tests."""
 
     def setUp(self):
+        warnings.filterwarnings('ignore',
+                                category=frontend.ConfigDeprecationWarning)
+        warnings.filterwarnings('ignore', category=DeprecationWarning)
         self.option_parser = frontend.OptionParser(
             components=(pep_html.Writer, rst.Parser), read_config_files=None)
 
     def files_settings(self, *names):
         settings = frontend.Values()
         for name in names:
-            settings.update(self.option_parser.get_config_file_settings(
-                self.config_files[name]), self.option_parser)
+            cfs = self.option_parser.get_config_file_settings(
+                                                    self.config_files[name])
+            settings.update(cfs, self.option_parser)
         return settings.__dict__
 
     def expected_settings(self, *names):
@@ -114,8 +141,9 @@ class ConfigFileTests(unittest.TestCase):
         except AssertionError:
             print('\n%s\n' % (self,), file=sys.stderr)
             print('-: expected\n+: result', file=sys.stderr)
-            print(''.join(self.compare(expected.splitlines(1),
-                                                     result.splitlines(1))), file=sys.stderr)
+            print(''.join(self.compare(
+                      expected.splitlines(True),
+                      result.splitlines(True))), file=sys.stderr)
             raise
 
     def test_nofiles(self):
@@ -123,8 +151,16 @@ class ConfigFileTests(unittest.TestCase):
                             self.expected_settings())
 
     def test_old(self):
-        self.compare_output(self.files_settings('old'),
-                            self.expected_settings('old'))
+        with self.assertWarnsRegex(FutureWarning,
+                                   r'The "\[option\]" section is deprecated.'):
+            self.files_settings('old')
+
+    def test_syntax_error(self):
+        with self.assertRaisesRegex(
+                 ValueError,
+                 'Error in config file ".*config_syntax_error.txt", '
+                 r'section "\[general\]"'):
+            self.files_settings('syntax_error')
 
     def test_one(self):
         self.compare_output(self.files_settings('one'),
@@ -133,6 +169,15 @@ class ConfigFileTests(unittest.TestCase):
     def test_multiple(self):
         self.compare_output(self.files_settings('one', 'two'),
                             self.expected_settings('one', 'two'))
+
+    def test_multiple_with_html5_writer(self):
+        # initialize option parser with different component set
+        self.option_parser = frontend.OptionParser(
+            components=(html5_polyglot.Writer, rst.Parser),
+            read_config_files=None)
+        # generator setting not changed by "config_2.txt":
+        self.compare_output(self.files_settings('one', 'two'),
+                            self.expected_settings('two (html5)'))
 
     def test_old_and_new(self):
         self.compare_output(self.files_settings('old', 'two'),
@@ -143,12 +188,19 @@ class ConfigFileTests(unittest.TestCase):
                             self.expected_settings('list'))
 
     def test_list2(self):
+        # setting `stylesheet` in 'list2' resets stylesheet_path to None
         self.compare_output(self.files_settings('list', 'list2'),
                             self.expected_settings('list2'))
 
-    def test_error_handler(self):
+    def test_encoding_error_handler(self):
+        # set error_encoding and error_encoding_error_handler (from affix)
         self.compare_output(self.files_settings('error'),
                             self.expected_settings('error'))
+
+    def test_encoding_error_handler2(self):
+        # second config file only changes encoding, not error_handler:
+        self.compare_output(self.files_settings('error', 'error2'),
+                            self.expected_settings('error', 'error2'))
 
 
 class ConfigEnvVarFileTests(ConfigFileTests):
@@ -172,10 +224,30 @@ class ConfigEnvVarFileTests(ConfigFileTests):
     def tearDown(self):
         os.environ = self.orig_environ
 
+    def test_old(self):
+        pass  # don't repreat this test
+
+    @unittest.skipUnless(
+        os.name == 'posix',
+        'os.path.expanduser() does not use HOME on Windows (since 3.8)')
+    def test_get_standard_config_files(self):
+        os.environ['HOME'] = '/home/parrot'
+        # TODO: set up mock home directory under Windows
+        self.assertEqual(self.option_parser.get_standard_config_files(),
+                         ['/etc/docutils.conf',
+                          './docutils.conf',
+                          '/home/parrot/.docutils'])
+        # split at ':', expand leading '~':
+        os.environ['DOCUTILSCONFIG'] = ('/etc/docutils2.conf'
+                                        ':~/.config/docutils.conf')
+        self.assertEqual(self.option_parser.get_standard_config_files(),
+                         ['/etc/docutils2.conf',
+                          '/home/parrot/.config/docutils.conf'])
+
 
 class HelperFunctionsTests(unittest.TestCase):
 
-    pathdict = {'foo': 'hallo', 'ham': u'h\xE4m', 'spam': u'spam'}
+    pathdict = {'foo': 'hallo', 'ham': 'h\xE4m', 'spam': 'spam'}
     keys = ['foo', 'ham']
 
     def setUp(self):
@@ -186,9 +258,9 @@ class HelperFunctionsTests(unittest.TestCase):
         pathdict = self.pathdict.copy()
         frontend.make_paths_absolute(pathdict, self.keys, base_path='base')
         self.assertEqual(pathdict['foo'], os.path.abspath('base/hallo'))
-        self.assertEqual(pathdict['ham'], os.path.abspath(u'base/h\xE4m'))
+        self.assertEqual(pathdict['ham'], os.path.abspath('base/h\xE4m'))
         # not touched, because key not in keys:
-        self.assertEqual(pathdict['spam'], u'spam')
+        self.assertEqual(pathdict['spam'], 'spam')
 
     def test_make_paths_absolute_cwd(self):
         # With base_path None, the cwd is used as base path.
@@ -196,61 +268,57 @@ class HelperFunctionsTests(unittest.TestCase):
         # os.getcwdu() is used and the converted path is a unicode instance:
         pathdict = self.pathdict.copy()
         frontend.make_paths_absolute(pathdict, self.keys)
-        self.assertEqual(pathdict['foo'], os.path.abspath(u'hallo'))
-        self.assertEqual(pathdict['ham'], os.path.abspath(u'h\xE4m'))
+        self.assertEqual(pathdict['foo'], os.path.abspath('hallo'))
+        self.assertEqual(pathdict['ham'], os.path.abspath('h\xE4m'))
         # not touched, because key not in keys:
-        self.assertEqual(pathdict['spam'], u'spam')
+        self.assertEqual(pathdict['spam'], 'spam')
 
     boolean_settings = (
-                (True, True ),
-                ('1', True ),
-                (u'on', True ),
-                ('yes', True ),
-                (u'true', True ),
-                (u'0', False ),
-                ('off', False ),
-                (u'no', False ),
-                ('false', False ),
+                (True, True),
+                ('1', True),
+                ('on', True),
+                ('yes', True),
+                ('true', True),
+                ('0', False),
+                ('off', False),
+                ('no', False),
+                ('false', False),
                )
+
     def test_validate_boolean(self):
         for t in self.boolean_settings:
             self.assertEqual(
                 frontend.validate_boolean(None, t[0], self.option_parser),
-                             t[1])
+                t[1])
 
     def test_validate_ternary(self):
         tests = (
                  ('500V', '500V'),
-                 (u'parrot', u'parrot'),
+                 ('parrot', 'parrot'),
                 )
         for t in self.boolean_settings + tests:
             self.assertEqual(
                 frontend.validate_ternary(None, t[0], self.option_parser),
-                             t[1])
+                t[1])
 
     def test_validate_colon_separated_string_list(self):
         tests = (
-                    (u'a', ['a',] ),
-                    ('a', ['a',] ),
-                    (u'a:b', ['a', 'b'] ),
-                    ('a:b', ['a', 'b'] ),
-                    ([u'a',], ['a',] ),
-                    ([u'a', u'b:c'], ['a', 'b', 'c'] ),
+                    ('a', ['a']),
+                    ('a:b', ['a', 'b']),
+                    (['a'], ['a']),
+                    (['a', 'b:c'], ['a', 'b', 'c']),
                 )
         for t in tests:
-            self.assertEqual(
-                    frontend.validate_colon_separated_string_list(None, t[0], None),
-                    t[1])
+            self.assertEqual(frontend.validate_colon_separated_string_list(
+                                 None, t[0], None),
+                             t[1])
 
     def test_validate_comma_separated_list(self):
         tests = (
-                    (u'a', ['a',] ),
-                    ('a', ['a',] ),
-                    (u'a,b', ['a', 'b'] ),
-                    ('a,b', ['a', 'b'] ),
-                    ([u'a',], ['a',] ),
-                    ([u'a', u'b,c'], ['a', 'b', 'c'] ),
-                    (['a', 'b,c'], ['a', 'b', 'c'] ),
+                    ('a', ['a']),
+                    ('a,b', ['a', 'b']),
+                    (['a'], ['a']),
+                    (['a', 'b,c'], ['a', 'b', 'c']),
                 )
         for t in tests:
             self.assertEqual(
@@ -259,10 +327,10 @@ class HelperFunctionsTests(unittest.TestCase):
 
     def test_validate_url_trailing_slash(self):
         tests = (
-                    ('', './' ),
-                    (None, './' ),
-                    (u'http://example.org', u'http://example.org/' ),
-                    ('http://example.org/', 'http://example.org/' ),
+                    ('', './'),
+                    (None, './'),
+                    ('http://example.org', 'http://example.org/'),
+                    ('http://example.org/', 'http://example.org/'),
                 )
         for t in tests:
             self.assertEqual(
@@ -271,17 +339,21 @@ class HelperFunctionsTests(unittest.TestCase):
 
     def test_validate_smartquotes_locales(self):
         tests = (
-                 ('en:ssvv', [('en', 'ssvv')]),
-                 (u'sd:«»°°', [(u'sd', u'«»°°')]),
-                 ([('sd', u'«»°°'), u'ds:°°«»'], [('sd', u'«»°°'),
-                                                  ('ds', u'°°«»')]),
-                 (u'frs:« : »:((:))', [(u'frs', [u'« ', u' »',
-                                                 u'((', u'))'])]),
-                )
+            ('en:ssvv', [('en', 'ssvv')]),
+            ('sd:«»°°', [('sd', '«»°°')]),
+            ([('sd', '«»°°'), 'ds:°°«»'], [('sd', '«»°°'), ('ds', '°°«»')]),
+            ('frs:« : »:((:))', [('frs', ['« ', ' »', '((', '))'])]),
+            )
         for t in tests:
             self.assertEqual(
                     frontend.validate_smartquotes_locales(None, t[0], None),
                     t[1])
+
+    def test_set_conditions_deprecation_warning(self):
+        reporter = utils.Reporter('test', 1, 4)
+        with self.assertWarnsRegex(DeprecationWarning,
+                                   'Set attributes via configuration '):
+            reporter.set_conditions('foo', 1, 4)  # trigger warning
 
 
 

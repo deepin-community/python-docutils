@@ -1,6 +1,5 @@
-#! /usr/bin/env python
-
-# $Id: unicode2rstsubs.py 8367 2019-08-27 12:09:56Z milde $
+#! /usr/bin/env python3
+# $Id: unicode2rstsubs.py 9072 2022-06-15 11:31:09Z milde $
 # Author: David Goodger <goodger@python.org>
 # Copyright: This program has been placed in the public domain.
 
@@ -17,24 +16,24 @@ wide-Unicode characters in the set.
 
 The input file, unicode.xml, is maintained as part of the MathML 2
 Recommentation XML source, and is available from
-<http://www.w3.org/2003/entities/xml/>.
+<https://www.w3.org/2003/entities/xml/>.
 """
-from __future__ import print_function
 
 import sys
 import os
-import optparse
 import re
 from xml.parsers.expat import ParserCreate
 
 
 usage_msg = """Usage: %s [unicode.xml]\n"""
 
+
 def usage(prog, status=0, msg=None):
     sys.stderr.write(usage_msg % prog)
     if msg:
         sys.stderr.write(msg + '\n')
     sys.exit(status)
+
 
 def main(argv=None):
     if argv is None:
@@ -48,11 +47,9 @@ def main(argv=None):
         inpath = 'unicode.xml'
     if not os.path.isfile(inpath):
         usage(argv[0], 1, 'No such file: "%s".' % inpath)
-    if sys.version_info >= (3, 0):
-        infile = open(inpath, mode='rb')
-    else:
-        infile = open(inpath)
+    infile = open(inpath, mode='rb')
     process(infile)
+
 
 def process(infile):
     grouper = CharacterEntitySetExtractor(infile)
@@ -60,7 +57,7 @@ def process(infile):
     grouper.write_sets()
 
 
-class CharacterEntitySetExtractor(object):
+class CharacterEntitySetExtractor:
 
     """
     Extracts character entity information from unicode.xml file, groups it by
@@ -73,9 +70,9 @@ class CharacterEntitySetExtractor(object):
     header = """\
 .. This data file has been placed in the public domain.
 .. Derived from the Unicode character mappings available from
-   <http://www.w3.org/2003/entities/xml/>.
+   <https://www.w3.org/2003/entities/xml/>.
    Processed by unicode2rstsubs.py, part of Docutils:
-   <http://docutils.sourceforge.net>.
+   <https://docutils.sourceforge.io>.
 """
 
     def __init__(self, infile):
@@ -138,9 +135,9 @@ class CharacterEntitySetExtractor(object):
             return
         entity = attributes['id']
         assert (entity not in self.sets[set]
-                or self.sets[set][entity] == self.charid), \
-                ('sets[%r][%r] == %r (!= %r)'
-                 % (set, entity, self.sets[set][entity], self.charid))
+                or self.sets[set][entity] == self.charid
+                ), ('sets[%r][%r] == %r (!= %r)'
+                    % (set, entity, self.sets[set][entity], self.charid))
         self.sets[set][entity] = self.charid
 
     def description_data(self, data):
@@ -172,11 +169,11 @@ class CharacterEntitySetExtractor(object):
             outname = set_name + '-wide.txt'
         else:
             outname = set_name + '.txt'
-        outfile = open(outname, 'w')
+        outfile = open(outname, 'w', encoding='ascii')
         print('writing file "%s"' % outname)
         outfile.write(self.header + '\n')
         set = self.sets[set_name]
-        entities = sorted([(e.lower(), e) for e in set.keys()])
+        entities = sorted((e.lower(), e) for e in set.keys())
         longest = 0
         for _, entity_name in entities:
             longest = max(longest, len(entity_name))
@@ -194,7 +191,7 @@ class CharacterEntitySetExtractor(object):
             for code in charid[1:].split('-'):
                 if int(code, 16) > 0xFFFF:
                     return 1            # wide-Unicode character
-        codes = ' '.join(['U+%s' % code for code in charid[1:].split('-')])
+        codes = ' '.join('U+%s' % code for code in charid[1:].split('-'))
         outfile.write('.. %-*s unicode:: %s .. %s\n'
                       % (longest + 2, '|' + entity_name + '|',
                          codes, self.descriptions[charid]))

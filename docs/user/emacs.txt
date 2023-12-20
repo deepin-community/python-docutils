@@ -1,5 +1,7 @@
 .. -*- coding: utf-8 -*-
 
+.. include:: ../header.txt
+
 ========================================
    Emacs Support for reStructuredText
 ========================================
@@ -89,7 +91,7 @@ If you decided to install locally please follow these steps.
 #. Download ``rst.el``
 
    Download the most recent published version of ``rst.el`` from
-   http://sourceforge.net/p/docutils/code/HEAD/tree/trunk/docutils/tools/editors/emacs/rst.el
+   https://sourceforge.net/p/docutils/code/HEAD/tree/trunk/docutils/tools/editors/emacs/rst.el
 
 #. Put ``rst.el`` to a directory in ``load-path``
 
@@ -589,12 +591,12 @@ Other commands are available for other formats:
   structures docutils will parse them into. You can use to run the
   active region through ``rst2pseudoxml.py`` and have the output
   automatically be displayed in a new buffer.
-  
+
 * ``rst-compile-pdf-preview`` (``C-c C-c C-p``)
 
   Convert the current document to PDF and launch a viewer on the
   results.
-  
+
 * ``rst-compile-slides-preview`` (``C-c C-c C-s``): Convert the
   current document to S5 slides and view in a web browser.
 
@@ -939,9 +941,9 @@ Stefan Merten.
 Most of the code has been modified, enhanced and extended by Stefan
 Merten who also is the current maintainer of ``rst.el``.
 
-.. _Emacs: http://www.gnu.org/software/emacs/emacs.html
-.. _reStructuredText: http://docutils.sf.net/rst.html
-.. _Docutils: http://docutils.sf.net/
+.. _Emacs: https://www.gnu.org/software/emacs/emacs.html
+.. _reStructuredText: https://docutils.sourceforge.io/rst.html
+.. _Docutils: https://docutils.sourceforge.io/
 
 
 

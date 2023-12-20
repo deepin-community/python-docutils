@@ -5,13 +5,13 @@ Maintainer: Debian Python Team <team+python@tracker.debian.org>
 Uploaders: Michael Schutte <michi@debian.org>,
            Dmitry Shachnev <mitya57@debian.org>
 Build-Depends: debhelper-compat (= 13)
-Build-Depends-Indep: dh-python (>= 3.20180313~),
-                     python3-all (>= 3.1.2-7~),
+Build-Depends-Indep: dh-python,
+                     python3-all,
                      python3-roman,
                      python3-setuptools,
                      xml-core
 Rules-Requires-Root: no
-Standards-Version: 4.6.0
+Standards-Version: 4.6.2
 Vcs-Git: https://salsa.debian.org/python-team/packages/python-docutils.git
 Vcs-Browser: https://salsa.debian.org/python-team/packages/python-docutils
 Homepage: https://docutils.sourceforge.io/
@@ -30,7 +30,10 @@ Suggests: docutils-doc,
           texlive-lang-french,
           texlive-latex-base,
           texlive-latex-recommended
-Breaks: python-docutils (<< 0.16+dfsg-3), python3-sphinx (<< 4.0)
+Breaks: python-docutils (<< 0.16+dfsg-3),
+        python3-m2r (<< 0.3),
+        python3-sphinx (<< 4.0),
+        ruby-github-markup (<< 1.7.0+dfsg-5)
 Description: text processing system for reStructuredText (implemented in Python 3)
  reStructuredText is an easy-to-read, what-you-see-is-what-you-get plaintext
  markup syntax and parser system. It is useful for in-line program documentation

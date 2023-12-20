@@ -1,11 +1,13 @@
+.. include:: ../header.txt
+
 =====================
  Docutils Transforms
 =====================
 
 :Author: David Goodger
 :Contact: docutils-develop@lists.sourceforge.net
-:Revision: $Revision: 7530 $
-:Date: $Date: 2012-10-16 14:40:36 +0200 (Di, 16. Okt 2012) $
+:Revision: $Revision: 9051 $
+:Date: $Date: 2022-04-02 23:59:06 +0200 (Sa, 02. Apr 2022) $
 :Copyright: This document has been placed in the public domain.
 
 
@@ -14,7 +16,7 @@
 Transforms change the document tree in-place, add to the tree, or prune it.
 Transforms resolve references and footnote numbers, process interpreted
 text, and do other context-sensitive processing. Each transform is a
-subclass of ``docutils.tranforms.Transform``.
+subclass of ``docutils.transforms.Transform``.
 
 There are `transforms added by components`_, others (e.g.
 ``parts.Contents``) are added by the parser, if a corresponding directive is
@@ -92,7 +94,7 @@ universal.StripComments         Reader (r)                    740
 
 peps.PEPZero                    peps.Headers (t/p)            760
 
-components.Filter               "meta" (d/p)                  780
+components.Filter               *not used*                    780
 
 universal.Decorations           Reader (r)                    820
 
@@ -102,15 +104,15 @@ universal.ExposeInternals       Reader (r)                    840
 
 references.DanglingReferences   standalone (r), pep (r)       850
 
+universal.SmartQuotes           Parser                        855
+
 universal.Messages              Writer (w)                    860
 
 universal.FilterMessages        Writer (w)                    870
 
-universal.SmartQuotes           Parser                        850
-
 universal.TestMessages          DocutilsTestSupport           880
 
-writer_aux.Compound             newlatex2e (w)                910
+writer_aux.Compound             *not used, to be removed*     910
 
 writer_aux.Admonitions          html4css1 (w),                920
                                 latex2e (w)

@@ -1,40 +1,47 @@
-#! /usr/bin/env python
-
-# $Id: test_include.py 8670 2021-04-07 12:04:36Z milde $
+#! /usr/bin/env python3
+# $Id: test_include.py 9048 2022-03-29 21:50:15Z milde $
 # Author: David Goodger <goodger@python.org>
 # Copyright: This module has been placed in the public domain.
 
 """
 Tests for misc.py "include" directive.
 """
-from __future__ import absolute_import
 
 import os.path
-import sys
 if __name__ == '__main__':
-    import __init__
+    import __init__  # noqa: F401
 from test_parsers import DocutilsTestSupport
-from docutils.parsers.rst import states
-from docutils.parsers import recommonmark_wrapper
+from docutils import parsers
 from docutils.utils.code_analyzer import with_pygments
 
-if sys.version_info >= (3, 0):
-    unichr = chr  # noqa
+# optional 3rd-party markdown parser
+md_parser_name = 'recommonmark'
+try:  # check availability
+    md_parser_class = parsers.get_parser_class(md_parser_name)
+except ImportError:
+    md_parser_class = None
 
 
 def suite():
     s = DocutilsTestSupport.ParserTestSuite()
+    # eventually skip optional parts:
     if not with_pygments:
         del(totest['include-code'])
+    if not md_parser_class:
+        del(totest['include-markdown'])
     s.generateTests(totest)
     return s
+
 
 # prepend this directory (relative to the test root):
 def mydir(path):
     return os.path.join('test_parsers/test_rst/test_directives/', path)
+
+
 # make `path` relative with utils.relative_path():
 def reldir(path):
     return DocutilsTestSupport.utils.relative_path(None, path)
+
 
 include1 = mydir('include1.txt')
 include2 = mydir('include2.txt')
@@ -53,52 +60,22 @@ include_md = mydir('include.md')
 utf_16_file = mydir('utf-16.csv')
 utf_16_error_str = ("UnicodeDecodeError: 'ascii' codec can't decode byte 0xfe "
                     "in position 0: ordinal not in range(128)")
-if sys.version_info < (3, 0):
-    utf_16_error_str = ("UnicodeError: Unable to decode input data.  "
-                        "Tried the following encodings: 'ascii'.\n"
-                        "            (%s)" % utf_16_error_str)
-nonexistent = os.path.join(os.path.dirname(states.__file__),
+nonexistent = os.path.join(os.path.dirname(parsers.rst.states.__file__),
                            'include', 'nonexistent')
 nonexistent_rel = DocutilsTestSupport.utils.relative_path(
     os.path.join(DocutilsTestSupport.testroot, 'dummy'), nonexistent)
 
 # Different error for path with 8bit chars with locale == C or None:
 try:
-    open(u'\u043c\u0438\u0440.txt')
+    open('\u043c\u0438\u0440.txt')
 except UnicodeEncodeError:
-    errstr_8bit_path = u"""\
+    errstr_8bit_path = """\
 Cannot encode input file path "\u043c\u0438\u0440.txt" (wrong locale?).\
 """
-except:
-    errstr_8bit_path = u"""\
+except FileNotFoundError:
+    errstr_8bit_path = """\
 InputError: [Errno 2] No such file or directory: '\u043c\u0438\u0440.txt'.\
 """
-
-# Parsing with Markdown (recommonmark) is an optional feature depending
-# on 3rd-party modules:
-if recommonmark_wrapper.CommonMarkParser:
-    markdown_parsing_result = """\
-    <section ids="title-1" names="title\\ 1">
-        <title>
-            Title 1
-        <paragraph>
-            <emphasis>
-                emphasis
-             and \n\
-            <emphasis>
-                also emphasis
-        <paragraph>
-            No whitespace required around a
-            <reference name="phrase reference" refuri="/uri">
-                phrase reference
-            ."""
-else:
-    markdown_parsing_result = """\
-    <system_message level="2" source="test_parsers/test_rst/test_directives/include.md" type="WARNING">
-        <paragraph>
-            Missing dependency: MarkDown input is processed by a 3rd party parser but Python did not find the required module "recommonmark" (https://pypi.org/project/recommonmark/).\
-"""
-
 
 totest = {}
 
@@ -220,21 +197,28 @@ Include code, add line numbers
         This file is used by ``test_include.py``.
 """ % reldir(include1)],
 ["""\
-Include markdown (recommonmark).
+Include with unknown parser.
 
 .. include:: %s
-   :parser: markdown
+   :parser: sillyformat
 
 A paragraph.
-""" % include_md,
+""" % include1,
 """\
 <document source="test data">
     <paragraph>
-        Include markdown (recommonmark).
-%s
+        Include with unknown parser.
+    <system_message level="3" line="3" source="test data" type="ERROR">
+        <paragraph>
+            Error in "include" directive:
+            invalid option value: (option: "parser"; value: \'sillyformat\')
+            Parser "sillyformat" not found. No module named 'sillyformat'.
+        <literal_block xml:space="preserve">
+            .. include:: test_parsers/test_rst/test_directives/include1.txt
+               :parser: sillyformat
     <paragraph>
         A paragraph.
-""" % markdown_parsing_result],
+"""],
 ["""\
 Let's test the parse context.
 
@@ -303,18 +287,18 @@ A paragraph.
             <title>
                 Inclusion 1
             <paragraph>
-                This file is used by 
+                This file is used by \n\
                 <literal>
                     test_include.py
                 .
-        <section dupnames="inclusion\\ 1" ids="id1">
+        <section dupnames="inclusion\\ 1" ids="inclusion-1-1">
             <title>
                 Inclusion 1
-            <system_message backrefs="id1" level="1" line="2" source="%s" type="INFO">
+            <system_message backrefs="inclusion-1-1" level="1" line="2" source="%s" type="INFO">
                 <paragraph>
                     Duplicate implicit target name: "inclusion 1".
             <paragraph>
-                This file is used by 
+                This file is used by \n\
                 <literal>
                     test_include.py
                 .
@@ -347,10 +331,10 @@ A paragraph.
                     test_include.py
                 .
             <transition>
-        <section dupnames="inclusion\\ 1" ids="id1">
+        <section dupnames="inclusion\\ 1" ids="inclusion-1-1">
             <title>
                 Inclusion 1
-            <system_message backrefs="id1" level="1" line="2" source="%s" type="INFO">
+            <system_message backrefs="inclusion-1-1" level="1" line="2" source="%s" type="INFO">
                 <paragraph>
                     Duplicate implicit target name: "inclusion 1".
             <paragraph>
@@ -386,7 +370,48 @@ In test data
         In includes/sibling/include7.txt
     <literal_block source="test_parsers/test_rst/test_directives/includes/include5.txt" xml:space="preserve">
         In includes/include5.txt
-        
+        \n\
+        .. include:: more/include6.txt
+    <table>
+        <tgroup cols="2">
+            <colspec colwidth="50">
+            <colspec colwidth="50">
+            <tbody>
+                <row>
+                    <entry>
+                        <paragraph>
+                            In
+                    <entry>
+                        <paragraph>
+                            includes/sibling/include7.txt
+"""],
+["""\
+Recursive inclusion with specified parser.
+
+In test data
+
+.. include:: %s
+   :parser: rst
+""" % include3,
+"""\
+<document source="test data">
+    <paragraph>
+        Recursive inclusion with specified parser.
+    <paragraph>
+        In test data
+    <paragraph>
+        In include3.txt
+    <paragraph>
+        In includes/include4.txt
+    <paragraph>
+        In includes/include5.txt
+    <paragraph>
+        In includes/more/include6.txt
+    <paragraph>
+        In includes/sibling/include7.txt
+    <literal_block source="test_parsers/test_rst/test_directives/includes/include5.txt" xml:space="preserve">
+        In includes/include5.txt
+        \n\
         .. include:: more/include6.txt
     <table>
         <tgroup cols="2">
@@ -432,7 +457,7 @@ Section
             In includes/sibling/include7.txt
         <literal_block source="test_parsers/test_rst/test_directives/includes/include5.txt" xml:space="preserve">
             In includes/include5.txt
-            
+            \n\
             .. include:: more/include6.txt
         <table>
             <tgroup cols="2">
@@ -504,12 +529,12 @@ Include file is UTF-16-encoded, and is not valid ASCII.
             .. include:: %s
                :encoding: ascii
 """ % (utf_16_error_str, reldir(utf_16_file))],
-[u"""\
+["""\
 cyrillic filename:
 
 .. include:: \u043c\u0438\u0440.txt
 """,
-u"""\
+"""\
 <document source="test data">
     <paragraph>
         cyrillic filename:
@@ -551,10 +576,10 @@ Testing errors in included file:
                 Block quote ends without a blank line; unexpected unindent.
         <paragraph>
             error
-    <section dupnames="hi" ids="id1">
+    <section dupnames="hi" ids="hi-1">
         <title>
             hi
-        <system_message backrefs="id1" level="1" line="10" source="%(source)s" type="INFO">
+        <system_message backrefs="hi-1" level="1" line="10" source="%(source)s" type="INFO">
             <paragraph>
                 Duplicate implicit target name: "hi".
         <system_message level="4" line="12" source="%(source)s" type="SEVERE">
@@ -609,7 +634,7 @@ Testing errors in included file:
                 1 argument(s) required, 0 supplied.
             <literal_block xml:space="preserve">
                 .. admonition::
-                
+                \n\
                    without title and content following a blank line
     <section ids="section-underline-too-short" names="section\\ underline\\ too\\ short">
         <title>
@@ -698,51 +723,68 @@ Testing errors in included file:
         <paragraph>
             $ with inconsistent quoting.
         <paragraph>
-            <problematic ids="id3" refid="id2">
+            <problematic ids="problematic-1" refid="system-message-1">
                 :unknown-role:`role`
-            
-            and 
-            <problematic ids="id5" refid="id4">
+            \n\
+            and \n\
+            <problematic ids="problematic-2" refid="system-message-2">
                 *
             unbalanced
-            <problematic ids="id7" refid="id6">
+            <problematic ids="problematic-3" refid="system-message-3">
                 `
             inline
-            <problematic ids="id9" refid="id8">
+            <problematic ids="problematic-4" refid="system-message-4">
                 **
             markup
         <system_message level="1" line="63" source="%(source)s" type="INFO">
             <paragraph>
                 No role entry for "unknown-role" in module "docutils.parsers.rst.languages.en".
                 Trying "unknown-role" as canonical role name.
-        <system_message backrefs="id3" ids="id2" level="3" line="63" source="%(source)s" type="ERROR">
+        <system_message backrefs="problematic-1" ids="system-message-1" level="3" line="63" source="%(source)s" type="ERROR">
             <paragraph>
                 Unknown interpreted text role "unknown-role".
-        <system_message backrefs="id5" ids="id4" level="2" line="63" source="%(source)s" type="WARNING">
+        <system_message backrefs="problematic-2" ids="system-message-2" level="2" line="63" source="%(source)s" type="WARNING">
             <paragraph>
                 Inline emphasis start-string without end-string.
-        <system_message backrefs="id7" ids="id6" level="2" line="63" source="%(source)s" type="WARNING">
+        <system_message backrefs="problematic-3" ids="system-message-3" level="2" line="63" source="%(source)s" type="WARNING">
             <paragraph>
                 Inline interpreted text or phrase reference start-string without end-string.
-        <system_message backrefs="id9" ids="id8" level="2" line="63" source="%(source)s" type="WARNING">
+        <system_message backrefs="problematic-4" ids="system-message-4" level="2" line="63" source="%(source)s" type="WARNING">
             <paragraph>
                 Inline strong start-string without end-string.
+        <block_quote>
+            <paragraph>
+                A block quote with \n\
+                <problematic ids="problematic-5" refid="system-message-5">
+                    *
+                inline warning
+            <system_message backrefs="problematic-5" ids="system-message-5" level="2" line="68" source="test_parsers/test_rst/test_directives/include10.txt" type="WARNING">
+                <paragraph>
+                    Inline emphasis start-string without end-string.
+            <attribution>
+                attribution with \n\
+                <problematic ids="problematic-6" refid="system-message-6">
+                    *
+                inline warning
+        <system_message backrefs="problematic-6" ids="system-message-6" level="2" line="70" source="test_parsers/test_rst/test_directives/include10.txt" type="WARNING">
+            <paragraph>
+                Inline emphasis start-string without end-string.
         <paragraph>
-            <problematic ids="id11" refid="id10">
+            <problematic ids="problematic-7" refid="system-message-7">
                 :PEP:`-1`
-        <system_message backrefs="id11" ids="id10" level="3" line="68" source="%(source)s" type="ERROR">
+        <system_message backrefs="problematic-7" ids="system-message-7" level="3" line="72" source="%(source)s" type="ERROR">
             <paragraph>
                 PEP number must be a number from 0 to 9999; "-1" is invalid.
-        <system_message level="1" line="66" source="%(source)s" type="INFO">
+        <system_message level="1" line="70" source="%(source)s" type="INFO">
             <paragraph>
                 No directive entry for "unknown" in module "docutils.parsers.rst.languages.en".
                 Trying "unknown" as canonical directive name.
-        <system_message level="3" line="70" source="%(source)s" type="ERROR">
+        <system_message level="3" line="74" source="%(source)s" type="ERROR">
             <paragraph>
                 Unknown directive type "unknown".
             <literal_block xml:space="preserve">
-                .. unknown:: directive (info still reported with wrong line)
-        <system_message level="3" line="72" source="%(source)s" type="ERROR">
+                .. unknown:: directive (TODO: info still reported with wrong line)
+        <system_message level="3" line="76" source="%(source)s" type="ERROR">
             <paragraph>
                 Malformed table.
                 No bottom table border found.
@@ -750,9 +792,11 @@ Testing errors in included file:
                 ==============  ======
                 A simple table  with
                 no bottom       border
+                \n\
+                .. end of inclusion from "test_parsers/test_rst/test_directives/include10.txt"
 """ % {'source': reldir(include10), 'nonexistent': reldir(nonexistent),
        'unichr_exception':
-       DocutilsTestSupport.exception_data(unichr, int("11111111", 16))[2]
+       DocutilsTestSupport.exception_data(chr, int("11111111", 16))[2]
       }],
 ["""\
 Include file with whitespace in the path:
@@ -781,7 +825,7 @@ b"""\
         Derived from the Unicode character mappings available from
         <http://www.w3.org/2003/entities/xml/>.
         Processed by unicode2rstsubs.py, part of Docutils:
-        <http://docutils.sourceforge.net>.
+        <https://docutils.sourceforge.io>.
     <substitution_definition names="b.Gammad">
         \\u03dc
     <substitution_definition names="b.gammad">
@@ -946,7 +990,7 @@ TAB expansion with literal include:
     <literal_block source="%s" xml:space="preserve">
         Literal included this should **not** be *marked* `up`.
                 <- leading raw tab.
-        
+        \n\
         Newlines
         are
         normalized.
@@ -965,7 +1009,7 @@ Custom TAB expansion with literal include:
     <literal_block source="%s" xml:space="preserve">
         Literal included this should **not** be *marked* `up`.
           <- leading raw tab.
-        
+        \n\
         Newlines
         are
         normalized.
@@ -984,7 +1028,7 @@ No TAB expansion with literal include:
     <literal_block source="%s" xml:space="preserve">
         Literal included this should **not** be *marked* `up`.
         \t<- leading raw tab.
-        
+        \n\
         Newlines
         are
         normalized.
@@ -1168,7 +1212,11 @@ Circular inclusion
         File "include16.txt": example of rekursive inclusion.
     <system_message level="2" line="3" source="%s" type="WARNING">
         <paragraph>
-            circular inclusion in "include" directive: %s < %s < %s < test data
+            circular inclusion in "include" directive:
+            %s
+            > %s
+            > %s
+            > test data
         <literal_block xml:space="preserve">
             .. include:: include15.txt
     <paragraph>
@@ -1193,7 +1241,12 @@ Circular inclusion with clipping.
         File "include16.txt": example of rekursive inclusion.
     <system_message level="2" line="3" source="%s" type="WARNING">
         <paragraph>
-            circular inclusion in "include" directive: %s < %s < %s < %s < test data
+            circular inclusion in "include" directive:
+            %s
+            > %s
+            > %s
+            > %s
+            > test data
         <literal_block xml:space="preserve">
             .. include:: include15.txt
     <paragraph>
@@ -1206,7 +1259,93 @@ Circular inclusion with clipping.
         File "include15.txt": example of rekursive inclusion.
 """ % (reldir(include16), reldir(include15), reldir(include16),
        reldir(include15), reldir(include16))],
+["""\
+Circular inclusion with specified parser.
+
+.. include:: %s
+   :parser: rst
+""" % include15,
+"""\
+<document source="test data">
+    <paragraph>
+        Circular inclusion with specified parser.
+    <paragraph>
+        File "include15.txt": example of rekursive inclusion.
+    <paragraph>
+        File "include16.txt": example of rekursive inclusion.
+    <system_message level="2" line="3" source="%s" type="WARNING">
+        <paragraph>
+            circular inclusion in "include" directive:
+            %s
+            > %s
+            > %s
+            > test data
+        <literal_block xml:space="preserve">
+            .. include:: include15.txt
+    <paragraph>
+        No loop when clipping before the "include" directive:
+    <paragraph>
+        File "include15.txt": example of rekursive inclusion.
+""" % (reldir(include16), reldir(include15),
+       reldir(include16), reldir(include15))],
+["""\
+No circular inclusion.
+
+============================= =============================
+.. include:: data/include.txt .. include:: data/include.txt
+============================= =============================
+""",
+"""\
+<document source="test data">
+    <paragraph>
+        No circular inclusion.
+    <table>
+        <tgroup cols="2">
+            <colspec colwidth="29">
+            <colspec colwidth="29">
+            <tbody>
+                <row>
+                    <entry>
+                        <paragraph>
+                            Some include text.
+                    <entry>
+                        <paragraph>
+                            Some include text."""],
 ]
+
+# Parsing with Markdown is an optional feature depending on 3rd-party modules:
+totest['include-markdown'] = [
+[f"""\
+Include Markdown source.
+
+.. include:: {include_md}
+   :parser: {md_parser_name}
+
+A paragraph.
+""",
+"""\
+<document source="test data">
+    <paragraph>
+        Include Markdown source.
+    <section ids="title-1" names="title\\ 1">
+        <title>
+            Title 1
+        <paragraph>
+            <emphasis>
+                emphasis
+             and \n\
+            <emphasis>
+                also emphasis
+        <paragraph>
+            No whitespace required around a
+            <reference name="phrase reference" refuri="/uri">
+                phrase reference
+            .
+    <paragraph>
+        A paragraph.
+"""],
+]
+
 
 if __name__ == '__main__':
     import unittest

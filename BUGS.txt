@@ -4,11 +4,11 @@
 
 :Author: David Goodger; open to all Docutils developers
 :Contact: goodger@python.org
-:Date: $Date: 2021-03-26 14:51:36 +0100 (Fr, 26. Mär 2021) $
-:Revision: $Revision: 8644 $
+:Date: $Date: 2022-01-21 14:45:42 +0100 (Fr, 21. Jän 2022) $
+:Revision: $Revision: 8959 $
 :Copyright: This document has been placed in the public domain.
 
-.. _Docutils: http://docutils.sourceforge.net/
+.. _Docutils: https://docutils.sourceforge.io/
 
 
 Bugs in Docutils?!?  Yes, we do have a few.  Some are old-timers that
@@ -118,13 +118,13 @@ __ http://subversion.tigris.org/
 __ http://svn.collab.net/viewcvs/svn/trunk/BUGS?view=markup
 
 .. _repository: docs/dev/repository.html
-.. _snapshot: http://docutils.sourceforge.net/#download
+.. _snapshot: https://docutils.sourceforge.io/#download
 .. _documentation: docs/
 .. _FAQ: FAQ.html
-.. _mailing list archives: http://docutils.sf.net/#mailing-lists
+.. _mailing list archives: https://docutils.sourceforge.io/#mailing-lists
 .. _Docutils-users: docs/user/mailing-lists.html#docutils-users
 .. _SourceForge Bug Tracker:
-   http://sourceforge.net/p/docutils/bugs/
+   https://sourceforge.net/p/docutils/bugs/
 
 
 Known Bugs

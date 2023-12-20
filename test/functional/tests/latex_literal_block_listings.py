@@ -8,9 +8,10 @@ parser_name = "rst"
 writer_name = "latex"
 
 # Extra setting we need
-settings_overrides['legacy_class_functions'] = False
 settings_overrides['stylesheet'] = 'docutils'
 settings_overrides['syntax_highlight'] = 'none'
+settings_overrides['legacy_column_widths'] = True
+settings_overrides['use_latex_citations'] = False
 
 settings_overrides['literal_block_env'] = 'lstlisting'
 settings_overrides['latex_preamble'] = r"""
