@@ -1,6 +1,6 @@
 #! /usr/bin/env python3
 
-# $Id: test_tables.py 9037 2022-03-05 23:31:10Z milde $
+# $Id: test_tables.py 9277 2022-11-26 23:15:13Z milde $
 # Author: David Goodger <goodger@python.org>
 # Copyright: This module has been placed in the public domain.
 
@@ -10,18 +10,39 @@ Tests for states.py.
 
 import os
 
+from pathlib import Path
+import sys
+import unittest
+
 if __name__ == '__main__':
-    import __init__  # noqa: F401
-from test_parsers import DocutilsTestSupport
+    # prepend the "docutils root" to the Python library path
+    # so we import the local `docutils` package.
+    sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
+
+from docutils.frontend import get_default_settings
+from docutils.parsers.rst import Parser
+from docutils.utils import new_document
+
+# TEST_ROOT is ./test/ from the docutils root
+TEST_ROOT = os.path.abspath(os.path.join(__file__, '..', '..', '..'))
 
 
-def suite():
-    s = DocutilsTestSupport.ParserTestSuite()
-    s.generateTests(totest)
-    return s
+class ParserTestCase(unittest.TestCase):
+    def test_parser(self):
+        parser = Parser()
+        settings = get_default_settings(Parser)
+        settings.warning_stream = ''
+        settings.halt_level = 5
+        for name, cases in totest.items():
+            for casenum, (case_input, case_expected) in enumerate(cases):
+                with self.subTest(id=f'totest[{name!r}][{casenum}]'):
+                    document = new_document('test data', settings.copy())
+                    parser.parse(case_input, document)
+                    output = document.pformat()
+                    self.assertEqual(output, case_expected)
 
 
-mydir = 'test_parsers/test_rst/'
+mydir = os.path.join(TEST_ROOT, 'test_parsers/test_rst')
 include2 = os.path.join(mydir, 'test_directives/include2.txt')
 
 totest = {}
@@ -1310,5 +1331,4 @@ Note       The first row of this table may expand
 
 
 if __name__ == '__main__':
-    import unittest
-    unittest.main(defaultTest='suite')
+    unittest.main()

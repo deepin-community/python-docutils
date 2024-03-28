@@ -1,6 +1,6 @@
 #! /usr/bin/env python3
 
-# $Id: test___init__.py 9037 2022-03-05 23:31:10Z milde $
+# $Id: test___init__.py 9277 2022-11-26 23:15:13Z milde $
 # Author: Lea Wiemann <LeWiemann@gmail.com>
 # Copyright: This module has been placed in the public domain.
 
@@ -8,12 +8,22 @@
 Test module for transforms/__init__.py.
 """
 
+from pathlib import Path
+import sys
 import unittest
+
+if __name__ == '__main__':
+    # prepend the "docutils root" to the Python library path
+    # so we import the local `docutils` package.
+    sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
 from docutils import transforms, utils
 
 
 class TestTransform(transforms.Transform):
+
+    # marker for pytest to ignore this class during test discovery
+    __test__ = False
 
     default_priority = 100
 

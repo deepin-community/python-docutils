@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# $Id: setup.py 9103 2022-07-05 20:04:21Z grubert $
+# $Id: setup.py 9376 2023-05-09 18:31:42Z grubert $
 # Copyright: This file has been placed in the public domain.
 
 import sys
@@ -33,7 +33,7 @@ into useful formats, such as HTML, XML, and LaTeX.  For
 input Docutils supports reStructuredText, an easy-to-read,
 what-you-see-is-what-you-get plaintext markup syntax.""",  # wrap at col 60
     'url': 'https://docutils.sourceforge.io/',
-    'version': '0.19',
+    'version': '0.20.1',
     'author': 'David Goodger',
     'author_email': 'goodger@python.org',
     'maintainer': 'docutils-develop list',
@@ -53,6 +53,7 @@ what-you-see-is-what-you-get plaintext markup syntax.""",  # wrap at col 60
         'docutils.parsers',
         'docutils.parsers.rst',
         'docutils.parsers.rst.directives',
+        'docutils.parsers.rst.include',
         'docutils.parsers.rst.languages',
         'docutils.readers',
         'docutils.transforms',
@@ -63,6 +64,8 @@ what-you-see-is-what-you-get plaintext markup syntax.""",  # wrap at col 60
         'docutils.writers.html5_polyglot',
         'docutils.writers.pep_html',
         'docutils.writers.s5_html',
+        'docutils.writers.s5_html.themes',
+        'docutils.writers.s5_html.themes.default',
         'docutils.writers.latex2e',
         'docutils.writers.xetex',
         'docutils.writers.odf_odt',
@@ -101,6 +104,7 @@ what-you-see-is-what-you-get plaintext markup syntax.""",  # wrap at col 60
         'Programming Language :: Python :: 3.8',
         'Programming Language :: Python :: 3.9',
         'Programming Language :: Python :: 3.10',
+        'Programming Language :: Python :: 3.11',
         'Topic :: Documentation',
         'Topic :: Software Development :: Documentation',
         'Topic :: Text Processing',
@@ -131,6 +135,7 @@ what-you-see-is-what-you-get plaintext markup syntax.""",  # wrap at col 60
         'Natural Language :: Slovak',
         'Natural Language :: Spanish',
         'Natural Language :: Swedish',
+        'Natural Language :: Ukrainian',
     ],
 }
 """Distutils setup parameters."""

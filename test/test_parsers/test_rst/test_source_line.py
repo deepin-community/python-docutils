@@ -1,5 +1,5 @@
 #! /usr/bin/env python3
-# $Id: test_source_line.py 9037 2022-03-05 23:31:10Z milde $
+# $Id: test_source_line.py 9277 2022-11-26 23:15:13Z milde $
 # Author: Günter Milde
 # Maintainer: docutils-develop@lists.sourceforge.net
 # :Copyright: 2021 Günter Milde,
@@ -24,25 +24,48 @@ adding them to more nodes is regarded a compatible feature extension.
 # to make internal attributes visible.
 
 import os
+from pathlib import Path
+import sys
+import unittest
 
 if __name__ == '__main__':
-    import __init__  # noqa: F401
-from test_transforms import DocutilsTestSupport  # before importing docutils!
-from docutils.transforms.universal import ExposeInternals
+    # prepend the "docutils root" to the Python library path
+    # so we import the local `docutils` package.
+    sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
+
+from docutils.frontend import get_default_settings
 from docutils.parsers.rst import Parser
+from docutils.transforms.universal import ExposeInternals, TestMessages
+from docutils.utils import new_document
+
+# TEST_ROOT is ./test/ from the docutils root
+TEST_ROOT = os.path.abspath(os.path.join(__file__, '..', '..', '..'))
 
 
-def suite():
-    parser = Parser()
-    s = DocutilsTestSupport.TransformTestSuite(
-    parser, suite_settings={'expose_internals': ['line', 'source']})
-    s.generateTests(totest)
-    return s
+class TransformTestCase(unittest.TestCase):
+    def test_transforms(self):
+        parser = Parser()
+        settings = get_default_settings(Parser)
+        settings.warning_stream = ''
+        settings.expose_internals = ['line', 'source']
+        for name, (transforms, cases) in totest.items():
+            for casenum, (case_input, case_expected) in enumerate(cases):
+                with self.subTest(id=f'totest[{name!r}][{casenum}]'):
+                    document = new_document('test data', settings.copy())
+                    parser.parse(case_input, document)
+                    # Don't do a ``populate_from_components()`` because that
+                    # would enable the Transformer's default transforms.
+                    document.transformer.add_transforms(transforms)
+                    document.transformer.add_transform(TestMessages)
+                    document.transformer.apply_transforms()
+                    output = document.pformat()
+                    self.assertEqual(output, case_expected)
 
 
-mydir = 'test_parsers/test_rst/'
-include14 = os.path.join(mydir, 'includes/include14.txt')
-
+mydir = os.path.join(TEST_ROOT, 'test_parsers/test_rst')
+include14 = os.path.relpath(
+    os.path.join(mydir, 'includes/include14.txt'),
+    os.getcwd()).replace('\\', '/')
 totest = {}
 
 totest['transitions'] = ((ExposeInternals,), [
@@ -149,32 +172,32 @@ Paragraph
 
 .. include:: %s
 """ % include14,
-"""\
+f"""\
 <document source="test data">
     <paragraph internal:line="1" internal:source="test data">
         Paragraph
-    <paragraph internal:line="1" internal:source="test_parsers/test_rst/includes/include14.txt">
+    <paragraph internal:line="1" internal:source="{include14}">
         Paragraph starting in line 1.
         With \n\
         <emphasis>
             inline
          element in line 2.
-    <block_quote internal:line="4" internal:source="test_parsers/test_rst/includes/include14.txt">
-        <paragraph internal:line="4" internal:source="test_parsers/test_rst/includes/include14.txt">
+    <block_quote internal:line="4" internal:source="{include14}">
+        <paragraph internal:line="4" internal:source="{include14}">
             Block quote in line 4
-        <attribution internal:line="6" internal:source="test_parsers/test_rst/includes/include14.txt">
+        <attribution internal:line="6" internal:source="{include14}">
             attribution
             in line 6
-    <bullet_list bullet="*" internal:line="9" internal:source="test_parsers/test_rst/includes/include14.txt">
-        <list_item internal:source="test_parsers/test_rst/includes/include14.txt">
-            <paragraph internal:line="9" internal:source="test_parsers/test_rst/includes/include14.txt">
+    <bullet_list bullet="*" internal:line="9" internal:source="{include14}">
+        <list_item internal:source="{include14}">
+            <paragraph internal:line="9" internal:source="{include14}">
                 bullet list in line 9
-        <list_item internal:source="test_parsers/test_rst/includes/include14.txt">
-            <paragraph internal:line="10" internal:source="test_parsers/test_rst/includes/include14.txt">
+        <list_item internal:source="{include14}">
+            <paragraph internal:line="10" internal:source="{include14}">
                 second item in line 10
-    <enumerated_list enumtype="arabic" internal:line="12" internal:source="test_parsers/test_rst/includes/include14.txt" prefix="" suffix=".">
-        <list_item internal:source="test_parsers/test_rst/includes/include14.txt">
-            <paragraph internal:line="12" internal:source="test_parsers/test_rst/includes/include14.txt">
+    <enumerated_list enumtype="arabic" internal:line="12" internal:source="{include14}" prefix="" suffix=".">
+        <list_item internal:source="{include14}">
+            <paragraph internal:line="12" internal:source="{include14}">
                 enumerated list in line 12
 """],
 ["""\
@@ -211,5 +234,4 @@ Final paragraph in line 11
 
 
 if __name__ == '__main__':
-    import unittest
-    unittest.main(defaultTest='suite')
+    unittest.main()

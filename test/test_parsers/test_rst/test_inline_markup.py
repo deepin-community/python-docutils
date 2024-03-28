@@ -1,5 +1,5 @@
 #! /usr/bin/env python3
-# $Id: test_inline_markup.py 9037 2022-03-05 23:31:10Z milde $
+# $Id: test_inline_markup.py 9277 2022-11-26 23:15:13Z milde $
 # Author: David Goodger <goodger@python.org>
 # Copyright: This module has been placed in the public domain.
 
@@ -8,15 +8,32 @@ Tests for inline markup in docutils/parsers/rst/states.py.
 Interpreted text tests are in a separate module, test_interpreted.py.
 """
 
+from pathlib import Path
+import sys
+import unittest
+
 if __name__ == '__main__':
-    import __init__  # noqa: F401
-from test_parsers import DocutilsTestSupport
+    # prepend the "docutils root" to the Python library path
+    # so we import the local `docutils` package.
+    sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
+
+from docutils.frontend import get_default_settings
+from docutils.parsers.rst import Parser
+from docutils.utils import new_document
 
 
-def suite():
-    s = DocutilsTestSupport.ParserTestSuite()
-    s.generateTests(totest)
-    return s
+class ParserTestCase(unittest.TestCase):
+    def test_parser(self):
+        parser = Parser()
+        settings = get_default_settings(Parser)
+        settings.warning_stream = ''
+        for name, cases in totest.items():
+            for casenum, (case_input, case_expected) in enumerate(cases):
+                with self.subTest(id=f'totest[{name!r}][{casenum}]'):
+                    document = new_document('test data', settings.copy())
+                    parser.parse(case_input, document)
+                    output = document.pformat()
+                    self.assertEqual(output, case_expected)
 
 
 totest = {}
@@ -963,7 +980,7 @@ Invalid phrase reference:
 """],
 ]
 
-totest['embedded_URIs'] = [
+totest['embedded_uris'] = [
 ["""\
 `phrase reference <http://example.com>`_
 """,
@@ -1671,7 +1688,7 @@ Escaped email addresses are not recognized: test\\@example.org
 """],
 ]
 
-totest['markup recognition rules'] = [
+totest['markup_recognition_rules'] = [
 ["""\
 __This__ should be left alone.
 """,
@@ -1929,7 +1946,8 @@ newline
         *\u3000IDEOGRAPHIC SPACE\u3000*
         *
         LINE SEPARATOR
-        *"""],
+        *
+"""],
 ["""\
 no inline markup because of non-ASCII whitespace following /preceding the markup
 **\xa0NO-BREAK SPACE\xa0** ``\xa0NO-BREAK SPACE\xa0`` `\xa0NO-BREAK SPACE\xa0`
@@ -1942,7 +1960,7 @@ no inline markup because of non-ASCII whitespace following /preceding the markup
         no inline markup because of non-ASCII whitespace following /preceding the markup
         **\xa0NO-BREAK SPACE\xa0** ``\xa0NO-BREAK SPACE\xa0`` `\xa0NO-BREAK SPACE\xa0`
         **\u2000EN QUAD\u2000** ``\u2000EN QUAD\u2000`` `\u2000EN QUAD\u2000`
-        **\u202fNARROW NBSP\u202f** ``\u202fNARROW NBSP\u202f`` `\u202fNARROW NBSP\u202f`\
+        **\u202fNARROW NBSP\u202f** ``\u202fNARROW NBSP\u202f`` `\u202fNARROW NBSP\u202f`
 """],
 # « * » ‹ * › « * » ‹ * › « * » ‹ * › French,
 ["""\
@@ -1990,5 +2008,4 @@ But this is „*’ emphasized »*‹.
 
 
 if __name__ == '__main__':
-    import unittest
-    unittest.main(defaultTest='suite')
+    unittest.main()

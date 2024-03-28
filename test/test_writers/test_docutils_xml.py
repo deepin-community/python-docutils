@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-# $Id: test_docutils_xml.py 9068 2022-06-13 12:05:08Z milde $
+# $Id: test_docutils_xml.py 9341 2023-04-11 22:22:50Z milde $
 # Author: Lea Wiemann <LeWiemann@gmail.com>
 # Copyright: This module has been placed in the public domain.
 
@@ -15,9 +15,8 @@ Test for docutils XML writer.
 """
 
 
-if __name__ == '__main__':
-    import __init__  # noqa: F401
-from test_writers import DocutilsTestSupport  # before importing docutils!
+import unittest
+
 import docutils
 import docutils.core
 
@@ -122,17 +121,17 @@ invalid_raw_xml = """\
 
 
 def publish_xml(settings, source):
-    return docutils.core.publish_string(source=source.encode('utf-8'),
-                                        reader_name='standalone',
-                                        writer_name='docutils_xml',
-                                        settings_overrides=settings)
+    return docutils.core.publish_string(source=source,
+                                       reader_name='standalone',
+                                       writer_name='docutils_xml',
+                                       settings_overrides=settings)
 
 
 # XML Test Case
 # -------------
 
 
-class DocutilsXMLTestCase(DocutilsTestSupport.StandardTestCase):
+class DocutilsXMLTestCase(unittest.TestCase):
 
     settings = {'input_encoding': 'utf-8',
                 'output_encoding': 'iso-8859-1',
@@ -203,5 +202,4 @@ class DocutilsXMLTestCase(DocutilsTestSupport.StandardTestCase):
 
 
 if __name__ == '__main__':
-    import unittest
     unittest.main()

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# $Id: test_smartquotes.py 9037 2022-03-05 23:31:10Z milde $
+# $Id: test_smartquotes.py 9321 2023-01-17 15:40:27Z milde $
 # :Copyright: © 2011 Günter Milde.
 # :Maintainer: docutils-develop@lists.sourceforge.net
 # :License: Released under the terms of the `2-Clause BSD license`_, in short:
@@ -15,29 +15,87 @@
 Test module for universal.SmartQuotes transform.
 """
 
+from pathlib import Path
+import sys
+import unittest
+
 if __name__ == '__main__':
-    import __init__  # noqa: F401
-from test_transforms import DocutilsTestSupport  # before importing docutils!
-from docutils.transforms.universal import SmartQuotes
+    # prepend the "docutils root" to the Python library path
+    # so we import the local `docutils` package.
+    sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+
+from docutils.frontend import get_default_settings
 from docutils.parsers.rst import Parser
+from docutils.transforms.universal import (SmartQuotes, FilterMessages,
+                                           TestMessages)
+from docutils.utils import new_document
 
 
-def suite():
-    parser = Parser()
-    settings = {'smart_quotes': True,
-                'trim_footnote_ref_space': True,
-                'report': 2}  # TODO why is this ignored when running as main?
-    s = DocutilsTestSupport.TransformTestSuite(
-        parser, suite_settings=settings)
-    s.generateTests(totest)
-    settings['language_code'] = 'de'
-    s.generateTests(totest_de)
-    settings['smart_quotes'] = 'alternative'
-    s.generateTests(totest_de_alt)
-    settings['smart_quotes'] = True
-    settings['smartquotes_locales'] = [('de', '«»()'), ('nl', '„”’’')]
-    s.generateTests(totest_locales)
-    return s
+class TransformTestCase(unittest.TestCase):
+    def test_transforms(self):
+        parser = Parser()
+        settings = get_default_settings(Parser)
+        settings.warning_stream = ''
+        settings.smart_quotes = True
+        settings.trim_footnote_ref_space = True
+        for name, (transforms, cases) in totest.items():
+            for casenum, (case_input, case_expected) in enumerate(cases):
+                with self.subTest(id=f'totest[{name!r}][{casenum}]'):
+                    document = new_document('test data', settings.copy())
+                    parser.parse(case_input, document)
+                    # Don't do a ``populate_from_components()`` because that
+                    # would enable the Transformer's default transforms.
+                    document.transformer.add_transforms(transforms)
+                    document.transformer.add_transform(TestMessages)
+                    document.transformer.apply_transforms()
+                    output = document.pformat()
+                    self.assertEqual(output, case_expected)
+
+        settings.language_code = 'de'
+        for name, (transforms, cases) in totest_de.items():
+            for casenum, (case_input, case_expected) in enumerate(cases):
+                with self.subTest(id=f'totest_de[{name!r}][{casenum}]'):
+                    document = new_document('test data', settings.copy())
+                    parser.parse(case_input, document)
+                    # Don't do a ``populate_from_components()`` because that
+                    # would enable the Transformer's default transforms.
+                    document.transformer.add_transforms(transforms)
+                    document.transformer.add_transform(TestMessages)
+                    # Filter with increased priority: call later, so that
+                    # messages added by `TestMessages` are filtered, too.
+                    document.transformer.add_transform(FilterMessages, 890)
+                    document.transformer.apply_transforms()
+                    output = document.pformat()
+                    self.assertEqual(output, case_expected)
+
+        settings.smart_quotes = 'alternative'
+        for name, (transforms, cases) in totest_de_alt.items():
+            for casenum, (case_input, case_expected) in enumerate(cases):
+                with self.subTest(id=f'totest_de_alt[{name!r}][{casenum}]'):
+                    document = new_document('test data', settings.copy())
+                    parser.parse(case_input, document)
+                    # Don't do a ``populate_from_components()`` because that
+                    # would enable the Transformer's default transforms.
+                    document.transformer.add_transforms(transforms)
+                    document.transformer.add_transform(TestMessages)
+                    document.transformer.apply_transforms()
+                    output = document.pformat()
+                    self.assertEqual(output, case_expected)
+
+        settings.smart_quotes = True
+        settings.smartquotes_locales = [('de', '«»()'), ('nl', '„”’’')]
+        for name, (transforms, cases) in totest_locales.items():
+            for casenum, (case_input, case_expected) in enumerate(cases):
+                with self.subTest(id=f'totest_locales[{name!r}][{casenum}]'):
+                    document = new_document('test data', settings.copy())
+                    parser.parse(case_input, document)
+                    # Don't do a ``populate_from_components()`` because that
+                    # would enable the Transformer's default transforms.
+                    document.transformer.add_transforms(transforms)
+                    document.transformer.add_transform(TestMessages)
+                    document.transformer.apply_transforms()
+                    output = document.pformat()
+                    self.assertEqual(output, case_expected)
 
 
 totest = {}
@@ -210,7 +268,7 @@ Do not drop characters from intra-word inline markup like
             Structured
         <emphasis>
             Text
-        .\
+        .
 """],
 ["""\
 Do not convert context-character at inline-tag boundaries
@@ -476,5 +534,4 @@ Dutch "smart quotes" and 's Gravenhage (leading apostrophe).
 
 
 if __name__ == '__main__':
-    import unittest
-    unittest.main(defaultTest='suite')
+    unittest.main()

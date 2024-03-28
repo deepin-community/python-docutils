@@ -32,7 +32,7 @@ Suggests: docutils-doc,
           texlive-latex-recommended
 Breaks: python-docutils (<< 0.16+dfsg-3),
         python3-m2r (<< 0.3),
-        python3-sphinx (<< 4.0),
+        python3-sphinx (<< 7.0.1),
         ruby-github-markup (<< 1.7.0+dfsg-5)
 Description: text processing system for reStructuredText (implemented in Python 3)
  reStructuredText is an easy-to-read, what-you-see-is-what-you-get plaintext

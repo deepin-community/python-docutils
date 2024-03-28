@@ -1,6 +1,6 @@
 #! /usr/bin/env python3
 
-# $Id: test_viewlist.py 9025 2022-03-04 15:55:47Z milde $
+# $Id: test_viewlist.py 9277 2022-11-26 23:15:13Z milde $
 # Author: David Goodger <goodger@python.org>
 # Copyright: This module has been placed in the public domain.
 
@@ -8,8 +8,16 @@
 Test module for the ViewList class from statemachine.py.
 """
 
+from pathlib import Path
+import sys
 import unittest
-from DocutilsTestSupport import statemachine
+
+if __name__ == '__main__':
+    # prepend the "docutils root" to the Python library path
+    # so we import the local `docutils` package.
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+
+from docutils import statemachine
 
 
 class ViewListTests(unittest.TestCase):
@@ -54,7 +62,7 @@ class ViewListTests(unittest.TestCase):
         self.assertEqual(repr(self.a), "ViewList(%s, items=%s)" %
                          (repr(self.a_list), repr(self.a.items)))
         # `del` also deletes meta-data:
-        del(self.c[1])
+        del self.c[1]
         self.assertEqual(list(self.c.xitems()),
                          [('c', 0, 'X'), ('c', 2, 'Z')])
         # operators with extended behaviour

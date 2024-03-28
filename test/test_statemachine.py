@@ -1,6 +1,6 @@
 #! /usr/bin/env python3
 
-# $Id: test_statemachine.py 9032 2022-03-05 23:29:06Z milde $
+# $Id: test_statemachine.py 9277 2022-11-26 23:15:13Z milde $
 # Author: David Goodger <goodger@python.org>
 # Copyright: This module has been placed in the public domain.
 
@@ -8,10 +8,17 @@
 Test module for statemachine.py.
 """
 
-import unittest
-import sys
+from pathlib import Path
 import re
-from DocutilsTestSupport import statemachine
+import sys
+import unittest
+
+if __name__ == '__main__':
+    # prepend the "docutils root" to the Python library path
+    # so we import the local `docutils` package.
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+
+from docutils import statemachine
 
 
 debug = False
