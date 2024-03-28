@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# $Id: test_settings.py 9047 2022-03-17 13:40:11Z milde $
+# $Id: test_settings.py 9296 2022-12-02 14:08:52Z aa-turner $
 # Author: David Goodger <goodger@python.org>
 # Copyright: This module has been placed in the public domain.
 
@@ -7,32 +7,40 @@
 Tests of runtime settings.
 """
 
-import sys
 import os
 import difflib
-import pprint
 import warnings
+from pathlib import Path
+import sys
 import unittest
+
+if __name__ == '__main__':
+    # prepend the "docutils root" to the Python library path
+    # so we import the local `docutils` package.
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from docutils import frontend, utils
 from docutils.writers import pep_html, html5_polyglot
 from docutils.parsers import rst
 
+# DATA_ROOT is ./test/data/ from the docutils root
+DATA_ROOT = os.path.abspath(os.path.join(__file__, '..', 'data'))
+
 
 def fixpath(path):
-    return os.path.abspath(os.path.join(*(path.split('/'))))
+    return os.path.join(DATA_ROOT, path)
 
 
 class ConfigFileTests(unittest.TestCase):
 
-    config_files = {'old': fixpath('data/config_old.txt'),
-                    'one': fixpath('data/config_1.txt'),
-                    'two': fixpath('data/config_2.txt'),
-                    'list': fixpath('data/config_list.txt'),
-                    'list2': fixpath('data/config_list_2.txt'),
-                    'error': fixpath('data/config_encoding.txt'),
-                    'error2': fixpath('data/config_encoding_2.txt'),
-                    'syntax_error': fixpath('data/config_syntax_error.txt'),
+    config_files = {'old': fixpath('config_old.txt'),
+                    'one': fixpath('config_1.txt'),
+                    'two': fixpath('config_2.txt'),
+                    'list': fixpath('config_list.txt'),
+                    'list2': fixpath('config_list_2.txt'),
+                    'error': fixpath('config_encoding.txt'),
+                    'error2': fixpath('config_encoding_2.txt'),
+                    'syntax_error': fixpath('config_syntax_error.txt'),
                     }
 
     # expected settings after parsing the equally named config_file:
@@ -44,7 +52,7 @@ class ConfigFileTests(unittest.TestCase):
                 'source_link': True,
                 'stylesheet': None,
                 'stylesheet_path': ['stylesheets/pep.css'],
-                'template': fixpath('data/pep-html-template'),
+                'template': fixpath('pep-html-template'),
                 },
         'one': {'datestamp': '%Y-%m-%d %H:%M UTC',
                 'generator': True,
@@ -56,7 +64,7 @@ class ConfigFileTests(unittest.TestCase):
                 'stylesheet': None,
                 'stylesheet_path': ['stylesheets/pep.css'],
                 'tab_width': 8,
-                'template': fixpath('data/pep-html-template'),
+                'template': fixpath('pep-html-template'),
                 'trim_footnote_reference_space': True,
                 'output_encoding': 'ascii',
                 'output_encoding_error_handler': 'xmlcharrefreplace',
@@ -130,21 +138,12 @@ class ConfigFileTests(unittest.TestCase):
 
     def compare_output(self, result, expected):
         """`result` and `expected` should both be dicts."""
-        self.assertTrue('record_dependencies' in result)
-        if 'record_dependencies' not in expected:
-            # Delete it if we don't want to test it.
-            del result['record_dependencies']
-        result = pprint.pformat(result) + '\n'
-        expected = pprint.pformat(expected) + '\n'
-        try:
-            self.assertEqual(result, expected)
-        except AssertionError:
-            print('\n%s\n' % (self,), file=sys.stderr)
-            print('-: expected\n+: result', file=sys.stderr)
-            print(''.join(self.compare(
-                      expected.splitlines(True),
-                      result.splitlines(True))), file=sys.stderr)
-            raise
+        self.assertIn('record_dependencies', result)
+        rd_result = result.pop('record_dependencies')
+        rd_expected = expected.pop('record_dependencies', None)
+        if rd_expected is not None:
+            self.assertEqual(str(rd_result), str(rd_expected))
+        self.assertEqual(result, expected)
 
     def test_nofiles(self):
         self.compare_output(self.files_settings(),
@@ -247,18 +246,20 @@ class ConfigEnvVarFileTests(ConfigFileTests):
 
 class HelperFunctionsTests(unittest.TestCase):
 
-    pathdict = {'foo': 'hallo', 'ham': 'h\xE4m', 'spam': 'spam'}
+    pathdict = {'foo': 'hallo', 'ham': 'häm', 'spam': 'spam'}
     keys = ['foo', 'ham']
 
     def setUp(self):
-        self.option_parser = frontend.OptionParser(
-            components=(rst.Parser,), read_config_files=None)
+        with warnings.catch_warnings():
+            warnings.filterwarnings('ignore', category=DeprecationWarning)
+            self.option_parser = frontend.OptionParser(
+                components=(rst.Parser,), read_config_files=None)
 
     def test_make_paths_absolute(self):
         pathdict = self.pathdict.copy()
         frontend.make_paths_absolute(pathdict, self.keys, base_path='base')
         self.assertEqual(pathdict['foo'], os.path.abspath('base/hallo'))
-        self.assertEqual(pathdict['ham'], os.path.abspath('base/h\xE4m'))
+        self.assertEqual(pathdict['ham'], os.path.abspath('base/häm'))
         # not touched, because key not in keys:
         self.assertEqual(pathdict['spam'], 'spam')
 
@@ -269,7 +270,7 @@ class HelperFunctionsTests(unittest.TestCase):
         pathdict = self.pathdict.copy()
         frontend.make_paths_absolute(pathdict, self.keys)
         self.assertEqual(pathdict['foo'], os.path.abspath('hallo'))
-        self.assertEqual(pathdict['ham'], os.path.abspath('h\xE4m'))
+        self.assertEqual(pathdict['ham'], os.path.abspath('häm'))
         # not touched, because key not in keys:
         self.assertEqual(pathdict['spam'], 'spam')
 
@@ -354,7 +355,6 @@ class HelperFunctionsTests(unittest.TestCase):
         with self.assertWarnsRegex(DeprecationWarning,
                                    'Set attributes via configuration '):
             reporter.set_conditions('foo', 1, 4)  # trigger warning
-
 
 
 if __name__ == '__main__':

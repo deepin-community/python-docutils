@@ -1,8 +1,9 @@
 #!/bin/sh
 ''''exec python3 -u "$0" "$@" #'''
 
-# $Id: alltests.py 9072 2022-06-15 11:31:09Z milde $
-# Author: David Goodger <goodger@python.org>
+# $Id: alltests.py 9294 2022-12-02 14:00:55Z aa-turner $
+# Author: David Goodger <goodger@python.org>,
+#         Garth Kidd <garth@deadlybloodyserious.com>
 # Copyright: This module has been placed in the public domain.
 
 __doc__ = """\
@@ -16,12 +17,19 @@ import time
 # and setup outside of unittest.
 start = time.time()
 
-import sys                  # noqa: E402
 import atexit               # noqa: E402
 import os                   # noqa: E402
+from pathlib import Path    # noqa: E402
 import platform             # noqa: E402
+import sys                  # noqa: E402
 
-import DocutilsTestSupport  # noqa: E402 must be imported before docutils
+# Prepend the "docutils root" to the Python library path
+# so we import the local `docutils` package.
+# For Python < 3.9, we need `resolve()` to ensure an absolute path.
+# https://docs.python.org/3/whatsnew/3.9.html#other-language-changes
+DOCUTILS_ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(DOCUTILS_ROOT))
+
 import docutils             # noqa: E402
 
 
@@ -55,49 +63,33 @@ class Tee:
             self.file.flush()
 
 
-def pformat(suite):
-    step = 4
-    suitestr = repr(suite).replace('=[<', '=[\n<').replace(', ', ',\n')
-    indent = 0
-    output = []
-    for line in suitestr.splitlines():
-        output.append(' ' * indent + line)
-        if line[-1:] == '[':
-            indent += step
-        else:
-            if line[-5:] == ']>]>,':
-                indent -= step * 2
-            elif line[-3:] == ']>,':
-                indent -= step
-    return '\n'.join(output)
-
-
-def suite():
-    path, script = os.path.split(sys.argv[0])
-    suite = package_unittest.loadTestModules(DocutilsTestSupport.testroot,
-                                             'test_', packages=1)
-    sys.stdout.flush()
-    return suite
-
-
 # must redirect stderr *before* first import of unittest
 sys.stdout = sys.stderr = Tee('alltests.out')
 
-import package_unittest  # noqa
+import unittest  # NoQA: E402
+
+
+class NumbersTestResult(unittest.TextTestResult):
+    """Result class that counts subTests."""
+    def addSubTest(self, test, subtest, error):
+        super().addSubTest(test, subtest, error)
+        self.testsRun += 1
+        if self.dots:
+            self.stream.write('.' if error is None else 'E')
+            self.stream.flush()
 
 
 if __name__ == '__main__':
-    suite = suite()
-    print('Testing Docutils %s with Python %s on %s at %s' % (
-        docutils.__version__, sys.version.split()[0],
-        time.strftime('%Y-%m-%d'), time.strftime('%H:%M:%S')))
-    print('OS: %s %s %s (%s, %s)' % (
-        platform.system(), platform.release(), platform.version(),
-        sys.platform, platform.platform()))
-    print('Working directory: %s' % os.getcwd())
-    print('Docutils package: %s' % os.path.dirname(docutils.__file__))
+    suite = unittest.defaultTestLoader.discover(str(DOCUTILS_ROOT / 'test'))
+    print(f'Testing Docutils {docutils.__version__} '
+          f'with Python {sys.version.split()[0]} '
+          f'on {time.strftime("%Y-%m-%d at %H:%M:%S")}')
+    print(f'OS: {platform.system()} {platform.release()} {platform.version()} '
+          f'({sys.platform}, {platform.platform()})')
+    print(f'Working directory: {os.getcwd()}')
+    print(f'Docutils package: {os.path.dirname(docutils.__file__)}')
     sys.stdout.flush()
-    result = package_unittest.main(suite)
+    result = unittest.TextTestRunner(resultclass=NumbersTestResult).run(suite)
     finish = time.time()
-    print('Elapsed time: %.3f seconds' % (finish - start))
+    print(f'Elapsed time: {finish - start:.3f} seconds')
     sys.exit(not result.wasSuccessful())

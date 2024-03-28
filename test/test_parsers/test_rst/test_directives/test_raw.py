@@ -1,6 +1,6 @@
 #! /usr/bin/env python3
 
-# $Id: test_raw.py 9037 2022-03-05 23:31:10Z milde $
+# $Id: test_raw.py 9277 2022-11-26 23:15:13Z milde $
 # Author: David Goodger <goodger@python.org>
 # Copyright: This module has been placed in the public domain.
 
@@ -9,23 +9,46 @@ Tests for misc.py "raw" directive.
 """
 
 import os.path
+from pathlib import Path
+import sys
+import unittest
 
 if __name__ == '__main__':
-    import __init__  # noqa: F401
-from test_parsers import DocutilsTestSupport
+    # prepend the "docutils root" to the Python library path
+    # so we import the local `docutils` package.
+    sys.path.insert(0, str(Path(__file__).resolve().parents[4]))
+
+from docutils.frontend import get_default_settings
+from docutils.parsers.rst import Parser
+from docutils.utils import new_document
+
+# TEST_ROOT is ./test/ from the docutils root
+TEST_ROOT = os.path.abspath(os.path.join(__file__, '..', '..', '..', '..'))
 
 
-def suite():
-    s = DocutilsTestSupport.ParserTestSuite()
-    s.generateTests(totest)
-    return s
+class ParserTestCase(unittest.TestCase):
+    def test_parser(self):
+        parser = Parser()
+        settings = get_default_settings(Parser)
+        settings.warning_stream = ''
+        settings.halt_level = 5
+        for name, cases in totest.items():
+            for casenum, (case_input, case_expected) in enumerate(cases):
+                with self.subTest(id=f'totest[{name!r}][{casenum}]'):
+                    document = new_document('test data', settings.copy())
+                    parser.parse(case_input, document)
+                    output = document.pformat()
+                    self.assertEqual(output, case_expected)
 
 
-mydir = 'test_parsers/test_rst/test_directives/'
-raw1 = os.path.join(mydir, 'raw1.txt')
-utf_16_file = os.path.join(mydir, 'utf-16.csv')
-utf_16_file_rel = DocutilsTestSupport.utils.relative_path(None, utf_16_file)
-utf_16_error_str = ("UnicodeDecodeError: 'ascii' codec can't decode byte 0xfe "
+mydir = os.path.join(TEST_ROOT, 'test_parsers/test_rst/test_directives')
+raw1 = os.path.relpath(
+    os.path.join(mydir, 'raw1.txt'),
+    os.getcwd()).replace('\\', '/')
+utf_16_file = os.path.relpath(
+    os.path.join(TEST_ROOT, 'data/utf-16-le-sig.txt'),
+    os.getcwd()).replace('\\', '/')
+utf_16_error_str = ("UnicodeDecodeError: 'ascii' codec can't decode byte 0xff "
                     "in position 0: ordinal not in range(128)")
 
 totest = {}
@@ -41,15 +64,15 @@ totest['raw'] = [
     <raw format="html" xml:space="preserve">
         <span>This is some plain old raw text.</span>
 """],
-["""\
+[f"""\
 .. raw:: html
-   :file: %s
-""" % raw1,
-"""\
+   :file: {raw1}
+""",
+f"""\
 <document source="test data">
-    <raw format="html" source="%s" xml:space="preserve">
+    <raw format="html" source="{raw1}" xml:space="preserve">
         <p>This file is used by <tt>test_raw.py</tt>.</p>
-""" % DocutilsTestSupport.utils.relative_path(None, raw1)],
+"""],
 ["""\
 .. raw:: html
    :file: rawfile.html
@@ -92,40 +115,49 @@ totest['raw'] = [
     <raw format="latex html" xml:space="preserve">
         \\[ \\sum_{n=1}^\\infty \\frac{1}{n} \\text{ etc.} \\]
 """],
-["""\
+[f"""\
 .. raw:: html
-   :file: %s
+   :file: {utf_16_file}
    :encoding: utf-16
-""" % utf_16_file_rel,
-b"""\
+""",
+f"""\
 <document source="test data">
-    <raw format="html" source="%s" xml:space="preserve">
-        "Treat", "Quantity", "Description"
-        "Albatr\xb0\xdf", 2.99, "\xa1On a \\u03c3\\u03c4\\u03b9\\u03ba!"
-        "Crunchy Frog", 1.49, "If we took the b\xf6nes out, it wouldn\\u2019t be
-        crunchy, now would it?"
-        "Gannet Ripple", 1.99, "\xbfOn a \\u03c3\\u03c4\\u03b9\\u03ba?"
-""".decode('raw_unicode_escape') % utf_16_file_rel],
-["""\
+    <raw format="html" source="{utf_16_file}" xml:space="preserve">
+        Grüße
+"""],
+[f"""\
+Default encoding: auto-determine (here via BOM).
+
+.. raw:: html
+   :file: {utf_16_file}
+""",
+f"""\
+<document source="test data">
+    <paragraph>
+        Default encoding: auto-determine (here via BOM).
+    <raw format="html" source="{utf_16_file}" xml:space="preserve">
+        Grüße
+"""],
+[f"""\
 Raw input file is UTF-16-encoded, and is not valid ASCII.
 
 .. raw:: html
-   :file: %s
+   :file: {utf_16_file}
    :encoding: ascii
-""" % utf_16_file_rel,
-"""\
+""",
+f"""\
 <document source="test data">
     <paragraph>
         Raw input file is UTF-16-encoded, and is not valid ASCII.
     <system_message level="4" line="3" source="test data" type="SEVERE">
         <paragraph>
             Problem with "raw" directive:
-            %s
+            {utf_16_error_str}
         <literal_block xml:space="preserve">
             .. raw:: html
-               :file: %s
+               :file: {utf_16_file}
                :encoding: ascii
-""" % (utf_16_error_str, utf_16_file_rel)],
+"""],
 ["""\
 .. raw:: html
    :encoding: utf-8
@@ -166,5 +198,4 @@ Raw input file is UTF-16-encoded, and is not valid ASCII.
 ]
 
 if __name__ == '__main__':
-    import unittest
-    unittest.main(defaultTest='suite')
+    unittest.main()

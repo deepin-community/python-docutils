@@ -1,5 +1,5 @@
 #! /usr/bin/env python3
-# $Id: test_TableParser.py 9037 2022-03-05 23:31:10Z milde $
+# $Id: test_TableParser.py 9277 2022-11-26 23:15:13Z milde $
 # Author: David Goodger <goodger@python.org>
 # Copyright: This module has been placed in the public domain.
 
@@ -7,15 +7,47 @@
 Tests for states.py.
 """
 
+from pathlib import Path
+import sys
+import unittest
+
 if __name__ == '__main__':
-    import __init__  # noqa: F401
-from test_parsers import DocutilsTestSupport
+    # prepend the "docutils root" to the Python library path
+    # so we import the local `docutils` package.
+    sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
+
+from docutils.parsers.rst import tableparser
+from docutils.statemachine import StringList, string2lines
 
 
-def suite():
-    s = DocutilsTestSupport.GridTableParserTestSuite()
-    s.generateTests(totest)
-    return s
+class GridTableParserTestCase(unittest.TestCase):
+    def test_parse_table(self):
+        parser = tableparser.GridTableParser()
+        for name, cases in totest.items():
+            for casenum, case in enumerate(cases):
+                case_input, case_table, case_expected = case
+                lines_input = StringList(string2lines(case_input), 'test data')
+                parser.setup(lines_input)
+                try:
+                    parser.find_head_body_sep()
+                    parser.parse_table()
+                    output = parser.cells
+                except Exception as details:
+                    output = f'{details.__class__.__name__}: {details}'
+                self.assertEqual(output, case_table)
+
+    def test_parse(self):
+        parser = tableparser.GridTableParser()
+        for name, cases in totest.items():
+            for casenum, case in enumerate(cases):
+                case_input, case_table, case_expected = case
+                lines_input = StringList(string2lines(case_input), 'test data')
+                with self.subTest(id=f'totest[{name!r}][{casenum}]'):
+                    try:
+                        output = parser.parse(lines_input)
+                    except Exception as details:
+                        output = f'{details.__class__.__name__}: {details}'
+                    self.assertEqual(output, case_expected)
 
 
 totest = {}
@@ -216,5 +248,4 @@ totest['grid_tables'] = [
 
 
 if __name__ == '__main__':
-    import unittest
-    unittest.main(defaultTest='suite')
+    unittest.main()

@@ -1,6 +1,6 @@
 #! /usr/bin/env python3
 
-# $Id: test_unicode.py 9037 2022-03-05 23:31:10Z milde $
+# $Id: test_unicode.py 9277 2022-11-26 23:15:13Z milde $
 # Author: David Goodger <goodger@python.org>
 # Copyright: This module has been placed in the public domain.
 
@@ -9,23 +9,49 @@ Tests for misc.py "unicode" directive.
 """
 
 
+from pathlib import Path
+import sys
+import unittest
+
 if __name__ == '__main__':
-    import __init__  # noqa: F401
-from test_parsers import DocutilsTestSupport
+    # prepend the "docutils root" to the Python library path
+    # so we import the local `docutils` package.
+    sys.path.insert(0, str(Path(__file__).resolve().parents[4]))
+
+from docutils.frontend import get_default_settings
+from docutils.parsers.rst import Parser
+from docutils.utils import new_document
 
 
-def suite():
-    s = DocutilsTestSupport.ParserTestSuite()
-    s.generateTests(totest)
-    return s
+class ParserTestCase(unittest.TestCase):
+    def test_parser(self):
+        parser = Parser()
+        settings = get_default_settings(Parser)
+        settings.warning_stream = ''
+        for name, cases in totest.items():
+            for casenum, (case_input, case_expected) in enumerate(cases):
+                with self.subTest(id=f'totest[{name!r}][{casenum}]'):
+                    document = new_document('test data', settings.copy())
+                    parser.parse(case_input, document)
+                    output = document.pformat()
+                    self.assertEqual(output, case_expected)
 
 
-unichr_exception = DocutilsTestSupport.exception_data(
-    chr, int("111111111111111111", 16))[0]
-if isinstance(unichr_exception, OverflowError):
-    unichr_exception_string = 'code too large (%s)' % unichr_exception
-else:
+try:
+    chr(0x111111111111111111)
+except OverflowError as unichr_exception:
+    unichr_exception_string = f'code too large ({unichr_exception})'
+except Exception as unichr_exception:
     unichr_exception_string = str(unichr_exception)
+else:
+    unichr_exception_string = ''
+
+try:
+    chr(0x11111111)
+except Exception as detail:
+    invalid_char_code = f'{detail.__class__.__name__}: {detail}'
+else:
+    invalid_char_code = ''
 
 totest = {}
 
@@ -166,11 +192,9 @@ Copyright |copy| 2003, |BogusMegaCorp (TM)|.
             Substitution definition "too big for unicode" empty or invalid.
         <literal_block xml:space="preserve">
             .. |too big for unicode| unicode:: 0x11111111
-""" % (unichr_exception_string,
-       DocutilsTestSupport.exception_data(chr, int("11111111", 16))[2])]
+""" % (unichr_exception_string, invalid_char_code)]
 ]
 
 
 if __name__ == '__main__':
-    import unittest
-    unittest.main(defaultTest='suite')
+    unittest.main()

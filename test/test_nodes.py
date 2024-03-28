@@ -1,5 +1,5 @@
 #! /usr/bin/env python3
-# $Id: test_nodes.py 9067 2022-06-10 11:08:46Z milde $
+# $Id: test_nodes.py 9310 2022-12-17 12:17:32Z milde $
 # Author: David Goodger <goodger@python.org>
 # Copyright: This module has been placed in the public domain.
 
@@ -7,9 +7,16 @@
 Test module for nodes.py.
 """
 
+from pathlib import Path
+import sys
 import unittest
 
-from DocutilsTestSupport import nodes, utils
+if __name__ == '__main__':
+    # prepend the "docutils root" to the Python library path
+    # so we import the local `docutils` package.
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+
+from docutils import nodes, utils
 
 debug = False
 
@@ -139,6 +146,16 @@ class ElementTests(unittest.TestCase):
         # as they are compared by value (like `str` instances)
         self.assertEqual(e.index(e[4]), 1)
         self.assertEqual(e.index(e[4], start=2), 4)
+
+    def test_previous_sibling(self):
+        e = nodes.Element()
+        c1 = nodes.Element()
+        c2 = nodes.Element()
+        e += [c1, c2]
+        # print(c1 == c2)
+        self.assertEqual(e.previous_sibling(), None)
+        self.assertEqual(c1.previous_sibling(), None)
+        self.assertEqual(c2.previous_sibling(), c1)
 
     def test_clear(self):
         element = nodes.Element()
@@ -334,6 +351,11 @@ class ElementTests(unittest.TestCase):
     def test_unicode(self):
         node = nodes.Element('Möhren', nodes.Text('Möhren'))
         self.assertEqual(str(node), '<Element>Möhren</Element>')
+
+    def test_set_class_deprecation_warning(self):
+        node = nodes.Element('test node')
+        with self.assertWarns(DeprecationWarning):
+            node.set_class('parrot')
 
 
 class MiscTests(unittest.TestCase):

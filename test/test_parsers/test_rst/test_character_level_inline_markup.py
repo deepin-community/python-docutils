@@ -1,5 +1,5 @@
 #! /usr/bin/env python3
-# $Id: test_character_level_inline_markup.py 9037 2022-03-05 23:31:10Z milde $
+# $Id: test_character_level_inline_markup.py 9277 2022-11-26 23:15:13Z milde $
 # Author: David Goodger <goodger@python.org>
 # Copyright: This module has been placed in the public domain.
 
@@ -10,15 +10,33 @@ with the "character-level-inline-markup" setting.
 Experimental.
 """
 
+from pathlib import Path
+import sys
+import unittest
+
 if __name__ == '__main__':
-    import __init__  # noqa: F401
-from test_parsers import DocutilsTestSupport
+    # prepend the "docutils root" to the Python library path
+    # so we import the local `docutils` package.
+    sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
+
+from docutils.frontend import get_default_settings
+from docutils.parsers.rst import Parser
+from docutils.utils import new_document
 
 
-def suite():
-    s = DocutilsTestSupport.ParserTestSuite(suite_settings={'character_level_inline_markup': True})
-    s.generateTests(totest)
-    return s
+class ParserTestCase(unittest.TestCase):
+    def test_parser(self):
+        parser = Parser()
+        settings = get_default_settings(Parser)
+        settings.warning_stream = ''
+        settings.character_level_inline_markup = True
+        for name, cases in totest.items():
+            for casenum, (case_input, case_expected) in enumerate(cases):
+                with self.subTest(id=f'totest[{name!r}][{casenum}]'):
+                    document = new_document('test data', settings.copy())
+                    parser.parse(case_input, document)
+                    output = document.pformat()
+                    self.assertEqual(output, case_expected)
 
 
 totest = {}
@@ -268,7 +286,7 @@ beware of _ref_ or __attr__ or object.__attr__
 """],
 ]
 
-totest['embedded_URIs'] = [
+totest['embedded_uris'] = [
 [r"""
 Escape chars in URIs:
 
@@ -412,7 +430,7 @@ http://example.com/rST_for_all.html
 """],
 ]
 
-totest['markup recognition rules'] = [
+totest['markup_recognition_rules'] = [
 ["""\
 __This__ is an anonymous reference with simple-inline-markup.
 """,
@@ -636,7 +654,8 @@ newline
         *\u3000IDEOGRAPHIC SPACE\u3000*
         *
         LINE SEPARATOR
-        *"""],
+        *
+"""],
 # « * » ‹ * › « * » ‹ * › « * » ‹ * › French,
 ["""\
 "Quoted" markup start-string (matched openers & closers) -> no markup:
@@ -683,5 +702,4 @@ But this is „*’ emphasized »*‹.
 
 
 if __name__ == '__main__':
-    import unittest
-    unittest.main(defaultTest='suite')
+    unittest.main()

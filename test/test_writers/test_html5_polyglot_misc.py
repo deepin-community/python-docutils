@@ -1,5 +1,5 @@
 #! /usr/bin/env python3
-# $Id: test_html5_polyglot_misc.py 9037 2022-03-05 23:31:10Z milde $
+# $Id: test_html5_polyglot_misc.py 9369 2023-05-02 23:04:27Z milde $
 # Authors: Lea Wiemann, Dmitry Shachnev, Günter Milde
 # Maintainer: docutils-develop@lists.sourceforge.net
 # Copyright: This module has been placed in the public domain.
@@ -9,14 +9,28 @@ Miscellaneous HTML writer tests.
 """
 
 import os
+from pathlib import Path
+import sys
+import unittest
 
 if __name__ == '__main__':
-    import __init__  # noqa: F401
-from test_writers import DocutilsTestSupport
+    # prepend the "docutils root" to the Python library path
+    # so we import the local `docutils` package.
+    sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+
 from docutils import core
 
+# TEST_ROOT is ./test/ from the docutils root
+TEST_ROOT = os.path.abspath(os.path.join(__file__, '..', '..'))
+# DATA_ROOT is ./test/data/ from the docutils root
+DATA_ROOT = os.path.join(TEST_ROOT, 'data')
 
-class EncodingTestCase(DocutilsTestSupport.StandardTestCase):
+
+def relpath(*parts):
+    return os.path.relpath(os.path.join(*parts), os.getcwd()).replace('\\', '/')
+
+
+class EncodingTestCase(unittest.TestCase):
 
     def test_xmlcharrefreplace(self):
         # Test that xmlcharrefreplace is the default output encoding
@@ -33,7 +47,7 @@ class EncodingTestCase(DocutilsTestSupport.StandardTestCase):
         self.assertIn(b'EUR = &#8364;', result)
 
 
-class MovingArgsTestCase(DocutilsTestSupport.StandardTestCase):
+class MovingArgsTestCase(unittest.TestCase):
 
     mys = {'stylesheet_path': '',
            # 'embed_stylesheet': False,
@@ -53,8 +67,8 @@ second term:
   second def
 """
         result = core.publish_string(data, writer_name='html5_polyglot',
-                                     settings_overrides=self.mys)
-        self.assertIn(b'<dt class="for the second item">second term:</dt>',
+                                     settings_overrides=self.mys).decode()
+        self.assertIn('<dt class="for the second item">second term:</dt>',
                       result)
 
     def test_definition_list_item_name(self):
@@ -70,12 +84,15 @@ second term:
   second def
 """
         result = core.publish_string(data, writer_name='html5_polyglot',
-                                     settings_overrides=self.mys)
-        self.assertIn(b'<dt id="second-item">second term:</dt>',
+                                     settings_overrides=self.mys).decode()
+        self.assertIn('<dt id="second-item">second term:</dt>',
                       result)
 
 
-class SettingsTestCase(DocutilsTestSupport.StandardTestCase):
+ham_css = relpath(DATA_ROOT, 'ham.css')
+
+
+class SettingsTestCase(unittest.TestCase):
     data = 'test'
 
     def test_default_stylesheet(self):
@@ -118,20 +135,22 @@ class SettingsTestCase(DocutilsTestSupport.StandardTestCase):
     def test_custom_stylesheet_dir(self):
         mys = {'_disable_config': True,
                'embed_stylesheet': False,
-               'stylesheet_dirs': ('../docutils/writers/html5_polyglot/',
-                                   'data'),
+               'stylesheet_dirs': (
+                   os.path.join(TEST_ROOT, '../docutils/writers/html5_polyglot/'),
+                   DATA_ROOT),
                'stylesheet_path': 'minimal.css, ham.css'}
         styles = core.publish_parts(self.data, writer_name='html5_polyglot',
                                     settings_overrides=mys)['stylesheet']
-        if os.path.isdir('../docutils/writers/html5_polyglot/'):
+        if os.path.isdir(os.path.join(TEST_ROOT, '../docutils/writers/html5_polyglot/')):
             self.assertIn('docutils/writers/html5_polyglot/minimal.css', styles)
-        self.assertIn('href="data/ham.css"', styles)
+        self.assertIn(f'href="{ham_css}"', styles)
 
     def test_custom_stylesheet_dir_embedded(self):
         mys = {'_disable_config': True,
                'embed_stylesheet': True,
-               'stylesheet_dirs': ('../docutils/writers/html5_polyglot/',
-                                   'data'),
+               'stylesheet_dirs': (
+                   os.path.join(TEST_ROOT, '../docutils/writers/html5_polyglot/'),
+                   DATA_ROOT),
                'stylesheet_path': 'ham.css'}
         styles = core.publish_parts(self.data, writer_name='html5_polyglot',
                                     settings_overrides=mys)['stylesheet']
@@ -141,6 +160,7 @@ class SettingsTestCase(DocutilsTestSupport.StandardTestCase):
         """Warn about deprecated setting name."""
         my_settings = {'_disable_config': True,
                        'embed_images': False,
+                       'output_encoding': 'unicode',
                        }
         with self.assertWarnsRegex(FutureWarning,
                                    '"embed_images" will be removed'):
@@ -148,7 +168,12 @@ class SettingsTestCase(DocutilsTestSupport.StandardTestCase):
                                 settings_overrides=my_settings)
 
 
-class MathTestCase(DocutilsTestSupport.StandardTestCase):
+minimal_css = relpath(TEST_ROOT, 'functional/input/data/minimal.css')
+plain_css = relpath(TEST_ROOT, 'functional/input/data/plain.css')
+math_css = relpath(TEST_ROOT, 'functional/input/data/math.css')
+
+
+class MathTestCase(unittest.TestCase):
 
     """Attention: This class tests the current implementation of maths support
     which is open to change in future Docutils releases. """
@@ -196,14 +221,16 @@ class MathTestCase(DocutilsTestSupport.StandardTestCase):
     def test_math_output_html_stylesheet(self):
         mys = {'_disable_config': True,
                'math_output': 'HTML math.css,custom/style.css',
-               'stylesheet_dirs': ('.', 'functional/input/data'),
+               'stylesheet_dirs': (
+                   TEST_ROOT,
+                   os.path.join(TEST_ROOT, 'functional/input/data')),
                'embed_stylesheet': False}
         styles = core.publish_parts(self.data, writer_name='html5_polyglot',
                                     settings_overrides=mys)['stylesheet']
-        self.assertEqual("""\
-<link rel="stylesheet" href="functional/input/data/minimal.css" type="text/css" />
-<link rel="stylesheet" href="functional/input/data/plain.css" type="text/css" />
-<link rel="stylesheet" href="functional/input/data/math.css" type="text/css" />
+        self.assertEqual(f"""\
+<link rel="stylesheet" href="{minimal_css}" type="text/css" />
+<link rel="stylesheet" href="{plain_css}" type="text/css" />
+<link rel="stylesheet" href="{math_css}" type="text/css" />
 <link rel="stylesheet" href="custom/style.css" type="text/css" />
 """, styles)
 
@@ -214,5 +241,4 @@ class MathTestCase(DocutilsTestSupport.StandardTestCase):
 
 
 if __name__ == '__main__':
-    import unittest
     unittest.main()

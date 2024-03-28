@@ -1,5 +1,5 @@
 #! /usr/bin/env python3
-# $Id: test__init__.py 9037 2022-03-05 23:31:10Z milde $
+# $Id: test__init__.py 9291 2022-12-01 21:13:16Z milde $
 # Authors: Günter Milde <milde@users.sf.net>,
 #          David Goodger <goodger@python.org>
 # Copyright: This module has been placed in the public domain.
@@ -8,7 +8,15 @@
 Test module for the docutils' __init__.py.
 """
 
+from pathlib import Path
+import sys
 import unittest
+
+if __name__ == '__main__':
+    # prepend the "docutils root" to the Python library path
+    # so we import the local `docutils` package.
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+
 import docutils
 import docutils.utils
 from docutils import VersionInfo
@@ -66,7 +74,7 @@ class VersionInfoTests(unittest.TestCase):
         """Test that __version__ is equivalent to __version_info__."""
         self.assertEqual(
             docutils.utils.version_identifier(docutils.__version_info__),
-            docutils.__version__)
+            docutils.__version__, f'{docutils.__version_info__} differs')
 
     def test_version_info_comparing(self):
         """Test comparing of __version_info__ instances."""

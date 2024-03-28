@@ -1,4 +1,4 @@
-.. -*- coding: utf-8 -*-
+.. include:: docs/header0.txt
 
 ========================
  Docutils Release Notes
@@ -6,13 +6,13 @@
 
 :Contact: grubert@users.sourceforge.net
 :Maintainer: docutils-develop@lists.sourceforge.net
-:Date: $Date: 2022-07-05 22:04:21 +0200 (Di, 05. Jul 2022) $
-:Revision: $Revision: 9103 $
+:Date: $Date: 2023-05-16 16:49:41 +0200 (Di, 16. Mai 2023) $
+:Revision: $Revision: 9387 $
 :Web site: https://docutils.sourceforge.io/
 :Copyright: This document has been placed in the public domain.
 
 
-This document summarizes the major changes in recent and upcoming releases.
+This document summarizes the major changes in previous and upcoming releases.
 For a more detailed list of changes, please see the Docutils `HISTORY`_.
 
 .. contents::
@@ -20,38 +20,105 @@ For a more detailed list of changes, please see the Docutils `HISTORY`_.
 Future changes
 ==============
 
-* Setup:
+Drop support for Python 3.7 and 3.8 in Docutils 0.21.
 
-  - Do not install the auxilliary script ``tools/rst2odt_prepstyles.py``
-    in the binary PATH.
+Command line interface
+----------------------
 
-  - Remove file ``install.py``. There are better ways, see README.txt__.
+* Docutils 0.21 will provide ``rst2*`` "console_scripts" `entry points`_
+  (without the ``.py`` extension) instead of installing the
+  ``rst2*.py`` `front end tools`_ in the binary PATH. [#]_
 
-    __ README.html#installation
+  You may use the ``docutils`` `generic command line front end tool`_
+  as a future-proof command, for example:
 
-* Input encoding:
+  .. code:: diff
 
-  - Reduce chances of unrecognised character mix-ups (mojibake).
+     - rst2latex.py --use-latex-abstract FAQ.txt > FAQ.tex
+     + docutils --writer=latex --use-latex-abstract FAQ.txt > FAQ.tex
 
-    Stop using the hard-coded fallback "latin-1" if the
-    `input-encoding`_ is not specified and decoding with UTF-8 fails.
+  Exceptions:
+    The ``rstpep2html.py`` and ``rst2odt_prepstyles.py`` scripts
+    will be retired.
 
-    Don't use the locale encoding as fallback in `UTF-8 mode`_.
+    Use ``docutils --reader=pep --writer=pep_html`` for a PEP preview. [#]_
 
-  - Only remove BOM (U+FEFF ZWNBSP at start of data), no other ZWNBSPs.
+    Use ``python -m docutils.writers.odf_odt.prepstyles``
+    to `strip the page size`__ from an ODT writer stylesheet.
 
-  .. _input-encoding: docs/user/config.html#input-encoding
-  .. _UTF-8 mode: https://docs.python.org/3/library/os.html#utf8-mode
+    __ docs/user/odt.html#page-size
 
-* `html5` writer:
+  .. [#] Some Linux distributions already use the short names.
+  .. [#] The final rendering is done by a Sphinx-based build system
+         (cf. :PEP:`676`).
+
+
+* The _`command-line usage pattern` will change:
+
+  .. code:: diff
+
+       - COMMAND [OPTIONS] [SOURCE [DESTINATION]]
+       + COMMAND [OPTIONS] [SOURCE [SOURCE2 [...]]] [>DESTINATION]
+
+  * Remove short options ``-i`` and ``-o`` in Docutils 0.22.
+    Use the long equivalents ``--input-encoding`` and ``--output-encoding``.
+
+  * Stop accepting the DESTINATION positional argument in Docutils 1.0.
+    Use output redirection or the option ``--output=DESTINATION``
+    (available since Docutils 0.20).
+
+  * Accept more than one source document and the short option
+    ``-o`` for ``--output`` in Docutils 2.0
+
+  For the rationale, see https://clig.dev/#arguments-and-flags.
+
+.. _entry points:
+    https://packaging.python.org/en/latest/specifications/entry-points/
+
+
+`Input encoding`_
+-----------------
+
+* Raise `UnicodeError` (instead of falling back to the locale encoding)
+  if decoding the source with the default encoding (UTF-8) fails and
+  Python is started in `UTF-8 mode`_. (Docutils 0.21)
+
+  Raise `UnicodeError` (instead of falling back to "latin1") if both,
+  default and locale encoding, fail. (Docutils 0.21)
+
+* Only remove BOM (U+FEFF ZWNBSP at start of data), no other ZWNBSPs.
+  Only remove BOM with `input_encoding`_ values None, '', 'utf-8-sig',
+  'utf-16', and 'utf-32'. (Docutils 0.21)
+
+* Change the default input encoding from ``None`` (auto-detect) to
+  "utf-8" in Docutils 0.22.
+
+* Remove the input encoding auto-detection code in Docutils 1.0 or later.
+
+Writers
+-------
+
+* The `default HTML writer`__  will change in Docutils 2.0:
+
+  The rst2html_ front end and ``get_writer_by_name('html')`` select
+  "html4css1" now and will select "html5" in Docutils 2.0 and later.
+
+  - Use rst2html4_, ``docutils --writer=html4``, or
+    ``get_writer_by_name('html4')`` if you depend on stability of the
+    generated HTML code, e.g. because you use a custom style sheet or
+    post-processing that may break otherwise.
+  - Use rst2html5_, ``docutils`` or ``get_writer_by_name('html5')``
+    if you want a HTML5 document.
+
+  __ docs/user/html.html#html
+
+* "html5" writer:
 
   - Stop setting the "footnote-reference" class value for footnote
-    references. Since 0.18, you can use the CSS selector
+    references in Docutils 0.21.
+    Since 0.18, you can use the CSS selector
     ``[role="doc-noteref"]`` instead of ``.footnote-reference``
     (see minimal.css for examples).
-
-  - Use dpub-ARIA role "doc-footnote" (instead of ARIA role "note")
-    for footnotes in Docutils 0.20.
 
   - Move attribution behind the blockquote to comply with the `"living
     standard"`__. (HTML5__ allows <cite> elements inside a blockquote.)
@@ -60,65 +127,157 @@ Future changes
     __ https://www.w3.org/TR/2014/REC-html5-20141028/grouping-content.html
        #the-blockquote-element
 
+  - Change the default value for math_output_ to "MathML" in Docutils 0.22.
+
   - Remove option ``--embed-images`` (obsoleted by "image_loading_")
-    in Docutils 2.0.
+    in Docutils 2.0.
 
-    .. _image_loading: docs/user/config.html#image-loading
-
-* `latex2e` writer:
+* "latex2e" writer:
 
   - Change default of use_latex_citations_ setting to True
-    in Docutils 1.0.
+    in Docutils 1.0.
 
   - Change default of legacy_column_widths_ setting to False
-    in Docutils 1.0.
+    in Docutils 1.0.
 
   - Remove ``use_verbatim_when_possible`` setting
-    (use literal_block_env_: verbatim) in Docutils 2.0.
+    (use literal_block_env_: verbatim) in Docutils 2.0.
 
-  - Do not insert ``\usepackage[utf8]{inputenc}`` into UTF-8 encoded
-    LaTeX sources. UTF-8 is the default encoding for LaTeX2e since 2018.
+* "null" writer: output will change to the empty string in Docutils 0.22.
 
-* `xetex` writer:
+Misc
+----
 
-  - Settings in the "latex2e writer" `configuration file section`__ will
-    be ignored in Docutils 0.20. Move settings intended for both, `xetex`
-    and `latex2e` writers to section "latex writers".
+* "csv-table_" directive:
 
-    __ docs/user/config.html#configuration-file-sections-entries
+  - Use the same CSV format for the main CSV data and the :header: option
+    (as specified in the documentation since addition of "csv-table_")
+    in Docutils 0.21.
 
-* Remove the "rawsource" argument from nodes.Text.__init__()
-  (deprecated and ignored since Docutils 0.18) in Docutils 2.0.
+  - Move `parsers.rst.directives.Table.process_header_option()` to
+    `parsers.rst.directives.CSVTable` in Docutils 0.21.
+
+  - Remove `parsers.rst.directives.CSVTable.HeaderDialect`
+    in Docutils 0.22.
 
 * Remove the compatibility hacks `nodes.reprunicode` and `nodes.ensure_str()`
-  in Docutils 0.21 or later. They are not required with Python 3.x.
+  in Docutils 0.21 or later. They are not required with Python 3.x.
 
-* Drop support for `old-format configuration files`_ in Docutils 2.0.
+* Remove file ``install.py`` in Docutils 0.21.
+  See README.txt__ for alternatives.
+
+  __ README.html#installation
+
+* Remove the "rawsource" argument from `nodes.Text.__init__()`
+  in Docutils 2.0.
+
+* Drop support for `old-format configuration files`_ in Docutils 2.0.
+
+* Remove the ``--html-writer`` option of the `buildhtml.py`_ application
+  (obsoleted by the `"writer" setting`_ since Docutils 0.18)
+  in Docutils 2.0.
+
+* Revise the `String I/O`__ interface used by the `publish_string()`
+  and `publish_from_doctree()` publisher convenience functions.
+  (In Python 3, name and behaviour no longer match.)
+
+  __ docs/api/publisher.html#string-i-o
 
 * Move math format conversion from docutils/utils/math (called from
   docutils/writers/_html_base.py) to a transform__.
 
   __ docs/ref/transforms.html
 
-* The default HTML writer "html" with frontend ``rst2html.py`` will change
-  from "html4css1" to "html5" in Docutils 2.0.
+* docutils/parsers/rst/languages/
 
-  Use ``get_writer_by_name('html')`` or the rst2html.py_ front end, if you
-  want the output to be up-to-date automatically.
+  Fix mistranslated localizations of the "admonition" directive name in
+  Docutils 0.21 (or later). In Docutils, "admonition" is used as a
+  generic term for "advice"/"caveat"/"remark", not a reprimand.
+  Use the English term (or specific admonitions) instead of "aanmaning",
+  "ammonizione", "Ermahnung", "exhortacion", "formaning", "upomnienie",
+  or "vermaning" to avoid errors in future conversions.
 
-  Use the "html4" writer or ``rst2html4.py``, if you depend on
-  stability of the generated HTML code, e.g. because you use a custom
-  style sheet or post-processing that may break otherwise.
-
-* Remove the ``--html-writer`` option of the ``buildhtml.py`` application
-  (obsoleted by the `"writer" option`_) in Docutils 2.0.
-
+.. _front end tools: docs/user/tools.html
+.. _input encoding:
+.. _input_encoding: docs/user/config.html#input-encoding
+.. _math_output: docs/user/config.html#math-output
+.. _UTF-8 mode: https://docs.python.org/3/library/os.html#utf8-mode
+.. _image_loading: docs/user/config.html#image-loading
 .. _old-format configuration files:
    docs/user/config.html#old-format-configuration-files
-.. _rst2html.py: docs/user/tools.html#rst2html-py
+.. _rst2html.py:
+.. _rst2html: docs/user/tools.html#rst2html
+.. _rst2html4: docs/user/tools.html#rst2html4
+.. _rst2html5: docs/user/tools.html#rst2html5
 .. _reference name: docs/ref/rst/restructuredtext.html#reference-names
 .. _literal_block_env: docs/user/config.html#literal-block-env
 .. _use_latex_citations: docs/user/config.html#use-latex-citations
+.. _buildhtml.py: docs/user/tools.html#buildhtml-py
+.. _csv-table: docs/ref/rst/directives.html#csv-table
+
+
+Release 0.20.1 (2023-05-17)
+===========================
+
+Bugfix release. See HISTORY_ for details.
+
+
+Release 0.20 (2023-05-04)
+=========================
+
+.. Note::
+
+   Docutils 0.20 is the last version supporting Python 3.7 and 3.8.
+
+* General
+
+  - Support Python 3.11 (patch #198 by Hugo van Kemenade).
+
+* Output changes:
+
+  HTML5:
+    Use dpub-ARIA role "doc-footnote" (instead of ARIA role "note")
+    for footnotes.
+
+  LaTeX:
+    Do not load the `inputenc` package in UTF-8 encoded LaTeX sources.
+    (UTF-8 is the default encoding for LaTeX2e since 2018).
+
+* Configuration changes:
+
+  - Settings in the [latex2e writer] configuration file section
+    are now ignored by the "xetex" writer.
+    Place common settings in section `[latex writers]`_.
+
+    .. _[latex writers]: docs/user/config.html#latex-writers
+
+  - New command line setting output_. Obsoletes the ``<destination>``
+    positional argument (cf. `future changes`__).
+
+    __ `command-line usage pattern`_
+
+* `utils.find_file_in_dirs()` now returns a POSIX path also on Windows;
+  `utils.get_stylesheet_list()` no longer converts ``\`` to ``/``.
+
+* docutils/languages/
+  docutils/parsers/rst/languages/
+
+  - Support Ukrainian. Patch by Dmytro Kazanzhy.
+
+* test/coverage.sh
+
+  - Removed. Use the coverage.py_ project instead,
+    ``coverage run test/alltests.py`` and ``coverage report``.
+
+  .. _coverage.py: https://pypi.org/project/coverage/
+
+* tools/
+
+  - Moved ``quicktest.py`` to ``tools/dev/``.
+
+* Bugfixes and improvements (see HISTORY_).
+
+.. _output: docs/user/config.html#output
 
 
 Release 0.19 (2022-07-05)
@@ -137,9 +296,10 @@ Release 0.19 (2022-07-05)
     restore the behaviour of custom CSS styles.
 
 * After package installation, the CLI commands ``python -m docutils`` and
-  ``docutils`` start the `generic command line front end tool`__.
+  ``docutils`` start the `generic command line front end tool`_.
 
-  __ docs/user/tools.html#generic-command-line-front-end
+  .. _generic command line front end tool:
+      docs/user/tools.html#generic-command-line-front-end
 
 * Support parsing "Markdown" input with 3rd party parsers
   myst_, pycmark_, or recommonmark_.
@@ -162,7 +322,7 @@ Release 0.18.1 (2021-12-23)
 
 .. Note::
 
-   Docutils 0.18.x is the last version supporting Python 2.7, 3.5, and 3.6.
+   Docutils 0.18.1 is the last version supporting Python 2.7, 3.5, and 3.6.
 
 * ``nodes.Node.traverse()`` returns a list again to restore backwards
   compatibility (fixes bug #431).
@@ -170,7 +330,7 @@ Release 0.18.1 (2021-12-23)
 
 * re-add module ``parsers.rst.directives.html``
   (stub, emits deprecation warning and loads
-  "Meta" directive from ist new place at ``parsers.rst.directives.misc``.)
+  "Meta" directive from its new place at ``parsers.rst.directives.misc``.)
 
 * Small bugfixes (see HISTORY_).
 
@@ -363,12 +523,8 @@ Release 0.17 (2021-04-03)
 Release 0.16 (2020-01-12)
 =========================
 
-.. Note::
-
-   Docutils 0.15.x is the last version supporting Python 2.6, 3.3 and 3.4.
-
-   Docutils 0.16.x supports Python 2.7 and Python >= 3.5 natively,
-   without the use of the ``2to3`` tool.
+Docutils 0.16.x supports Python 2.7 and Python >= 3.5 natively,
+without the use of the ``2to3`` tool.
 
 * reStructuredText:
 
@@ -391,10 +547,10 @@ Release 0.16 (2020-01-12)
 * tools/buildhtml.py
 
   - New option ``--html-writer`` allows to select "html" (default),
-    "html4" or "html5" (deprecated in favour of the `"writer" option`_
-    in release 0.18).
+    "html4" or "html5" (deprecated in favour of the `"writer" setting`_
+    in Docutils 0.18).
 
-  .. _"writer" option:
+  .. _"writer" setting:
      docs/user/config.html#writer-buildhtml-application
 
 * docutils/io.py
@@ -413,13 +569,11 @@ Release 0.16 (2020-01-12)
 Release 0.15 (2019-07-20)
 =========================
 
+Docutils 0.15.x is compatible with Python versions 2.6, 2.7 and 3.3 to 3.5.
+
 .. Note::
 
-   Docutils 0.14.x is the last version supporting Python 2.4, 2.5,
-   3.1, and 3.2.
-
-   Docutils 0.15.x is compatible with Python versions 2.6, 2.7 and 3.3 to 3.5
-   (cf. `Python 3 compatibility`_).
+   Docutils 0.15.x is the last version supporting Python 2.6, 3.3 and 3.4.
 
 * reStructuredText:
 
@@ -433,6 +587,11 @@ Release 0.15 (2019-07-20)
 
 Release 0.14 (2017-08-03)
 =========================
+
+.. Note::
+
+   Docutils 0.14.x is the last version supporting Python 2.4, 2.5,
+   3.1, and 3.2.
 
 * docutils/docs/ref/docutils.dtd:
 
@@ -562,12 +721,7 @@ Release 0.11 (2013-07-22)
 Release 0.10 (2012-12-16)
 =========================
 
-.. Note::
-
-   Docutils 0.9.x is the last version supporting Python 2.3.
-
-   Docutils 0.10 is compatible with Python versions from 2.4 to 3.2
-   (cf. `Python 3 compatibility`_).
+Docutils 0.10 is compatible with Python versions from 2.4 to 3.2.
 
 * General:
 
@@ -607,6 +761,10 @@ Release 0.10 (2012-12-16)
 
 Release 0.9.1 (2012-06-17)
 ==========================
+
+.. Note::
+
+   Docutils 0.9.1 is the last version supporting Python 2.3.
 
 * General:
 
@@ -779,12 +937,8 @@ General:
 Release 0.6 (2009-10-11)
 ========================
 
-.. Note::
-
-   Docutils 0.5 is the last version supporting Python 2.2.
-
-   Docutils 0.6 is compatible with Python versions from 2.3 up to 2.6
-   and convertible to 3.1 code.
+Docutils 0.6 is compatible with Python versions from 2.3 up to 2.6
+and convertible to 3.1 code.
 
 .. note::
 
@@ -848,6 +1002,10 @@ Release 0.6 (2009-10-11)
 Release 0.5 (2008-06-25)
 ========================
 
+.. Note::
+
+   Docutils 0.5 is the last version supporting Python 2.2.
+
 Components:
 
 * HTML writer.
@@ -901,12 +1059,10 @@ Release 0.4 (2006-01-09)
 
 .. Note::
 
-   Docutils 0.4.x is the last version that will support Python 2.1.
-   Docutils 0.5 will *not* be compatible with Python 2.1; Python 2.2
-   or later will be required.
+   Docutils 0.4 is the last version supporting Python 2.1.
 
-   Docutils 0.4.x is the last version that will make compromises in
-   its HTML output for Netscape Navigator 4.  Docutils 0.5 will
+   It is also the last version that will make compromises in
+   its HTML output for Netscape Navigator 4.  Docutils 0.5 will
    require more up-to-date browsers (the exact definition is to be
    determined).
 

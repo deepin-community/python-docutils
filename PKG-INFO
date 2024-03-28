@@ -1,6 +1,6 @@
 Metadata-Version: 2.1
 Name: docutils
-Version: 0.19
+Version: 0.20.1
 Summary: Docutils -- Python Documentation Utilities
 Home-page: https://docutils.sourceforge.io/
 Author: David Goodger
@@ -25,6 +25,7 @@ Classifier: Programming Language :: Python :: 3.7
 Classifier: Programming Language :: Python :: 3.8
 Classifier: Programming Language :: Python :: 3.9
 Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
 Classifier: Topic :: Documentation
 Classifier: Topic :: Software Development :: Documentation
 Classifier: Topic :: Text Processing
@@ -55,6 +56,7 @@ Classifier: Natural Language :: Russian
 Classifier: Natural Language :: Slovak
 Classifier: Natural Language :: Spanish
 Classifier: Natural Language :: Swedish
+Classifier: Natural Language :: Ukrainian
 Requires-Python: >=3.7
 License-File: COPYING.txt
 

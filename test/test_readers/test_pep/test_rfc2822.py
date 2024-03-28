@@ -1,6 +1,6 @@
 #! /usr/bin/env python3
 
-# $Id: test_rfc2822.py 9037 2022-03-05 23:31:10Z milde $
+# $Id: test_rfc2822.py 9277 2022-11-26 23:15:13Z milde $
 # Author: David Goodger <goodger@python.org>
 # Copyright: This module has been placed in the public domain.
 
@@ -8,15 +8,34 @@
 Tests for RFC-2822 headers in PEPs (readers/pep.py).
 """
 
+from pathlib import Path
+import sys
+import unittest
+
 if __name__ == '__main__':
-    import __init__  # noqa: F401
-from test_readers import DocutilsTestSupport
+    # prepend the "docutils root" to the Python library path
+    # so we import the local `docutils` package.
+    sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
+
+from docutils.frontend import get_default_settings
+from docutils.parsers.rst import Parser
+from docutils.parsers.rst.states import Inliner
+from docutils.readers.pep import Reader
+from docutils.utils import new_document
 
 
-def suite():
-    s = DocutilsTestSupport.PEPParserTestSuite()
-    s.generateTests(totest)
-    return s
+class PEPParserTestCase(unittest.TestCase):
+    def test_parser(self):
+        parser = Parser(rfc2822=True, inliner=Inliner())
+        settings = get_default_settings(Parser, Reader)
+        settings.warning_stream = ''
+        for name, cases in totest.items():
+            for casenum, (case_input, case_expected) in enumerate(cases):
+                with self.subTest(id=f'totest[{name!r}][{casenum}]'):
+                    document = new_document('test data', settings.copy())
+                    parser.parse(case_input, document)
+                    output = document.pformat()
+                    self.assertEqual(output, case_expected)
 
 
 totest = {}
@@ -289,5 +308,4 @@ Version:
 ]
 
 if __name__ == '__main__':
-    import unittest
-    unittest.main(defaultTest='suite')
+    unittest.main()

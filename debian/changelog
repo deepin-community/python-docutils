@@ -1,3 +1,52 @@
+python-docutils (0.20.1+dfsg-3) unstable; urgency=medium
+
+  * Backport upstream changes to enable tbl preprocessor (closes: #1053355).
+
+ -- Dmitry Shachnev <mitya57@debian.org>  Thu, 30 Nov 2023 14:16:27 +0300
+
+python-docutils (0.20.1+dfsg-2) unstable; urgency=medium
+
+  * Merge 0.19+dfsg-8 upload from unstable.
+  * Refresh debian/patches/manpage-literal-blocks.diff.
+  * Upload to unstable.
+
+ -- Dmitry Shachnev <mitya57@debian.org>  Tue, 14 Nov 2023 13:45:51 +0300
+
+python-docutils (0.20.1+dfsg-1) experimental; urgency=medium
+
+  * New upstream release.
+  * Drop patches which are included in the new release:
+    - rst2odt_prepstyles-elementtree.diff
+    - no-empty-manual.diff
+  * Refresh and rebase other patches.
+  * Amend static-help-message.diff to fix newly added tests.
+  * Override false-positive privacy-breach-generic Lintian warning
+    in docutils-doc.
+  * Add a patch to support SOURCE_DATE_EPOCH (closes: #831779).
+    - Unset SOURCE_DATE_EPOCH when running tests, to make them pass.
+  * Bump python3-sphinx Breaks to 7.0.1.
+  * Remove ancient debian/NEWS to fix Lintian warning (see #1021502).
+
+ -- Dmitry Shachnev <mitya57@debian.org>  Sat, 20 May 2023 20:39:31 +0300
+
+python-docutils (0.19+dfsg-8) unstable; urgency=medium
+
+  * Backport upstream patch to fix previous_sibling() method.
+
+ -- Dmitry Shachnev <mitya57@debian.org>  Sun, 29 Oct 2023 21:38:21 +0300
+
+python-docutils (0.19+dfsg-7) unstable; urgency=medium
+
+  [ Julian Gilbey ]
+  * Slightly cleaner version of patch in -6.
+
+  [ Dmitry Shachnev ]
+  * Add a patch to use .EE and .EX macros for literal blocks in the
+    manpage writer, to fix warnings from groff 1.23 (closes: #1041809,
+    thanks G. Branden Robinson).
+
+ -- Dmitry Shachnev <mitya57@debian.org>  Wed, 02 Aug 2023 23:48:48 +0300
+
 python-docutils (0.19+dfsg-6) unstable; urgency=medium
 
   * Team upload.
