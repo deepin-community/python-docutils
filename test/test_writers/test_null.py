@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-# $Id: test_null.py 9037 2022-03-05 23:31:10Z milde $
+# $Id: test_null.py 9277 2022-11-26 23:15:13Z milde $
 # Author: Lea Wiemann <LeWiemann@gmail.com>
 # Copyright: This module has been placed in the public domain.
 
@@ -8,15 +8,35 @@
 Test for Null writer.
 """
 
+from pathlib import Path
+import sys
+import unittest
+
 if __name__ == '__main__':
-    import __init__  # noqa: F401
-from test_writers import DocutilsTestSupport
+    # prepend the "docutils root" to the Python library path
+    # so we import the local `docutils` package.
+    sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+
+from docutils.core import publish_string
 
 
-def suite():
-    s = DocutilsTestSupport.PublishTestSuite('null')
-    s.generateTests(totest)
-    return s
+class WriterPublishTestCase(unittest.TestCase):
+    def test_publish(self):
+        writer_name = 'null'
+        for name, cases in totest.items():
+            for casenum, (case_input, case_expected) in enumerate(cases):
+                with self.subTest(id=f'totest[{name!r}][{casenum}]'):
+                    output = publish_string(
+                        source=case_input,
+                        writer_name=writer_name,
+                        settings_overrides={
+                            '_disable_config': True,
+                            'strict_visitor': True,
+                        },
+                    )
+                    if isinstance(output, bytes):
+                        output = output.decode('utf-8')
+                    self.assertEqual(output, case_expected)
 
 
 totest = {}
@@ -29,5 +49,4 @@ None]
 ]
 
 if __name__ == '__main__':
-    import unittest
-    unittest.main(defaultTest='suite')
+    unittest.main()

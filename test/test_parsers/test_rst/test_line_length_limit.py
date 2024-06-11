@@ -14,16 +14,39 @@ Tests for inline markup in docutils/parsers/rst/states.py.
 Interpreted text tests are in a separate module, test_interpreted.py.
 """
 
+import os.path
+from pathlib import Path
+import sys
+import unittest
+
 if __name__ == '__main__':
-    import __init__  # noqa: F401
-from test_parsers import DocutilsTestSupport
+    # prepend the "docutils root" to the Python library path
+    # so we import the local `docutils` package.
+    sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
+
+from docutils.frontend import get_default_settings
+from docutils.parsers.rst import Parser
+from docutils.utils import new_document
+
+# TEST_ROOT is ./test/ from the docutils root
+TEST_ROOT = os.path.abspath(os.path.join(__file__, '..', '..', '..'))
+docutils_conf = os.path.relpath(
+    os.path.join(TEST_ROOT, 'docutils.conf'), os.getcwd()).replace('\\', '/')
 
 
-def suite():
-    s = DocutilsTestSupport.ParserTestSuite(
-            suite_settings={'line_length_limit': 80})
-    s.generateTests(totest)
-    return s
+class ParserTestCase(unittest.TestCase):
+    def test_parser(self):
+        parser = Parser()
+        settings = get_default_settings(Parser)
+        settings.warning_stream = ''
+        settings.line_length_limit = 80
+        for name, cases in totest.items():
+            for casenum, (case_input, case_expected) in enumerate(cases):
+                with self.subTest(id=f'totest[{name!r}][{casenum}]'):
+                    document = new_document('test data', settings.copy())
+                    parser.parse(case_input, document)
+                    output = document.pformat()
+                    self.assertEqual(output, case_expected)
 
 
 totest = {}
@@ -49,25 +72,25 @@ above the limit
         <paragraph>
             Line 2 exceeds the line-length-limit.
 """],
-["""\
+[f"""\
 Include Test
 ============
 
-.. include:: docutils.conf
+.. include:: {docutils_conf}
    :literal:
 
 A paragraph.
 """,
-"""\
+f"""\
 <document source="test data">
     <section ids="include-test" names="include\\ test">
         <title>
             Include Test
         <system_message level="2" line="4" source="test data" type="WARNING">
             <paragraph>
-                "docutils.conf": line 5 exceeds the line-length-limit.
+                "{docutils_conf}": line 5 exceeds the line-length-limit.
             <literal_block xml:space="preserve">
-                .. include:: docutils.conf
+                .. include:: {docutils_conf}
                    :literal:
         <paragraph>
             A paragraph.
@@ -76,5 +99,4 @@ A paragraph.
 
 
 if __name__ == '__main__':
-    import unittest
-    unittest.main(defaultTest='suite')
+    unittest.main()

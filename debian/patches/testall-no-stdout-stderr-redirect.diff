@@ -12,16 +12,16 @@ Last-Update: 2011-09-18
  1 file changed, 3 deletions(-)
 
 diff --git a/test/alltests.py b/test/alltests.py
-index dbc206f..3e48ad6 100755
+index 9968692..c4bbe72 100755
 --- a/test/alltests.py
 +++ b/test/alltests.py
-@@ -80,9 +80,6 @@ def suite():
-     return suite
+@@ -63,9 +63,6 @@ class Tee:
+             self.file.flush()
  
  
 -# must redirect stderr *before* first import of unittest
 -sys.stdout = sys.stderr = Tee('alltests.out')
 -
- import package_unittest  # noqa
+ import unittest  # NoQA: E402
  
  

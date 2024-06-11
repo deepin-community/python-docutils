@@ -1,6 +1,6 @@
 #! /usr/bin/env python3
 
-# $Id: test_tables.py 9037 2022-03-05 23:31:10Z milde $
+# $Id: test_tables.py 9277 2022-11-26 23:15:13Z milde $
 # Author: David Goodger <goodger@python.org>
 # Copyright: This module has been placed in the public domain.
 
@@ -11,29 +11,50 @@ Tests for tables.py directives.
 import os
 import csv
 import platform
+from pathlib import Path
+import sys
+import unittest
 
 if __name__ == '__main__':
-    import __init__  # noqa: F401
-from test_parsers import DocutilsTestSupport
+    # prepend the "docutils root" to the Python library path
+    # so we import the local `docutils` package.
+    sys.path.insert(0, str(Path(__file__).resolve().parents[4]))
+
+from docutils.frontend import get_default_settings
+from docutils.parsers.rst import Parser
+from docutils.utils import new_document
+
+# TEST_ROOT is ./test/ from the docutils root
+TEST_ROOT = os.path.abspath(os.path.join(__file__, '..', '..', '..', '..'))
 
 
-def suite():
-    s = DocutilsTestSupport.ParserTestSuite()
-    s.generateTests(totest)
-    return s
+class ParserTestCase(unittest.TestCase):
+    def test_parser(self):
+        parser = Parser()
+        settings = get_default_settings(Parser)
+        settings.warning_stream = ''
+        settings.halt_level = 5
+        for name, cases in totest.items():
+            for casenum, (case_input, case_expected) in enumerate(cases):
+                with self.subTest(id=f'totest[{name!r}][{casenum}]'):
+                    document = new_document('test data', settings.copy())
+                    parser.parse(case_input, document)
+                    output = document.pformat()
+                    self.assertEqual(output, case_expected)
 
 
-mydir = 'test_parsers/test_rst/test_directives/'
+mydir = os.path.join(TEST_ROOT, 'test_parsers/test_rst/test_directives')
 utf_16_csv = os.path.join(mydir, 'utf-16.csv')
-utf_16_csv_rel = DocutilsTestSupport.utils.relative_path(None, utf_16_csv)
 empty_txt = os.path.join(mydir, 'empty.txt')
 
-unichr_exception = DocutilsTestSupport.exception_data(
-    chr, int("9999999999999", 16))[0]
-if isinstance(unichr_exception, OverflowError):
-    unichr_exception_string = 'code too large (%s)' % unichr_exception
-else:
+try:
+    chr(0x9999999999999)
+except OverflowError as unichr_exception:
+    unichr_exception_string = f'code too large ({unichr_exception})'
+except Exception as unichr_exception:
     unichr_exception_string = str(unichr_exception)
+else:
+    unichr_exception_string = ''
 
 csv_eod_error_str = 'unexpected end of data'
 # pypy adds a line number
@@ -42,15 +63,17 @@ if platform.python_implementation() == 'PyPy':
 csv_unknown_url = "'bogus.csv'"
 
 
-def null_bytes():
+try:
     with open(utf_16_csv, 'rb') as f:
         csv_data = f.read()
     csv_data = str(csv_data, 'latin1').splitlines()
     reader = csv.reader([line + '\n' for line in csv_data])
     next(reader)
+except Exception as detail:
+    null_bytes_exception = detail
+else:
+    null_bytes_exception = None
 
-
-null_bytes_exception = DocutilsTestSupport.exception_data(null_bytes)[0]
 # Null bytes are valid in Python 3.11+:
 if null_bytes_exception is None:
     bad_encoding_result = """\
@@ -137,6 +160,12 @@ else:
         (7- and 8-bit text encoded as UTF-16 has lots of null/zero bytes.)
 """ % (null_bytes_exception, utf_16_csv)
 
+try:
+    int('y')
+except ValueError as detail:
+    invalid_literal = detail.args[0]
+else:
+    invalid_literal = ''
 
 totest = {}
 
@@ -457,7 +486,7 @@ totest['table'] = [
 """],
 ]
 
-totest['csv-table'] = [
+totest['csv_table'] = [
 ["""\
 .. csv-table:: inline with integral header
    :width: 80%
@@ -939,7 +968,7 @@ totest['csv-table'] = [
                :widths: 0 0 0
             \n\
                some, csv, data
-""" % DocutilsTestSupport.exception_data(int, "y")[1][0]],
+""" % invalid_literal],
 ["""\
 .. csv-table:: good delimiter
    :delim: /
@@ -1165,6 +1194,64 @@ bad_encoding_result
                             \u00bfOn a \u03c3\u03c4\u03b9\u03ba?
 """],
 ["""\
+.. csv-table:: auto encoding
+   :file: %s
+   :header-rows: 1
+""" % utf_16_csv,
+"""\
+<document source="test data">
+    <table>
+        <title>
+            auto encoding
+        <tgroup cols="3">
+            <colspec colwidth="33">
+            <colspec colwidth="33">
+            <colspec colwidth="33">
+            <thead>
+                <row>
+                    <entry>
+                        <paragraph>
+                            Treat
+                    <entry>
+                        <paragraph>
+                            Quantity
+                    <entry>
+                        <paragraph>
+                            Description
+            <tbody>
+                <row>
+                    <entry>
+                        <paragraph>
+                            Albatr\u00b0\u00df
+                    <entry>
+                        <paragraph>
+                            2.99
+                    <entry>
+                        <paragraph>
+                            \u00a1On a \u03c3\u03c4\u03b9\u03ba!
+                <row>
+                    <entry>
+                        <paragraph>
+                            Crunchy Frog
+                    <entry>
+                        <paragraph>
+                            1.49
+                    <entry>
+                        <paragraph>
+                            If we took the b\u00f6nes out, it wouldn\u2019t be
+                            crunchy, now would it?
+                <row>
+                    <entry>
+                        <paragraph>
+                            Gannet Ripple
+                    <entry>
+                        <paragraph>
+                            1.99
+                    <entry>
+                        <paragraph>
+                            \u00bfOn a \u03c3\u03c4\u03b9\u03ba?
+"""],
+["""\
 .. csv-table:: no CSV data
    :file: %s
 """ % empty_txt,
@@ -1179,7 +1266,7 @@ bad_encoding_result
 """ % empty_txt],
 ]
 
-totest['list-table'] = [
+totest['list_table'] = [
 ["""\
 .. list-table:: list table with integral header
    :widths: 10 20 30
@@ -1522,5 +1609,4 @@ totest['list-table'] = [
 
 
 if __name__ == '__main__':
-    import unittest
-    unittest.main(defaultTest='suite')
+    unittest.main()

@@ -1,19 +1,28 @@
 #!/usr/bin/env python3
 
-# $Id: test_publisher.py 9025 2022-03-04 15:55:47Z milde $
+# $Id: test_publisher.py 9369 2023-05-02 23:04:27Z milde $
 # Author: Martin Blais <blais@furius.ca>
 # Copyright: This module has been placed in the public domain.
 
 """
 Test the `Publisher` facade and the ``publish_*`` convenience functions.
 """
-
+import os.path
 import pickle
+from pathlib import Path
+import sys
+import unittest
 
-import DocutilsTestSupport              # must be imported before docutils
+if __name__ == '__main__':
+    # prepend the "docutils root" to the Python library path
+    # so we import the local `docutils` package.
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+
 import docutils
-from docutils import core, nodes, io
+from docutils import core, nodes
 
+# DATA_ROOT is ./test/data/ from the docutils root
+DATA_ROOT = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'data')
 
 test_document = """\
 Test Document
@@ -21,7 +30,7 @@ Test Document
 
 This is a test document with a broken reference: nonexistent_
 """
-pseudoxml_output = b"""\
+pseudoxml_output = """\
 <document ids="test-document" names="test\\ document" source="<string>" title="Test Document">
     <title>
         Test Document
@@ -36,7 +45,7 @@ pseudoxml_output = b"""\
             <paragraph>
                 Unknown target name: "nonexistent".
 """
-exposed_pseudoxml_output = b"""\
+exposed_pseudoxml_output = """\
 <document ids="test-document" internal:refnames="{'nonexistent': [<reference: <#text: 'nonexistent'>>]}" names="test\\ document" source="<string>" title="Test Document">
     <title>
         Test Document
@@ -53,7 +62,10 @@ exposed_pseudoxml_output = b"""\
 """
 
 
-class PublisherTests(DocutilsTestSupport.StandardTestCase):
+class PublisherTests(unittest.TestCase):
+
+    settings = {'_disable_config': True,
+                'datestamp': False}
 
     def test_input_error_handling(self):
         # core.publish_cmdline(argv=['nonexisting/path'])
@@ -66,16 +78,83 @@ class PublisherTests(DocutilsTestSupport.StandardTestCase):
 
     def test_output_error_handling(self):
         # pass IOErrors to calling application if `traceback` is True
-        with self.assertRaises(io.OutputError):
-            core.publish_cmdline(argv=['data/include.txt', 'nonexisting/path'],
+        with self.assertRaises(docutils.io.OutputError):
+            core.publish_cmdline(argv=[os.path.join(DATA_ROOT, 'include.txt'),
+                                       'nonexisting/path'],
                                  settings_overrides={'traceback': True})
 
+    def test_set_destination(self):
+        # Exit if `_destination` and `output` settings conflict.
+        publisher = core.Publisher()
+        publisher.get_settings(output='out_name', _destination='out_name')
+        # no conflict if both have same value:
+        publisher.set_destination()
+        # no conflict if both are overridden:
+        publisher.set_destination(destination_path='winning_dest')
+        # ... also sets _destination to 'winning_dest' -> conflict
+        with self.assertRaises(SystemExit):
+            publisher.set_destination()
 
-class PublishDoctreeTestCase(DocutilsTestSupport.StandardTestCase, docutils.SettingsSpec):
+    def test_destination_output_conflict(self):
+        # Exit if positional argument and --output option conflict.
+        settings = {'output': 'out_name'}
+        with self.assertRaises(SystemExit):
+            core.publish_cmdline(argv=['-', 'dest_name'],
+                                 settings_overrides=settings)
+
+    def test_publish_string_input_encoding(self):
+        """Test handling of encoded input."""
+        # Transparently decode `bytes` source (with "input_encoding" setting)
+        # default: auto-detect, fallback utf-8
+        # Output is encoded according to "output_encoding" setting.
+        settings = dict(self.settings)
+        source = 'test → me'
+        expected = ('<document source="<string>">\n'
+                    '    <paragraph>\n'
+                    '        test → me\n').encode('utf-8')
+        output = core.publish_string(source.encode('utf-16'),
+                                     settings_overrides=settings)
+        self.assertEqual(output, expected)
+
+        # encoding declaration in source
+        source = '.. encoding: latin1\n\nGrüße'
+        # don't encode output (return `str`)
+        settings['output_encoding'] = 'unicode'
+        output = core.publish_string(source.encode('utf-16'),
+                                     settings_overrides=settings)
+        self.assertTrue(output.endswith('Grüße\n'))
+
+    def test_publish_string_output_encoding(self):
+        settings = dict(self.settings)
+        settings['output_encoding'] = 'latin1'
+        settings['output_encoding_error_handler'] = 'replace'
+        source = 'Grüß → dich'
+        expected = ('<document source="<string>">\n'
+                    '    <paragraph>\n'
+                    '        Grüß → dich\n')
+        # encode output, return `bytes`
+        output = bytes(core.publish_string(source,
+                                           settings_overrides=settings))
+        self.assertEqual(output, expected.encode('latin1', 'replace'))
+
+    def test_publish_string_output_encoding_odt(self):
+        """The ODT writer generates a zip archive, not a `str`.
+
+        TODO: return `str` with document as "flat XML" (.fodt).
+        """
+        settings = dict(self.settings)
+        settings['output_encoding'] = 'unicode'
+        with self.assertRaises(AssertionError) as cm:
+            core.publish_string('test', writer_name='odt',
+                                settings_overrides=settings)
+        self.assertIn('`data` is no `str` instance', str(cm.exception))
+
+
+class PublishDoctreeTestCase(unittest.TestCase, docutils.SettingsSpec):
 
     settings_default_overrides = {
         '_disable_config': True,
-        'warning_stream': io.NullOutput()}
+        'warning_stream': docutils.io.NullOutput()}
 
     def test_publish_doctree(self):
         # Test `publish_doctree` and `publish_from_doctree`.
@@ -106,12 +185,13 @@ class PublishDoctreeTestCase(DocutilsTestSupport.StandardTestCase, docutils.Sett
             settings_spec=self,
             settings_overrides={'expose_internals':
                                 ['refnames', 'do_not_expose'],
-                                'report_level': 1})
+                                'report_level': 1,
+                                'output_encoding': 'unicode'})
         self.assertEqual(output, exposed_pseudoxml_output)
 
         # Test publishing parts using document as the source.
         parts = core.publish_parts(
-            reader_name='doctree', source_class=io.DocTreeInput,
+            reader_name='doctree', source_class=docutils.io.DocTreeInput,
             source=doctree, source_path='test', writer_name='html',
             settings_spec=self)
         self.assertTrue(isinstance(parts, dict))
@@ -148,12 +228,11 @@ class PublishDoctreeTestCase(DocutilsTestSupport.StandardTestCase, docutils.Sett
         self.assertTrue(isinstance(doctree_zombie, nodes.document))
 
         # Write out the document:
-        output = core.publish_from_doctree(
-            doctree_zombie, writer_name='pseudoxml',
-            settings_spec=self)
-        self.assertEqual(output, pseudoxml_output)
+        output = core.publish_from_doctree(doctree_zombie,
+                                           writer_name='pseudoxml',
+                                           settings_spec=self)
+        self.assertEqual(output.decode(), pseudoxml_output)
 
 
 if __name__ == '__main__':
-    import unittest
     unittest.main()

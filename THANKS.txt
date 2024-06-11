@@ -1,12 +1,12 @@
-.. -*- coding: utf-8 -*-
+.. include:: docs/header0.txt
 
 Acknowledgements
 ================
 
 :Author: David Goodger
 :Contact: goodger@python.org
-:Date: $Date: 2022-01-21 14:45:42 +0100 (Fr, 21. Jän 2022) $
-:Revision: $Revision: 8959 $
+:Date: $Date: 2022-11-29 00:55:25 +0100 (Di, 29. Nov 2022) $
+:Revision: $Revision: 9280 $
 :Copyright: This document has been placed in the public domain.
 
 I would like to acknowledge the people who have made a direct impact

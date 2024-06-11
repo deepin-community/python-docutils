@@ -13,15 +13,31 @@ Tests for inline markup in CommonMark parsers
 Cf. the `CommonMark Specification <https://spec.commonmark.org/>`__
 """
 
+from pathlib import Path
+import sys
+import unittest
+
 if __name__ == '__main__':
-    import __init__  # noqa: F401
-from test_parsers import DocutilsTestSupport
+    # prepend the "docutils root" to the Python library path
+    # so we import the local `docutils` package.
+    sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
+
+from docutils.frontend import get_default_settings
+from docutils.parsers.recommonmark_wrapper import Parser
+from docutils.utils import new_document
 
 
-def suite():
-    s = DocutilsTestSupport.RecommonmarkParserTestSuite()
-    s.generateTests(totest)
-    return s
+class RecommonmarkParserTestCase(unittest.TestCase):
+    def test_parser(self):
+        parser = Parser()
+        settings = get_default_settings(Parser)
+        for name, cases in totest.items():
+            for casenum, (case_input, case_expected) in enumerate(cases):
+                with self.subTest(id=f'totest[{name!r}][{casenum}]'):
+                    document = new_document('test data', settings.copy())
+                    parser.parse(case_input, document)
+                    output = document.pformat()
+                    self.assertEqual(output, case_expected)
 
 
 totest = {}
@@ -378,7 +394,7 @@ across lines]
 """],
 ]
 
-totest['appended_URIs'] = [
+totest['appended_uris'] = [
 ["""\
 [anonymous reference](http://example.com)
 """,
@@ -434,7 +450,7 @@ Relative URIs' reference text can't be omitted:
 """],
 ]
 
-totest['standalone hyperlink'] = [
+totest['standalone_hyperlink'] = [
 ["""\
 CommonMark calls standalone hyperlinks
 like <http://example.com> "autolinks".
@@ -450,7 +466,7 @@ like <http://example.com> "autolinks".
 """],
 ]
 
-totest['raw HTML'] = [
+totest['raw_html'] = [
 ["""\
 foo <a href="uri"> bar
 """,
@@ -499,7 +515,7 @@ Hard line breaks are not supported by Docutils.
 """],
 ]
 
-totest['markup recognition rules'] = [
+totest['markup_recognition_rules'] = [
 [r"""
 Character-level m*a***r**`k`_u_p
 works except for underline.
@@ -521,5 +537,4 @@ works except for underline.
 
 
 if __name__ == '__main__':
-    import unittest
-    unittest.main(defaultTest='suite')
+    unittest.main()

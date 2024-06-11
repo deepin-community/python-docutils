@@ -1,5 +1,5 @@
 #! /usr/bin/env python3
-# $Id: test_html4css1_misc.py 9037 2022-03-05 23:31:10Z milde $
+# $Id: test_html4css1_misc.py 9369 2023-05-02 23:04:27Z milde $
 # Authors: Lea Wiemann, Dmitry Shachnev, Günter Milde
 # Maintainer: docutils-develop@lists.sourceforge.net
 # Copyright: This module has been placed in the public domain.
@@ -9,14 +9,21 @@ Miscellaneous HTML writer tests.
 """
 
 import os
+import unittest
 
-if __name__ == '__main__':
-    import __init__  # noqa: F401
-from test_writers import DocutilsTestSupport
 from docutils import core
 
+# TEST_ROOT is ./test/ from the docutils root
+TEST_ROOT = os.path.abspath(os.path.join(__file__, '..', '..'))
+# DATA_ROOT is ./test/data/ from the docutils root
+DATA_ROOT = os.path.join(TEST_ROOT, 'data')
 
-class EncodingTestCase(DocutilsTestSupport.StandardTestCase):
+
+def relpath(*parts):
+    return os.path.relpath(os.path.join(*parts), os.getcwd()).replace('\\', '/')
+
+
+class EncodingTestCase(unittest.TestCase):
 
     def test_xmlcharrefreplace(self):
         # Test that xmlcharrefreplace is the default output encoding
@@ -26,15 +33,15 @@ class EncodingTestCase(DocutilsTestSupport.StandardTestCase):
             'stylesheet': '',
             '_disable_config': True,
             }
-        result = core.publish_string(
+        result = bytes(core.publish_string(
             'EUR = \u20ac', writer_name='html4css1',
-            settings_overrides=settings_overrides)
+            settings_overrides=settings_overrides))
         # Encoding a euro sign with latin1 doesn't work, so the
         # xmlcharrefreplace handler is used.
         self.assertIn(b'EUR = &#8364;', result)
 
 
-class MovingArgsTestCase(DocutilsTestSupport.StandardTestCase):
+class MovingArgsTestCase(unittest.TestCase):
 
     mys = {'stylesheet_path': '',
            # 'embed_stylesheet': False,
@@ -76,7 +83,10 @@ second term:
                       result)
 
 
-class SettingsTestCase(DocutilsTestSupport.StandardTestCase):
+ham_css = relpath(DATA_ROOT, 'ham.css')
+
+
+class SettingsTestCase(unittest.TestCase):
     data = 'test'
 
     def test_default_stylesheet(self):
@@ -119,27 +129,33 @@ class SettingsTestCase(DocutilsTestSupport.StandardTestCase):
     def test_custom_stylesheet_dir(self):
         mys = {'_disable_config': True,
                'embed_stylesheet': False,
-               'stylesheet_dirs': ('../docutils/writers/html4css1/',
-                                   'data'),
+               'stylesheet_dirs': (
+                   os.path.join(TEST_ROOT, '../docutils/writers/html4css1/'),
+                   DATA_ROOT),
                'stylesheet_path': 'html4css1.css, ham.css'}
         styles = core.publish_parts(self.data, writer_name='html4css1',
                                     settings_overrides=mys)['stylesheet']
-        if os.path.isdir('../docutils/writers/html4css1/'):
+        if os.path.isdir(os.path.join(TEST_ROOT, '../docutils/writers/html4css1/')):
             self.assertIn('docutils/writers/html4css1/html4css1.css', styles)
-        self.assertIn('href="data/ham.css"', styles)
+        self.assertIn(f'href="{ham_css}"', styles)
 
     def test_custom_stylesheet_dir_embedded(self):
         mys = {'_disable_config': True,
                'embed_stylesheet': True,
-               'stylesheet_dirs': ('../docutils/writers/html4css1/',
-                                   'data'),
+               'stylesheet_dirs': (
+                   os.path.join(TEST_ROOT, '../docutils/writers/html4css1/'),
+                   DATA_ROOT),
                'stylesheet_path': 'ham.css'}
         styles = core.publish_parts(self.data, writer_name='html4css1',
                                     settings_overrides=mys)['stylesheet']
         self.assertIn('dl.docutils dd {\n  margin-bottom: 0.5em }', styles)
 
 
-class MathTestCase(DocutilsTestSupport.StandardTestCase):
+html4css1_css = relpath(TEST_ROOT, 'functional/input/data/html4css1.css')
+math_css = relpath(TEST_ROOT, 'functional/input/data/math.css')
+
+
+class MathTestCase(unittest.TestCase):
 
     """Attention: This class tests the current implementation of maths support
     which is open to change in future Docutils releases. """
@@ -187,13 +203,15 @@ class MathTestCase(DocutilsTestSupport.StandardTestCase):
     def test_math_output_html_stylesheet(self):
         mys = {'_disable_config': True,
                'math_output': 'HTML math.css,custom/style.css',
-               'stylesheet_dirs': ('.', 'functional/input/data'),
+               'stylesheet_dirs': (
+                   TEST_ROOT,
+                   os.path.join(TEST_ROOT, 'functional/input/data')),
                'embed_stylesheet': False}
         styles = core.publish_parts(self.data, writer_name='html4css1',
                                     settings_overrides=mys)['stylesheet']
-        self.assertEqual("""\
-<link rel="stylesheet" href="functional/input/data/html4css1.css" type="text/css" />
-<link rel="stylesheet" href="functional/input/data/math.css" type="text/css" />
+        self.assertEqual(f"""\
+<link rel="stylesheet" href="{html4css1_css}" type="text/css" />
+<link rel="stylesheet" href="{math_css}" type="text/css" />
 <link rel="stylesheet" href="custom/style.css" type="text/css" />
 """, styles)
 
@@ -204,5 +222,4 @@ class MathTestCase(DocutilsTestSupport.StandardTestCase):
 
 
 if __name__ == '__main__':
-    import unittest
     unittest.main()

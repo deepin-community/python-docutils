@@ -1,6 +1,6 @@
 #!/usr/bin/python3 -i
 
-# $Id: profile_docutils.py 8925 2022-01-03 23:48:58Z milde $
+# $Id: profile_docutils.py 9115 2022-07-28 17:06:24Z milde $
 # Author: Lea Wiemann <LeWiemann@gmail.com>
 # Copyright: This script has been placed in the public domain.
 
@@ -35,5 +35,5 @@ stats.print_stats(40)
 
 try:
     exec(open(os.environ['PYTHONSTARTUP']).read())
-except:
+except Exception:
     pass

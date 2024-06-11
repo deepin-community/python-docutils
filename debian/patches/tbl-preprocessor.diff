@@ -1,0 +1,48 @@
+From: Engelbert Gruber <grubert@users.sourceforge.net>
+Date: Sat, 18 Nov 2023 21:48:30 +0000
+Subject: Enable tbl preprocessor for manpages that contain tables
+
+Origin: upstream, commits
+ https://sourceforge.net/p/docutils/code/9477/
+ https://sourceforge.net/p/docutils/code/9482/
+---
+ docutils/writers/manpage.py       | 6 ++++++
+ test/test_writers/test_manpage.py | 1 +
+ 2 files changed, 7 insertions(+)
+
+diff --git a/docutils/writers/manpage.py b/docutils/writers/manpage.py
+index f0e5378..dd9582a 100644
+--- a/docutils/writers/manpage.py
++++ b/docutils/writers/manpage.py
+@@ -199,6 +199,7 @@ class Translator(nodes.NodeVisitor):
+         self._in_docinfo = None
+         self._field_name = None
+         self._active_table = None
++        self._has_a_table = False   # is there a table in this document
+         self._in_literal = False
+         self.header_written = 0
+         self._line_block = 0
+@@ -1071,6 +1072,11 @@ class Translator(nodes.NodeVisitor):
+ 
+     def visit_table(self, node):
+         self._active_table = Table()
++        if not self._has_a_table:
++            self._has_a_table = True
++            # the comment to hint that preprocessor tbl should be called
++            self.head.insert(0, "'\\\" t\n")
++            # single apostrophe, backslash, double apostroph, blank, character-t
+ 
+     def depart_table(self, node):
+         self.ensure_eol()
+diff --git a/test/test_writers/test_manpage.py b/test/test_writers/test_manpage.py
+index 1cd2cb4..2713bd5 100644
+--- a/test/test_writers/test_manpage.py
++++ b/test/test_writers/test_manpage.py
+@@ -236,6 +236,7 @@ totest['table'] = [
+         ====== =====
+ """,
+ '''\
++\'\\" t
+ .\\" Man page generated from reStructuredText.
+ .
+ ''' + indend_macros + '''.TH ""  "" ""

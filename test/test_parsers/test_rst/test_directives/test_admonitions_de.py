@@ -1,6 +1,6 @@
 #! /usr/bin/env python3
 
-# $Id: test_admonitions_de.py 9037 2022-03-05 23:31:10Z milde $
+# $Id: test_admonitions_de.py 9277 2022-11-26 23:15:13Z milde $
 # Author: David Goodger <goodger@python.org>
 # Copyright: This module has been placed in the public domain.
 
@@ -8,16 +8,41 @@
 Tests for admonitions.py directives in German document.
 """
 
+from pathlib import Path
+import sys
+import unittest
+
 if __name__ == '__main__':
-    import __init__  # noqa: F401
-from test_parsers import DocutilsTestSupport
+    # prepend the "docutils root" to the Python library path
+    # so we import the local `docutils` package.
+    sys.path.insert(0, str(Path(__file__).resolve().parents[4]))
+
+from docutils.frontend import get_default_settings
+from docutils.parsers.rst import Parser, directives, roles
+from docutils.utils import new_document
 
 
-def suite():
-    settings = {'language_code': 'de'}
-    s = DocutilsTestSupport.ParserTestSuite(suite_settings=settings)
-    s.generateTests(totest)
-    return s
+class ParserTestCase(unittest.TestCase):
+    def test_parser(self):
+        parser = Parser()
+        settings = get_default_settings(Parser)
+        settings.warning_stream = ''
+        settings.language_code = 'de'
+        for name, cases in totest.items():
+            for casenum, (case_input, case_expected) in enumerate(cases):
+                # Language-specific roles and roles added by the
+                # "default-role" and "role" directives are currently stored
+                # globally in the roles._roles dictionary.
+                # Language-specific directives are currently stored
+                # globally in the directives._directives dictionary.
+                # This workaround empties these dictionaries.
+                directives._directives = {}
+                roles._roles = {}
+                with self.subTest(id=f'totest[{name!r}][{casenum}]'):
+                    document = new_document('test data', settings.copy())
+                    parser.parse(case_input, document)
+                    output = document.pformat()
+                    self.assertEqual(output, case_expected)
 
 
 totest = {}
@@ -166,6 +191,10 @@ totest['admonitions'] = [
 """,
 """\
 <document source="test data">
+    <system_message level="1" line="1" source="test data" type="INFO">
+        <paragraph>
+            No directive entry for "admonition" in module "docutils.parsers.rst.languages.de".
+            Using English fallback for directive "admonition".
     <admonition classes="admonition-admonition">
         <title>
             Admonition
@@ -179,6 +208,10 @@ totest['admonitions'] = [
 """,
 """\
 <document source="test data">
+    <system_message level="1" line="1" source="test data" type="INFO">
+        <paragraph>
+            No directive entry for "admonition" in module "docutils.parsers.rst.languages.de".
+            Using English fallback for directive "admonition".
     <admonition classes="admonition-and-by-the-way">
         <title>
             And, by the way...
@@ -194,6 +227,10 @@ totest['admonitions'] = [
 """,
 """\
 <document source="test data">
+    <system_message level="1" line="1" source="test data" type="INFO">
+        <paragraph>
+            No directive entry for "admonition" in module "docutils.parsers.rst.languages.de".
+            Using English fallback for directive "admonition".
     <admonition classes="emergency" ids="reference-name" names="reference\\ name">
         <title>
             Admonition
@@ -207,6 +244,10 @@ totest['admonitions'] = [
 """,
 """\
 <document source="test data">
+    <system_message level="1" line="1" source="test data" type="INFO">
+        <paragraph>
+            No directive entry for "admonition" in module "docutils.parsers.rst.languages.de".
+            Using English fallback for directive "admonition".
     <system_message level="3" line="1" source="test data" type="ERROR">
         <paragraph>
             Error in "admonition" directive:
@@ -220,5 +261,4 @@ totest['admonitions'] = [
 
 
 if __name__ == '__main__':
-    import unittest
-    unittest.main(defaultTest='suite')
+    unittest.main()
