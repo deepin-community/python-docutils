@@ -1,6 +1,6 @@
 #! /usr/bin/env python3
 
-# $Id: test_traversals.py 9038 2022-03-05 23:31:46Z milde $
+# $Id: test_traversals.py 9277 2022-11-26 23:15:13Z milde $
 # Author: Martin Blais <blais@furius.ca>
 # Copyright: This module has been placed in the public domain.
 
@@ -8,7 +8,14 @@
 Test module for traversals.
 """
 
+from pathlib import Path
+import sys
 import unittest
+
+if __name__ == '__main__':
+    # prepend the "docutils root" to the Python library path
+    # so we import the local `docutils` package.
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 import docutils
 from docutils import core, nodes, writers

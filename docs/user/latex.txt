@@ -6,8 +6,8 @@
 
 :Author: Engelbert Gruber, Günter Milde
 :Contact: docutils-develop@lists.sourceforge.net
-:Revision: $Revision: 9069 $
-:Date: $Date: 2022-06-13 14:05:18 +0200 (Mo, 13. Jun 2022) $
+:Revision: $Revision: 9124 $
+:Date: $Date: 2022-09-13 12:29:51 +0200 (Di, 13. Sep 2022) $
 :Copyright: This document has been placed in the public domain.
 :Abstract: This document covers topics specific to Docutils' LaTeX_ export.
 
@@ -1644,7 +1644,7 @@ booktabs
   A line above and below the table and one after the head.
 
 borderless
-  No borders.
+  No borders around table cells.
 
 colwidths-auto
   Column width determination by LaTeX.

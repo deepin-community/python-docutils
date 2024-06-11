@@ -10,7 +10,7 @@
 #
 # .. _2-Clause BSD license: https://opensource.org/licenses/BSD-2-Clause
 
-# :Id: $Id: test_CLI.py 9072 2022-06-15 11:31:09Z milde $
+# :Id: $Id: test_CLI.py 9331 2023-03-25 17:54:40Z aa-turner $
 
 """
 Test module for the command line interface.
@@ -19,13 +19,21 @@ Test module for the command line interface.
 import difflib
 from io import StringIO
 import locale
+from pathlib import Path
 import os
 import re
 import sys
 import unittest
 
-# import docutils
-from docutils import __main__, frontend
+if __name__ == '__main__':
+    # prepend the "docutils root" to the Python library path
+    # so we import the local `docutils` package.
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+
+from docutils import __main__, core
+
+# DATA_ROOT is ./test/data/ from the docutils root
+DATA_ROOT = Path(__file__).parent / 'data'
 
 
 def print_mismatch(expected, output):
@@ -46,16 +54,16 @@ class CliTests(unittest.TestCase):
         sys.stdout = StringIO()  # re-direct sys.stdout
 
     def tearDown(self):
-        del(os.environ['DOCUTILSCONFIG'])
+        del os.environ['DOCUTILSCONFIG']
         sys.stdout = self.orig_stdout
         sys.argv = self.orig_argv
         locale.setlocale(locale.LC_ALL, 'C')  # restore default (C) locale
 
-    def test_main_help(self):
-        # collect help text
-        sys.argv = ['docutils', '--help']
+    def get_help_text(self, prog, entry_point):
+        # call entry_point function and collect help text
+        sys.argv = [prog, '--help']
         try:
-            __main__.main()
+            entry_point()
         except SystemExit:
             pass
         output = sys.stdout.getvalue()
@@ -64,10 +72,37 @@ class CliTests(unittest.TestCase):
                         output, flags=re.DOTALL)
         # normalise error encoding default
         output = output.replace(
-            f'{frontend.OptionParser.default_error_encoding}:backslashreplace',
+            f'{core.OptionParser.default_error_encoding}:backslashreplace',
             'utf-8:backslashreplace')
+        return output
+
+    def test_main_help(self):
+        # collect help text
+        output = self.get_help_text('docutils', __main__.main)
+
         # compare to stored version
-        with open('data/help/docutils.txt', encoding='utf-8') as samplefile:
+        docutils_txt = os.path.join(DATA_ROOT, 'help/docutils.txt')
+        with open(docutils_txt, encoding='utf-8') as samplefile:
+            expected = samplefile.read()
+        if expected != output:
+            print_mismatch(expected, output)
+
+    def test_rst2html_help(self):
+        # collect help text
+        output = self.get_help_text('rst2html', core.rst2html)
+        # compare to stored version
+        rst2html_txt = os.path.join(DATA_ROOT, 'help/rst2html.txt')
+        with open(rst2html_txt, encoding='utf-8') as samplefile:
+            expected = samplefile.read()
+        if expected != output:
+            print_mismatch(expected, output)
+
+    def test_rst2latex_help(self):
+        # collect help text
+        output = self.get_help_text('rst2latex', core.rst2latex)
+        # compare to stored version
+        rst2latex_txt = os.path.join(DATA_ROOT, 'help/rst2latex.txt')
+        with open(rst2latex_txt, encoding='utf-8') as samplefile:
             expected = samplefile.read()
         if expected != output:
             print_mismatch(expected, output)

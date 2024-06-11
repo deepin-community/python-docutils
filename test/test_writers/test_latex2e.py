@@ -1,5 +1,5 @@
 #! /usr/bin/env python3
-# $Id: test_latex2e.py 9037 2022-03-05 23:31:10Z milde $
+# $Id: test_latex2e.py 9384 2023-05-11 15:50:42Z milde $
 # Author: engelbert gruber <grubert@users.sourceforge.net>
 # Copyright: This module has been placed in the public domain.
 
@@ -7,42 +7,169 @@
 Tests for latex2e writer.
 """
 
+import os
+from pathlib import Path
 import string
+import sys
+import unittest
 
 if __name__ == '__main__':
-    import __init__  # noqa: F401
-from test_transforms import DocutilsTestSupport  # before importing docutils!
+    # prepend the "docutils root" to the Python library path
+    # so we import the local `docutils` package.
+    sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+
+from docutils.core import publish_string
+
+# DATA_ROOT is ./test/data from the docutils root
+DATA_ROOT = Path(__file__).resolve().parents[1] / 'data'
+
+ham = os.path.relpath(DATA_ROOT/'ham.tex').replace('\\', '/')
+spam = os.path.relpath(DATA_ROOT/'spam').replace('\\', '/')
+# workaround for PyPy (cf. https://sourceforge.net/p/docutils/bugs/471/)
+if sys.implementation.name == "pypy" and sys.version_info < (3, 10):
+    spampath = f"PosixPath('{spam}.sty')"
+else:
+    spampath = f"'{spam}.sty'"
 
 
-def suite():
-    settings = {'use_latex_toc': False,
-                # avoid latex writer future warnings:
-                'use_latex_citations': False,
-                'legacy_column_widths': True,
-                }
-    s = DocutilsTestSupport.PublishTestSuite('latex', suite_settings=settings)
-    s.generateTests(totest)
-    settings['use_latex_toc'] = True
-    s.generateTests(totest_latex_toc)
-    settings['documentclass'] = 'book'
-    s.generateTests(totest_latex_toc_book)
-    del settings['documentclass']
-    settings['use_latex_toc'] = False
-    settings['sectnum_xform'] = False
-    s.generateTests(totest_latex_sectnum)
-    settings['sectnum_xform'] = True
-    settings['use_latex_citations'] = True
-    s.generateTests(totest_latex_citations)
-    settings['table_style'] = ['colwidths-auto']
-    s.generateTests(totest_table_style_auto)
-    settings['table_style'] = ['booktabs']
-    s.generateTests(totest_table_style_booktabs)
-    settings['stylesheet_path'] = 'data/spam,data/ham.tex'
-    s.generateTests(totest_stylesheet)
-    settings['embed_stylesheet'] = True
-    settings['warning_stream'] = ''
-    s.generateTests(totest_stylesheet_embed)
-    return s
+class WriterPublishTestCase(unittest.TestCase):
+
+    maxDiff = None
+    writer_name = 'latex'
+    settings = {
+        '_disable_config': True,
+        'strict_visitor': True,
+        # Explicit set current default to avoid latex writer future warnings:
+        'use_latex_citations': False,
+        'legacy_column_widths': True,
+        }
+
+    def test_defaults(self):
+        for name, cases in samples_default.items():
+            for casenum, (rst_input, expected) in enumerate(cases):
+                with self.subTest(id=f'samples_default[{name!r}][{casenum}]'):
+                    output = publish_string(source=rst_input,
+                                            writer_name=self.writer_name,
+                                            settings_overrides=self.settings)
+                    output = output.decode()
+                    self.assertEqual(output, expected)
+
+    def test_docutils_toc(self):
+        settings = self.settings.copy()
+        settings['use_latex_toc'] = False
+        for name, cases in samples_docutils_toc.items():
+            for casenum, (rst_input, expected) in enumerate(cases):
+                id = f'samples_docutils_toc[{name!r}][{casenum}]'
+                with self.subTest(id=id):
+                    output = publish_string(source=rst_input,
+                                            writer_name=self.writer_name,
+                                            settings_overrides=settings)
+                    output = output.decode()
+                    self.assertEqual(output, expected)
+
+    def test_book(self):
+        settings = self.settings.copy()
+        settings['documentclass'] = 'book'
+        for name, cases in samples_book.items():
+            for casenum, (rst_input, expected) in enumerate(cases):
+                with self.subTest(id=f'samples_book[{name!r}][{casenum}]'):
+                    output = publish_string(source=rst_input,
+                                            writer_name=self.writer_name,
+                                            settings_overrides=settings)
+                    output = output.decode()
+                    self.assertEqual(output, expected)
+
+    def test_latex_sectnum(self):
+        settings = self.settings.copy()
+        settings['use_latex_toc'] = False
+        settings['sectnum_xform'] = False
+        for name, cases in samples_latex_sectnum.items():
+            for casenum, (rst_input, expected) in enumerate(cases):
+                with self.subTest(
+                        id=f'samples_latex_sectnum[{name!r}][{casenum}]'):
+                    output = publish_string(source=rst_input,
+                                            writer_name=self.writer_name,
+                                            settings_overrides=settings)
+                    output = output.decode()
+                    self.assertEqual(output, expected)
+
+    def test_latex_citations(self):
+        settings = self.settings.copy()
+        settings['use_latex_citations'] = True
+        for name, cases in samples_latex_citations.items():
+            for casenum, (rst_input, expected) in enumerate(cases):
+                with self.subTest(
+                        id=f'samples_latex_citations[{name!r}][{casenum}]'):
+                    output = publish_string(source=rst_input,
+                                            writer_name=self.writer_name,
+                                            settings_overrides=settings)
+                    output = output.decode()
+                    self.assertEqual(output, expected)
+
+    def test_table_style_auto(self):
+        settings = self.settings.copy()
+        settings['table_style'] = ['colwidths-auto']
+        for name, cases in samples_table_style_auto.items():
+            for casenum, (rst_input, expected) in enumerate(cases):
+                with self.subTest(
+                        id=f'samples_table_style_auto[{name!r}][{casenum}]'):
+                    output = publish_string(source=rst_input,
+                                            writer_name=self.writer_name,
+                                            settings_overrides=settings)
+                    output = output.decode()
+                    self.assertEqual(output, expected)
+
+    def test_booktabs(self):
+        settings = self.settings.copy()
+        settings['table_style'] = ['booktabs']
+        for name, cases in samples_table_style_booktabs.items():
+            for casenum, (rst_input, expected) in enumerate(cases):
+                with self.subTest(id=f'samples_booktabs[{name!r}][{casenum}]'):
+                    output = publish_string(source=rst_input,
+                                            writer_name=self.writer_name,
+                                            settings_overrides=settings)
+                    output = output.decode()
+                    self.assertEqual(output, expected)
+
+    def test_link_stylesheet(self):
+        settings = self.settings.copy()
+        settings['stylesheet_path'] = f'{spam},{ham}'
+        for name, cases in samples_stylesheet.items():
+            for casenum, (rst_input, expected) in enumerate(cases):
+                id = f'samples_link_stylesheet[{name!r}][{casenum}]'
+                with self.subTest(id=id):
+                    output = publish_string(source=rst_input,
+                                            writer_name=self.writer_name,
+                                            settings_overrides=settings)
+                    output = output.decode()
+                    self.assertEqual(output, expected)
+
+    def test_embed_embed_stylesheet(self):
+        settings = self.settings.copy()
+        settings['stylesheet_path'] = f'{spam},{ham}'
+        settings['embed_stylesheet'] = True
+        settings['warning_stream'] = ''
+        for name, cases in samples_stylesheet_embed.items():
+            for casenum, (rst_input, expected) in enumerate(cases):
+                id = f'samples_embed_stylesheet[{name!r}][{casenum}]'
+                with self.subTest(id=id):
+                    output = publish_string(source=rst_input,
+                                            writer_name=self.writer_name,
+                                            settings_overrides=settings)
+                    output = output.decode()
+                    self.assertEqual(output, expected)
+
+    def test_bibtex(self):
+        settings = self.settings.copy()
+        settings['use_bibtex'] = ['alpha', 'xampl']
+        for name, cases in samples_bibtex.items():
+            for casenum, (rst_input, expected) in enumerate(cases):
+                with self.subTest(id=f'samples_bibtex[{name!r}][{casenum}]'):
+                    output = publish_string(source=rst_input,
+                                            writer_name=self.writer_name,
+                                            settings_overrides=settings)
+                    output = output.decode()
+                    self.assertEqual(output, expected)
 
 
 head_template = string.Template(
@@ -64,7 +191,6 @@ head_prefix=r"""\documentclass[a4paper]{article}
 """,
 requirements=r"""\usepackage{ifthen}
 \usepackage[T1]{fontenc}
-\usepackage[utf8]{inputenc}
 """,
 latex_preamble=r"""% PDF Standard Fonts
 \usepackage{mathptmx} % Times
@@ -121,17 +247,18 @@ head_alltt = head_template.substitute(
          + '\\usepackage{alltt}\n'))
 
 
-totest = {}
-totest_latex_toc = {}
-totest_latex_toc_book = {}
-totest_latex_sectnum = {}
-totest_latex_citations = {}
-totest_stylesheet = {}
-totest_stylesheet_embed = {}
-totest_table_style_auto = {}
-totest_table_style_booktabs = {}
+samples_default = {}
+samples_docutils_toc = {}
+samples_book = {}
+samples_latex_sectnum = {}
+samples_latex_citations = {}
+samples_stylesheet = {}
+samples_stylesheet_embed = {}
+samples_table_style_auto = {}
+samples_table_style_booktabs = {}
+samples_bibtex = {}
 
-totest['url_chars'] = [
+samples_default['url_chars'] = [
 ["http://nowhere/url_with%28parens%29",
 head + r"""
 \url{http://nowhere/url_with\%28parens\%29}
@@ -140,7 +267,7 @@ head + r"""
 """],
 ]
 
-totest['textcomp'] = [
+samples_default['textcomp'] = [
 ["2 µm is just 2/1000000 m",
 head_textcomp + r"""
 2 µm is just 2/1000000 m
@@ -149,12 +276,11 @@ head_textcomp + r"""
 """],
 ]
 
-totest['spanish quote'] = [
+samples_default['spanish_quote'] = [
 [".. role:: language-es\n\nUnd damit :language-es:`basta`!",
 head_template.substitute(dict(parts,
 requirements=r"""\usepackage{ifthen}
 \usepackage[T1]{fontenc}
-\usepackage[utf8]{inputenc}
 \usepackage[spanish,english]{babel}
 \AtBeginDocument{\shorthandoff{.<>}}
 """)) + r"""
@@ -164,7 +290,7 @@ Und damit \foreignlanguage{spanish}{basta}!
 """],
 ]
 
-totest['code role'] = [
+samples_default['code_role'] = [
 [':code:`x=1`',
 head_template.substitute(dict(parts, requirements=parts['requirements']
                               + '\\usepackage{color}\n',
@@ -176,8 +302,7 @@ head_template.substitute(dict(parts, requirements=parts['requirements']
 """],
 ]
 
-totest['table_of_contents'] = [
-# input
+samples_docutils_toc['table_of_contents'] = [
 ["""\
 .. contents:: Table of Contents
 
@@ -250,8 +375,7 @@ Paragraph 2.
 """],
 ]
 
-totest['footnote text'] = [
-# input
+samples_default['footnote_text'] = [
 ["""\
 .. [1] paragraph
 
@@ -292,8 +416,7 @@ paragraph
 """],
 ]
 
-totest_latex_toc['no_sectnum'] = [
-# input
+samples_default['no_sectnum'] = [
 ["""\
 .. contents::
 
@@ -317,8 +440,7 @@ head_template.substitute(dict(parts,
 """],
 ]
 
-totest_latex_toc['sectnum'] = [
-# input
+samples_default['sectnum'] = [
 ["""\
 .. contents::
 .. sectnum::
@@ -343,8 +465,7 @@ head_template.substitute(dict(parts,
 """],
 ]
 
-totest_latex_toc['depth'] = [
-# input
+samples_default['depth'] = [
 ["""\
 .. contents::
     :depth: 1
@@ -370,8 +491,7 @@ head_template.substitute(dict(parts,
 """],
 ]
 
-totest_latex_toc_book['depth'] = [
-# input
+samples_book['depth'] = [
 ["""\
 .. contents::
     :depth: 1
@@ -400,8 +520,7 @@ head_template.substitute(dict(parts,
 ]
 
 
-totest_latex_sectnum['no_sectnum'] = [
-# input
+samples_latex_sectnum['no_sectnum'] = [
 ["""\
 some text
 
@@ -422,8 +541,7 @@ some text
 """],
 ]
 
-totest_latex_sectnum['sectnum'] = [
-# input
+samples_latex_sectnum['sectnum'] = [
 ["""\
 .. sectnum::
 
@@ -447,8 +565,7 @@ some text
 """],
 ]
 
-totest_latex_citations['citations_with_underscore'] = [
-# input
+samples_latex_citations['citations_with_underscore'] = [
 ["""\
 Just a test citation [my_cite2006]_.
 
@@ -470,8 +587,7 @@ The underscore is mishandled.
 ]
 
 
-totest_latex_citations['adjacent_citations'] = [
-# input
+samples_latex_citations['adjacent_citations'] = [
 ["""\
 Two non-citations: [MeYou2007]_[YouMe2007]_.
 
@@ -509,8 +625,7 @@ important.
 ]
 
 
-totest['enumerated_lists'] = [
-# input
+samples_default['enumerated_lists'] = [
 ["""\
 1. Item 1.
 2. Second to the previous item this one will explain
@@ -562,8 +677,7 @@ head + r"""
 # as active character (e.g. de (ngerman)).
 
 
-totest['table_caption'] = [
-# input
+samples_default['table_caption'] = [
 ["""\
 .. table:: Foo
 
@@ -588,7 +702,7 @@ head_table + r"""
 """],
 ]
 
-totest['table_styles'] = [
+samples_default['table_styles'] = [
 ["""\
 .. table::
    :class: borderless
@@ -599,22 +713,22 @@ totest['table_styles'] = [
    |  3  |  4  |
    +-----+-----+
 """,
-head_table + r"""
-\setlength{\DUtablewidth}{\linewidth}%
-\begin{longtable*}{p{0.075\DUtablewidth}p{0.075\DUtablewidth}}
+head_table + """
+\\setlength{\\DUtablewidth}{\\linewidth}%
+\\begin{longtable*}{p{0.075\\DUtablewidth}p{0.075\\DUtablewidth}}
 
 1
- & 
+ & \n\
 2
- \\
+ \\\\
 
 3
- & 
+ & \n\
 4
- \\
-\end{longtable*}
+ \\\\
+\\end{longtable*}
 
-\end{document}
+\\end{document}
 """],
 ["""\
 .. table::
@@ -624,19 +738,19 @@ head_table + r"""
    |  1  |2|
    +-----+-+
 """,
-head_booktabs + r"""
-\setlength{\DUtablewidth}{\linewidth}%
-\begin{longtable*}{p{0.075\DUtablewidth}p{0.028\DUtablewidth}}
-\toprule
+head_booktabs + """
+\\setlength{\\DUtablewidth}{\\linewidth}%
+\\begin{longtable*}{p{0.075\\DUtablewidth}p{0.028\\DUtablewidth}}
+\\toprule
 
 1
- & 
+ & \n\
 2
- \\
-\bottomrule
-\end{longtable*}
+ \\\\
+\\bottomrule
+\\end{longtable*}
 
-\end{document}
+\\end{document}
 """],
 ["""\
 .. table::
@@ -680,23 +794,23 @@ head_table + r"""
    |  1  |  2  |
    +-----+-----+
 """,
-head_table + r"""
-\setlength{\DUtablewidth}{\linewidth}%
-\begin{longtable*}{|p{0.191\DUtablewidth}|p{0.365\DUtablewidth}|}
-\hline
+head_table + """
+\\setlength{\\DUtablewidth}{\\linewidth}%
+\\begin{longtable*}{|p{0.191\\DUtablewidth}|p{0.365\\DUtablewidth}|}
+\\hline
 
 1
- & 
+ & \n\
 2
- \\
-\hline
-\end{longtable*}
+ \\\\
+\\hline
+\\end{longtable*}
 
-\end{document}
+\\end{document}
 """],
 ]
 
-totest_table_style_booktabs['table_styles'] = [
+samples_table_style_booktabs['table_styles'] = [
 # borderless overrides "booktabs" table_style
 ["""\
 .. table::
@@ -708,22 +822,22 @@ totest_table_style_booktabs['table_styles'] = [
    |  3  |  4  |
    +-----+-----+
 """,
-head_table + r"""
-\setlength{\DUtablewidth}{\linewidth}%
-\begin{longtable*}{p{0.075\DUtablewidth}p{0.075\DUtablewidth}}
+head_table + """
+\\setlength{\\DUtablewidth}{\\linewidth}%
+\\begin{longtable*}{p{0.075\\DUtablewidth}p{0.075\\DUtablewidth}}
 
 1
- & 
+ & \n\
 2
- \\
+ \\\\
 
 3
- & 
+ & \n\
 4
- \\
-\end{longtable*}
+ \\\\
+\\end{longtable*}
 
-\end{document}
+\\end{document}
 """],
 ["""\
 .. table::
@@ -750,22 +864,22 @@ head_booktabs + r"""
    |  1  |  2  |
    +-----+-----+
 """,
-head_booktabs + r"""
-\setlength{\DUtablewidth}{\linewidth}%
-\begin{longtable*}{p{0.191\DUtablewidth}p{0.365\DUtablewidth}}
-\toprule
+head_booktabs + """
+\\setlength{\\DUtablewidth}{\\linewidth}%
+\\begin{longtable*}{p{0.191\\DUtablewidth}p{0.365\\DUtablewidth}}
+\\toprule
 
 1
- & 
+ & \n\
 2
- \\
-\bottomrule
-\end{longtable*}
+ \\\\
+\\bottomrule
+\\end{longtable*}
 
-\end{document}
+\\end{document}
 """],
 ]
-totest_table_style_auto['table_styles'] = [
+samples_table_style_auto['table_styles'] = [
 ["""\
 .. table::
    :class: borderless
@@ -810,24 +924,23 @@ head_booktabs + r"""
    |  1  |  2  |
    +-----+-----+
 """,
-head_table + r"""
-\setlength{\DUtablewidth}{\linewidth}%
-\begin{longtable*}{|p{0.191\DUtablewidth}|p{0.365\DUtablewidth}|}
-\hline
+head_table + """
+\\setlength{\\DUtablewidth}{\\linewidth}%
+\\begin{longtable*}{|p{0.191\\DUtablewidth}|p{0.365\\DUtablewidth}|}
+\\hline
 
 1
- & 
+ & \n\
 2
- \\
-\hline
-\end{longtable*}
+ \\\\
+\\hline
+\\end{longtable*}
 
-\end{document}
+\\end{document}
 """],
 ]
 
-totest['table_align'] = [
-# input
+samples_default['table_align'] = [
 ["""\
 .. table::
    :align: right
@@ -836,23 +949,23 @@ totest['table_align'] = [
    |  1  |  2  |
    +-----+-----+
 """,
-head_table + r"""
-\setlength{\DUtablewidth}{\linewidth}%
-\begin{longtable*}[r]{|p{0.075\DUtablewidth}|p{0.075\DUtablewidth}|}
-\hline
+head_table + """
+\\setlength{\\DUtablewidth}{\\linewidth}%
+\\begin{longtable*}[r]{|p{0.075\\DUtablewidth}|p{0.075\\DUtablewidth}|}
+\\hline
 
 1
- & 
+ & \n\
 2
- \\
-\hline
-\end{longtable*}
+ \\\\
+\\hline
+\\end{longtable*}
 
-\end{document}
+\\end{document}
 """],
 ]
 
-totest['table_empty_cells'] = [
+samples_default['table_empty_cells'] = [
 ["""\
 ===== ======
 Title
@@ -860,33 +973,33 @@ Title
 entry value1
 ===== ======
 """,
-head_table + r"""
-\setlength{\DUtablewidth}{\linewidth}%
-\begin{longtable*}{|p{0.075\DUtablewidth}|p{0.086\DUtablewidth}|}
-\hline
-\textbf{%
+head_table + """
+\\setlength{\\DUtablewidth}{\\linewidth}%
+\\begin{longtable*}{|p{0.075\\DUtablewidth}|p{0.086\\DUtablewidth}|}
+\\hline
+\\textbf{%
 Title
-} &  \\
-\hline
-\endfirsthead
-\hline
-\textbf{%
+} &  \\\\
+\\hline
+\\endfirsthead
+\\hline
+\\textbf{%
 Title
-} &  \\
-\hline
-\endhead
-\multicolumn{2}{p{0.16\DUtablewidth}}{\raggedleft\ldots continued on next page}\\
-\endfoot
-\endlastfoot
+} &  \\\\
+\\hline
+\\endhead
+\\multicolumn{2}{p{0.16\\DUtablewidth}}{\\raggedleft\\ldots continued on next page}\\\\
+\\endfoot
+\\endlastfoot
 
 entry
- & 
+ & \n\
 value1
- \\
-\hline
-\end{longtable*}
+ \\\\
+\\hline
+\\end{longtable*}
 
-\end{document}
+\\end{document}
 """],
 ["""\
 +----+----+
@@ -895,25 +1008,25 @@ value1
 |         |
 +---------+
 """,
-head_table + r"""
-\setlength{\DUtablewidth}{\linewidth}%
-\begin{longtable*}{|p{0.063\DUtablewidth}|p{0.063\DUtablewidth}|}
-\hline
+head_table + """
+\\setlength{\\DUtablewidth}{\\linewidth}%
+\\begin{longtable*}{|p{0.063\\DUtablewidth}|p{0.063\\DUtablewidth}|}
+\\hline
 
 c3
- & 
+ & \n\
 c4
- \\
-\hline
-\multicolumn{2}{|p{0.13\DUtablewidth}|}{} \\
-\hline
-\end{longtable*}
+ \\\\
+\\hline
+\\multicolumn{2}{|p{0.13\\DUtablewidth}|}{} \\\\
+\\hline
+\\end{longtable*}
 
-\end{document}
+\\end{document}
 """],
 ]
 
-totest['table_nonstandard_class'] = [
+samples_default['table_nonstandard_class'] = [
 ["""\
 .. table::
    :class: my-class
@@ -941,35 +1054,34 @@ head_template.substitute(
 \fi
 """
     )
-) + r"""
-\begin{DUclass}{my-class}
-\setlength{\DUtablewidth}{\linewidth}%
-\begin{longtable*}{|p{0.075\DUtablewidth}|p{0.075\DUtablewidth}|}
-\hline
+) + """
+\\begin{DUclass}{my-class}
+\\setlength{\\DUtablewidth}{\\linewidth}%
+\\begin{longtable*}{|p{0.075\\DUtablewidth}|p{0.075\\DUtablewidth}|}
+\\hline
 
 1
- & 
+ & \n\
 2
- \\
-\hline
+ \\\\
+\\hline
 
 3
- & 
+ & \n\
 4
- \\
-\hline
-\end{longtable*}
-\end{DUclass}
+ \\\\
+\\hline
+\\end{longtable*}
+\\end{DUclass}
 
-\end{document}
+\\end{document}
 """],
 ]
 
 # The "[" needs to be protected (otherwise it will be seen as an
 # option to "\\", "\item", etc. ).
 
-totest['bracket_protection'] = [
-# input
+samples_default['bracket_protection'] = [
 ["""
 * [no option] to this item
 """,
@@ -982,8 +1094,7 @@ head + r"""
 """],
 ]
 
-totest['literal_block'] = [
-# input
+samples_default['literal_block'] = [
 ["""\
 Test special characters { [ \\\\ ] } in literal block::
 
@@ -1006,7 +1117,7 @@ Test special characters \{ {[} \textbackslash{} {]} \} in literal block:
 """],
 ]
 
-totest['raw'] = [
+samples_default['raw'] = [
 [r""".. raw:: latex
 
    $E=mc^2$
@@ -1033,11 +1144,11 @@ same paragraph.
 [r""".. compound::
 
   Compound paragraph
-  
+
   .. raw:: LaTeX
-     
+
      raw LaTeX block
-  
+
   compound paragraph continuation.
 """,
 head_template.substitute(
@@ -1065,7 +1176,7 @@ compound paragraph continuation.
 """],
 ]
 
-totest['title_with_inline_markup'] = [
+samples_default['title_with_inline_markup'] = [
 ["""\
 This is the *Title*
 ===================
@@ -1107,27 +1218,26 @@ This is the \emph{document}.
 """],
 ]
 
-totest_stylesheet['two-styles'] = [
-# input
+samples_stylesheet['two-styles'] = [
 ["""two stylesheet links in the header""",
 head_template.substitute(dict(parts,
-stylesheet=r"""\usepackage{data/spam}
-\input{data/ham.tex}
-""")) + r"""
+stylesheet=r"""\usepackage{%s}
+\input{%s}
+""" % (spam, ham))) + r"""
 two stylesheet links in the header
 
 \end{document}
 """],
 ]
 
-totest_stylesheet_embed['two-styles'] = [
-# input
+samples_stylesheet_embed['two-styles'] = [
 ["""two stylesheets embedded in the header""",
 head_template.substitute(dict(parts,
-stylesheet=r"""% Cannot embed stylesheet:
-%  [Errno 2] No such file or directory: 'data/spam.sty'
-% embedded stylesheet: data/ham.tex
-\newcommand{\ham}{wonderful ham}
+stylesheet=f"""\
+% Cannot embed stylesheet:
+%  [Errno 2] No such file or directory: {spampath}
+% embedded stylesheet: {ham}
+\\newcommand{{\\ham}}{{wonderful ham}}
 
 """)) + r"""
 two stylesheets embedded in the header
@@ -1136,6 +1246,28 @@ two stylesheets embedded in the header
 """],
 ]
 
+samples_bibtex['alpha'] = [
+["""\
+Just a test citation [book-full]_.
+""",
+head + r"""
+Just a test citation \cite{book-full}.
+
+\bibliographystyle{alpha}
+\bibliography{xampl}
+
+\end{document}
+"""],
+["""\
+No bibliography if there is no citation.
+""",
+head + r"""
+No bibliography if there is no citation.
+
+\end{document}
+"""],
+]
+
+
 if __name__ == '__main__':
-    import unittest
-    unittest.main(defaultTest='suite')
+    unittest.main()

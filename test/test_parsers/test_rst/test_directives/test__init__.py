@@ -1,5 +1,5 @@
 #! /usr/bin/env python3
-# $Id: test__init__.py 9037 2022-03-05 23:31:10Z milde $
+# $Id: test__init__.py 9277 2022-11-26 23:15:13Z milde $
 # Author: Günter Milde <milde@users.sf.net>,
 # :License: Released under the terms of the `2-Clause BSD license`_, in short:
 #
@@ -13,19 +13,21 @@
 Test module for `docutils.parsers.rst.directives`.
 """
 
+from pathlib import Path
+import sys
 import unittest
 
-
 if __name__ == '__main__':
-    import __init__  # noqa: F401
-from test_parsers import DocutilsTestSupport
+    # prepend the "docutils root" to the Python library path
+    # so we import the local `docutils` package.
+    sys.path.insert(0, str(Path(__file__).resolve().parents[4]))
 
 import docutils
 import docutils.parsers.null
 from docutils.parsers.rst import directives
 
 
-class DirectiveOptionConversionTestCase(DocutilsTestSupport.StandardTestCase):
+class DirectiveOptionConversionTestCase(unittest.TestCase):
 
     def test_flag(self):
         # Raise error when there is an argument:

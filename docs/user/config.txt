@@ -6,8 +6,8 @@
 
 :Author: David Goodger
 :Contact: docutils-develop@lists.sourceforge.net
-:Revision: $Revision: 9077 $
-:Date: $Date: 2022-06-17 13:31:28 +0200 (Fr, 17. Jun 2022) $
+:Revision: $Revision: 9369 $
+:Date: $Date: 2023-05-03 01:04:27 +0200 (Mi, 03. Mai 2023) $
 :Copyright: This document has been placed in the public domain.
 
 .. sidebar:: Docutils Security for Web Applications
@@ -67,8 +67,6 @@ the three implicit ones listed above (or the ones defined by the
 ``DOCUTILSCONFIG`` environment variable), and its entries will have
 priority.
 
-.. _Docutils Runtime Settings: ../api/runtime-settings.html
-
 
 -------------------------
 Configuration File Syntax
@@ -102,8 +100,9 @@ recognized:
 
 List values can be comma- or colon-delimited.
 
-strip_classes_, strip_elements_with_classes_, stylesheet, and
-stylesheet_path use the comma as delimiter,
+strip_classes_, strip_elements_with_classes_, smartquotes_locales_,
+stylesheet, stylesheet_dirs, stylesheet_path, legacy_class_functions_,
+and use_bibtex_ use the comma as delimiter,
 whitespace around list values is stripped. ::
 
     strip-classes: ham,eggs,
@@ -147,6 +146,9 @@ Individual configuration sections and settings are described in the
 following section.
 
 
+.. _configuration section:
+.. _configuration sections:
+
 -------------------------------------
 Configuration File Sections & Entries
 -------------------------------------
@@ -155,7 +157,7 @@ Below are the Docutils runtime settings, listed by config file
 section.  **Any setting may be specified in any section, but only
 settings from active sections will be used.**  Sections correspond to
 Docutils components (module name or alias; section names are always in
-lowercase letters).  Each `Docutils application`_ uses a specific set
+lowercase letters).  Each Docutils application_ uses a specific set
 of components; corresponding configuration file sections are applied
 when the application is used.  Configuration sections are applied in
 general-to-specific order, as follows:
@@ -198,7 +200,7 @@ Some knowledge of Python_ is assumed for some attributes.
 .. _Python: https://www.python.org/
 .. _RFC 822: https://www.rfc-editor.org/rfc/rfc822.txt
 .. _front-end tool:
-.. _Docutils application: tools.html
+.. _application: tools.html
 
 
 [general]
@@ -299,7 +301,7 @@ error_encoding_error_handler
 ----------------------------
 
 The error handler for unencodable characters in error output.
-Acceptable values are the `Error Handlers`_ of Python's "encoding" module.
+Acceptable values are the `Error Handlers`_ of Python's "codecs" module.
 See also output_encoding_error_handler_.
 
 Default: "backslashreplace"
@@ -367,15 +369,19 @@ Option: ``--id-prefix`` (hidden, intended mainly for programmatic use).
 input_encoding
 --------------
 
-The text encoding for input.
+The text encoding for input (use the empty string to restore the default).
 
-Default: auto-detect (None).  Options: ``--input-encoding, -i``.
+Default: auto-detect_ (None). [#]_  Options: ``--input-encoding, -i``.
+
+.. [#] The default will change to "utf-8" in Docutils 0.22.
+
+.. _auto-detect: ../api/publisher.html#encodings
 
 input_encoding_error_handler
 ----------------------------
 
 The error handler for undecodable characters in the input.
-Acceptable values are the `Error Handlers`_ of Python's "encoding" module,
+Acceptable values are the `Error Handlers`_ of Python's "codecs" module,
 including:
 
 strict
@@ -414,18 +420,39 @@ Default: English ("en").  Options: ``--language, -l``.
 
 .. _class attribute: ../ref/doctree.html#classes
 
+
+output
+------
+
+The name of the output destination. Use ``-`` for stdout.
+
+Obsoletes the ``<destination>`` positional argument
+(cf. `Future changes`_ in the RELEASE-NOTES).
+
+Default: None (stdout). Option: ``--output``.
+
+New in Docutils 0.20.
+
+.. _Future changes: ../../RELEASE-NOTES.html#future-changes
+
 output_encoding
 ---------------
 
 The text encoding for output.
 
-Default: "utf-8".  Options: ``--output-encoding, -o``.
+The "output_encoding" setting may also affect the content of the output
+(e.g. an encoding declaration in HTML or XML or the representation of
+characters as LaTeX macro vs. literal character).
+
+This setting is ignored by the `ODF/ODT Writer`_
+
+Default: "utf-8".  Options: ``--output-encoding``.
 
 output_encoding_error_handler
 -----------------------------
 
 The error handler for unencodable characters in the output.
-Acceptable values are the `Error Handlers`_ of Python's "encoding" module,
+Acceptable values are the `Error Handlers`_ of Python's "codecs" module,
 including:
 
 strict
@@ -449,7 +476,7 @@ record_dependencies
 
 Path to a file where Docutils will write a list of files that were
 required to generate the output, e.g. included files or embedded
-stylesheets [#dependencies]_. [#pwd]_ The format is one path per
+stylesheets. [#dependencies]_ [#pwd]_ The format is one path per
 line with forward slashes as separator, the encoding is UTF-8.
 
 Set to ``-`` in order to write dependencies to stdout.
@@ -615,8 +642,9 @@ Generic parser options:
 file_insertion_enabled
 ----------------------
 
-Enable or disable directives or directive that insert the contents of
-external files, such as "include_" or "raw_" with option "url".
+Enable or disable directives inserting the contents of
+external files, such as "include_" directive
+or the "raw_" and "csv-table_" directives with option "url" or "file".
 A "warning" system message (including the directive text) is inserted
 instead.  (See also raw_enabled_ for another security-relevant setting.)
 
@@ -625,6 +653,7 @@ Options: ``--file-insertion-enabled, --no-file-insertion``.
 
 .. _include: ../ref/rst/directives.html#include
 .. _raw: ../ref/rst/directives.html#raw
+.. _csv-table: ../ref/rst/directives.html#csv-table
 
 line_length_limit
 -----------------
@@ -799,9 +828,11 @@ New in Docutils 0.9.
 tab_width
 ~~~~~~~~~
 
-Number of spaces for hard tab expansion.
+Number of spaces for `hard tab expansion`_.
 
 Default: 8.  Option: ``--tab-width``.
+
+.. _hard tab expansion: ../ref/rst/restructuredtext.html#whitespace
 
 trim_footnote_reference_space
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -1062,6 +1093,40 @@ the output document. Supported values are (case insensitive):
   stylesheet(s) will only be referenced or embedded if required
   (i.e. if there is mathematical content in the document).
 
+:MathML:
+  Embed math content as presentational MathML_.
+
+  Self-contained documents (no JavaScript, no external downloads).
+  MathML is part of the HTML5 standard [#mathml-in-html4]_ and
+  `supported by all major browsers`__ (since January 2023 also by Chrome).
+
+  .. [#mathml-in-html4] 
+    With the "html4css1" writer, the resulting HTML document does
+    not validate, as there is no DTD for `MathML + XHTML Transitional`.
+    However, MathML-enabled browsers will render it fine.
+
+  Docutil's latex2mathml converter supports a considerable
+  `subset of LaTeX math syntax`__.
+
+  An external converter can be appended after whitespace, e.g.,
+  ``--math-output="MathML blahtexml"``:
+
+  blahtexml_
+    Fast conversion, support for many symbols and environments, but no
+    "align" (or other equation-aligning) environment. (C++)
+
+  LaTeXML_
+    Comprehensive macro support but *very* slow. (Perl)
+
+  TtM_
+    No "matrix", "align" and  "cases" environments. Support may be removed.
+
+  Pandoc_
+    Comprehensive macro support, fast, but a large install size. (Haskell)
+
+  __ https://developer.mozilla.org/en-US/docs/Web/MathML#browser_compatibility
+  __ ../ref/rst/mathematics.html
+
 :MathJax:
   Format math for display with MathJax_, a JavaScript-based math rendering
   engine.
@@ -1111,42 +1176,6 @@ the output document. Supported values are (case insensitive):
 
     This is the fallback if no URL is specified.
 
-:MathML:
-  Embed math content as presentational MathML_.
-
-  Pro:
-    The W3C recommendation for math on the web.
-
-    Self-contained documents (no JavaScript, no external downloads).
-
-  Con:
-    Limited `browser support`__.
-
-    Docutil's latex2mathml converter supports only a
-    `subset of LaTeX math syntax`__.
-
-    With the "html4css1" writer, the resulting HTML document does
-    not validate, as there is no DTD for `MathML + XHTML Transitional`.
-    However, MathML-enabled browsers will render it fine.
-
-    __ https://developer.mozilla.org/en-US/docs/Web/MathML
-       #browser_compatibility
-    __ ../ref/rst/mathematics.html
-
-
-  An external converter can be appended after whitespace, e.g.,
-  ``--math-output="MathML latexml"``:
-
-  blahtexml_
-    Fast conversion, support for many symbols and environments, but no
-    "align" (or other equation-aligning) environment. (C++)
-
-  LaTeXML_
-    Comprehensive macro support but *very* slow. (Perl)
-
-  TtM_
-    No "matrix", "align" and  "cases" environments. Support may be removed.
-
 :LaTeX:
   Include literal LaTeX code.
 
@@ -1154,7 +1183,9 @@ the output document. Supported values are (case insensitive):
 
 Default: HTML math.css.  Option: ``--math-output``.
 
-New in Docutils 0.8.
+| New in Docutils 0.8. 
+| The default for the HTML5 writer will change to
+  "MathML" in Docutils 0.22.
 
 .. _math directive: ../ref/rst/directives.html#math
 .. _MathJax: http://www.mathjax.org/
@@ -1163,6 +1194,7 @@ New in Docutils 0.8.
 .. _blahtexml: http://gva.noekeon.org/blahtexml/
 .. _LaTeXML: http://dlmf.nist.gov/LaTeXML/
 .. _TtM: http://hutchinson.belmont.ma.us/tth/mml/
+.. _Pandoc: https://pandoc.org/
 
 
 .. _stylesheet [html writers]:
@@ -1232,10 +1264,10 @@ See also `table_style [latex writers]`_.
 The default CSS sylesheets define:
 
   borderless
-    No borders around the table.
+    No borders around table cells.
 
   align-left, align-center, align-right
-    Align the tables
+    Align table as indicated.
 
 The HTML5 stylesheets also define:
 
@@ -1254,8 +1286,7 @@ In addition, the HTML writers support:
     Overridden by the "widths" option of the `table directive`_.
 
   colwidths-grid
-    Backwards compatibility setting. Write column widths
-    determined from the source to the HTML file.
+    Write column widths determined from the source to the HTML file.
     Overridden by the "widths" option of the `table directive`_.
 
 Default: "".  Option: ``--table-style``.
@@ -1632,7 +1663,7 @@ Options for the `hyperref TeX package`_. If hyperlink_color_ is
 not "false", the expansion of ::
 
   'colorlinks=true,linkcolor=%s,urlcolor=%s' % (
-     hyperlink_color, self.hyperlink_color
+      hyperlink_color, hyperlink_color)
 
 is prepended.
 
@@ -1660,7 +1691,7 @@ comma-separated list of class values as optional argument. If `False`, class
 values are handled with wrappers and admonitions use the ``DUadmonition``
 environment. See `Generating LaTeX with Docutils`__ for details.
 
-Default: False (changed in Docutils 0.18).
+Default: False (since Docutils 0.18).
 Options: ``--legacy-class-functions``, ``--new-class-functions``.
 
 New in Docutils 0.17.
@@ -1679,7 +1710,7 @@ table width and keeps the ratio of specified column widths.
 Custom table and/or column widths can be set with the respective options
 of the `table directive`_. See also `Generating LaTeX with Docutils`__.
 
-Default: True (will change to False in 0.19).
+Default: True (will change to False in Docutils 1.0).
 Options: ``--legacy-column-widths``, ``--new-column-widths``.
 
 New in Docutils 0.18.
@@ -1747,6 +1778,8 @@ stylesheet
 ~~~~~~~~~~
 
 A comma-separated list_ of style files.
+Used without path adaption (cf. `stylesheet_path [latex writers]`_).
+Under Windows, path separators are normalized to forward slashes (``/``).
 See also `stylesheet [html writers]`_.
 
 Overrides also stylesheet_path__. [#override]_
@@ -1798,7 +1831,7 @@ output file path. Run ``latex`` from the directory containing
 the output file.
 See also `stylesheet_path [html writers]`_.
 
-The stylesheet__  option is preferred for files in the `TeX input path`_.
+For files in the `TeX input path`_, the stylesheet__  option is recommended.
 
 Also overrides stylesheet__. [#override]_
 
@@ -1837,13 +1870,16 @@ See also `template [html writers]`_.
 Default: writer dependent (see `[latex2e writer]`_, `[xetex writer]`_).
 Option: ``--template``.
 
-
 use_bibtex
 ~~~~~~~~~~
-Specify style and database for the experimental `BibTeX` support, for
-example::
 
-  --use-bibtex=mystyle,mydb1,mydb2
+Provisional, name, values, and behaviour may change in future versions
+or the option may be removed.
+
+A comma-separated list of style and database(s) for the experimental
+`BibTeX` support, for example::
+
+  --use-bibtex=unsrt,mydb1,mydb2
 
 Default: "" (don't use BibTeX).  Option ``--use-bibtex``.
 
@@ -1894,7 +1930,6 @@ LaTeX (pdfTeX_). It shares all settings defined in the `[latex writers]`_
 
 .. _LaTeX2e writer: latex.html#latex2e-writer
 .. _pdfTeX: https://www.tug.org/applications/pdftex/
-.. _configuration section: `Configuration File Sections & Entries`_
 
 
 Writer Specific Defaults
@@ -1931,14 +1966,12 @@ Default: "T1".  Option: ``--font-encoding``.
 [xetex writer]
 ~~~~~~~~~~~~~~
 
-The `XeTeX writer`_ generates a LaTeX source for compilation with `XeTeX or
-LuaTeX`_. It derives from the latex2e writer, and shares all settings
-defined in the `[latex writers]`_ and `[latex2e writer]`_ `configuration
-sections`_.
+The `XeTeX writer`_ generates a LaTeX source for compilation with `XeTeX
+or LuaTeX`_. It derives from the latex2e writer, and shares all settings
+defined in the `[latex writers]`_ `configuration section`_.
 
 .. _XeTeX writer: latex.html#xetex-writer
 .. _XeTeX or LuaTeX: https://texfaq.org/FAQ-xetex-luatex
-.. _configuration sections: `Configuration File Sections & Entries`_
 
 Writer Specific Defaults
 """"""""""""""""""""""""
@@ -1967,10 +2000,21 @@ template__:
   __ `template [latex writers]`_
 
 
+.. _ODF/ODT Writer:
+
 [odf_odt writer]
 ----------------
 
-The following command line options are specific to ``odtwriter``:
+The `ODF/ODT Writer`__ generates documents in the 
+OpenDocument_ Text format (.odt).
+
+The output_encoding_ setting is ignored, the output encoding is
+always "UTF-8".
+
+__
+.. _ODT Writer for Docutils: odt.html
+.. _OpenDocument: https://en.wikipedia.org/wiki/OpenDocument
+
 
 stylesheet
 ~~~~~~~~~~
@@ -1997,6 +2041,7 @@ keeping email links usable with standards-compliant browsers.
 
 no-cloak-email-addresses
 ~~~~~~~~~~~~~~~~~~~~~~~~
+
 Do not obfuscate email addresses.
 
 table-border-thickness
@@ -2028,6 +2073,7 @@ Do not create sections for headers.
 
 create-links
 ~~~~~~~~~~~~
+
 Create links.
 
 no-links
@@ -2078,8 +2124,6 @@ custom footers and about special field character sequences, see
 section "Custom header/footers: inserting page numbers, date,
 time, etc" in the `Odt Writer for Docutils`_ document for
 details.
-
-.. _Odt Writer for Docutils: odt.html
 
 
 [pseudoxml writer]
@@ -2161,9 +2205,9 @@ New in 0.17. Obsoletes the ``html_writer`` option.
 [docutils application]
 --------------------------
 
-New in 0.17. Config file support added in 0.18.
-Renamed in 0.19 (the old name "docutils-cli application" is kept as alias).
-Support for reader/parser import names added in 0.19.
+| New in 0.17. Config file support added in 0.18.
+| Renamed in 0.19 (the old name "docutils-cli application" is kept as alias).
+| Support for reader/parser import names added in 0.19.
 
 reader
 ~~~~~~
@@ -2320,6 +2364,7 @@ pep_template           [pep_html writer] template
 .. _block quote: ../ref/rst/restructuredtext.html#block-quotes
 .. _citations: ../ref/rst/restructuredtext.html#citations
 .. _bullet lists: ../ref/rst/restructuredtext.html#bullet-lists
+.. _Docutils Runtime Settings: ../api/runtime-settings.html
 .. _enumerated lists: ../ref/rst/restructuredtext.html#enumerated-lists
 .. _field lists: ../ref/rst/restructuredtext.html#field-lists
 .. _field names: ../ref/rst/restructuredtext.html#field-names
@@ -2332,5 +2377,5 @@ pep_template           [pep_html writer] template
 .. _tables: ../ref/rst/restructuredtext.html#tables
 .. _table of contents: ../ref/rst/directives.html#contents
 
-.. _Error Handlers: 
+.. _Error Handlers:
    https://docs.python.org/3/library/codecs.html#error-handlers

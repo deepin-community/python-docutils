@@ -1,5 +1,5 @@
 #! /usr/bin/env python3
-# $Id: test_docinfo.py 9037 2022-03-05 23:31:10Z milde $
+# $Id: test_docinfo.py 9351 2023-04-17 20:26:33Z milde $
 # Author: David Goodger <goodger@python.org>
 # Copyright: This module has been placed in the public domain.
 
@@ -7,24 +7,58 @@
 Tests for docutils.transforms.frontmatter.DocInfo.
 """
 
+from pathlib import Path
+import sys
+import unittest
+
 if __name__ == '__main__':
-    import __init__  # noqa: F401
-from test_transforms import DocutilsTestSupport
-from docutils.transforms.frontmatter import DocInfo
+    # prepend the "docutils root" to the Python library path
+    # so we import the local `docutils` package.
+    sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+
+from docutils.frontend import get_default_settings
 from docutils.parsers.rst import Parser
+from docutils.transforms.frontmatter import DocInfo
+from docutils.transforms.universal import FilterMessages, TestMessages
+from docutils.utils import new_document
 
 
-def suite():
+class TransformTestCase(unittest.TestCase):
+
+    maxDiff = None
+    settings = get_default_settings(Parser)
+    settings.warning_stream = ''
     parser = Parser()
-    settings = {'language_code': 'en'}
-    s = DocutilsTestSupport.TransformTestSuite(
-        parser, suite_settings=settings)
-    s.generateTests(totest)
-    settings['language_code'] = 'de'
-    s.generateTests(totest_de)
-    settings['language_code'] = 'ru'
-    s.generateTests(totest_ru)
-    return s
+
+    def check_output(self, samples, settings):
+        # yield (output, expected) for each test sample
+        for key, (transforms, cases) in samples.items():
+            for casenum, (case_input, case_expected) in enumerate(cases):
+                with self.subTest(id=f'samples[{key!r}][{casenum}]'):
+                    document = new_document('test data', settings)
+                    self.parser.parse(case_input, document)
+                    # Don't do a ``populate_from_components()`` because that
+                    # would enable the Transformer's default transforms.
+                    document.transformer.add_transforms(transforms)
+                    document.transformer.add_transform(TestMessages)
+                    # Filter INFOs with increased priority so that
+                    # messages added by `TestMessages` are filtered, too:
+                    document.transformer.add_transform(FilterMessages, 890)
+                    document.transformer.apply_transforms()
+                    self.assertEqual(document.pformat(), case_expected)
+
+    def test_transforms(self):
+        self.check_output(totest, self.settings)
+
+    def test_transforms_de(self):
+        settings = self.settings.copy()
+        settings.language_code = 'de'
+        self.check_output(totest_de, settings)
+
+    def test_transforms_ru(self):
+        settings = self.settings.copy()
+        settings.language_code = 'ru'
+        self.check_output(totest_ru, settings)
 
 
 totest = {}
@@ -40,16 +74,21 @@ totest['bibliographic_field_lists'] = ((DocInfo,), [
 
     It is automatically moved to the end of the other bibliographic elements.
 
-:Author: Me
+:Author: E. *Xample*
+
 :Version: 1
+
 :Date: 2001-08-11
+
 :Parameter i: integer
 """,
 """\
 <document source="test data">
     <docinfo>
         <author>
-            Me
+            E. \n\
+            <emphasis>
+                Xample
         <version>
             1
         <date>
@@ -144,7 +183,8 @@ totest['bibliographic_field_lists'] = ((DocInfo,), [
                             must be a paragraph
                 <system_message level="2" line="1" source="test data" type="WARNING">
                     <paragraph>
-                        Cannot extract bibliographic field "Author" containing anything other than a single paragraph.
+                        Bibliographic field "Author"
+                        must contain a single <paragraph>, not a <bullet_list>.
         <status>
             a \n\
             <emphasis>
@@ -160,7 +200,8 @@ totest['bibliographic_field_lists'] = ((DocInfo,), [
                     paragraph.
                 <system_message level="2" line="3" source="test data" type="WARNING">
                     <paragraph>
-                        Cannot extract compound bibliographic field "Date".
+                        Bibliographic field "Date"
+                        must contain a single <paragraph>, not [<paragraph>, <paragraph>].
         <field classes="version">
             <field_name>
                 Version
@@ -317,7 +358,12 @@ totest['bibliographic_field_lists'] = ((DocInfo,), [
                             Shaw
                 <system_message level="2" line="3" source="test data" type="WARNING">
                     <paragraph>
-                        Bibliographic field "Authors" incompatible with extraction: it must contain either a single paragraph (with authors separated by one of ";,"), multiple paragraphs (one per author), or a bullet list with one paragraph (one author) per item.
+                        Cannot extract "Authors" from bibliographic field:
+                        Bibliographic field "Authors" must contain either
+                         a single paragraph (with author names separated by one of ";,"),
+                         multiple paragraphs (one per author),
+                         or a bullet list with one author name per item.
+                        Note: Leading initials can cause (mis)recognizing names as enumerated list.
         <field classes="authors">
             <field_name>
                 Authors
@@ -327,7 +373,12 @@ totest['bibliographic_field_lists'] = ((DocInfo,), [
                     <list_item>
                 <system_message level="2" line="6" source="test data" type="WARNING">
                     <paragraph>
-                        Bibliographic field "Authors" incompatible with extraction: it must contain either a single paragraph (with authors separated by one of ";,"), multiple paragraphs (one per author), or a bullet list with one paragraph (one author) per item.
+                        Cannot extract "Authors" from bibliographic field:
+                        Bibliographic field "Authors" must contain either
+                         a single paragraph (with author names separated by one of ";,"),
+                         multiple paragraphs (one per author),
+                         or a bullet list with one author name per item.
+                        Note: Leading initials can cause (mis)recognizing names as enumerated list.
         <field classes="authors">
             <field_name>
                 Authors
@@ -340,7 +391,12 @@ totest['bibliographic_field_lists'] = ((DocInfo,), [
                     Two
                 <system_message level="2" line="10" source="test data" type="WARNING">
                     <paragraph>
-                        Bibliographic field "Authors" incompatible with extraction: it must contain either a single paragraph (with authors separated by one of ";,"), multiple paragraphs (one per author), or a bullet list with one paragraph (one author) per item.
+                        Cannot extract "Authors" from bibliographic field:
+                        Bibliographic field "Authors" must contain either
+                         a single paragraph (with author names separated by one of ";,"),
+                         multiple paragraphs (one per author),
+                         or a bullet list with one author name per item.
+                        Note: Leading initials can cause (mis)recognizing names as enumerated list.
         <field classes="authors">
             <field_name>
                 Authors
@@ -353,7 +409,12 @@ totest['bibliographic_field_lists'] = ((DocInfo,), [
                             Two
                 <system_message level="2" line="15" source="test data" type="WARNING">
                     <paragraph>
-                        Bibliographic field "Authors" incompatible with extraction: it must contain either a single paragraph (with authors separated by one of ";,"), multiple paragraphs (one per author), or a bullet list with one paragraph (one author) per item.
+                        Cannot extract "Authors" from bibliographic field:
+                        Bibliographic field "Authors" must contain either
+                         a single paragraph (with author names separated by one of ";,"),
+                         multiple paragraphs (one per author),
+                         or a bullet list with one author name per item.
+                        Note: Leading initials can cause (mis)recognizing names as enumerated list.
 """],
 ["""\
 .. RCS keyword extraction.
@@ -379,7 +440,7 @@ totest['bibliographic_field_lists'] = ((DocInfo,), [
 """],
 ])
 
-totest_de['bibliographic_field_lists'] = ((DocInfo,), [
+totest_de['bibliographic_field_lists_de'] = ((DocInfo,), [
 ["""\
 .. Bibliographic element extraction for a German document.
 
@@ -423,7 +484,7 @@ totest_de['bibliographic_field_lists'] = ((DocInfo,), [
 """]
 ])
 
-totest_ru['bibliographic_field_lists'] = ((DocInfo,), [
+totest_ru['bibliographic_field_lists_ru'] = ((DocInfo,), [
 ["""\
 .. Bibliographic element extraction for a Russian document.
 
@@ -469,5 +530,4 @@ totest_ru['bibliographic_field_lists'] = ((DocInfo,), [
 
 
 if __name__ == '__main__':
-    import unittest
-    unittest.main(defaultTest='suite')
+    unittest.main()

@@ -1,0 +1,68 @@
+From: Dmitry Shachnev <mitya57@debian.org>
+Date: Sat, 20 May 2023 19:52:44 +0300
+Subject: Support SOURCE_DATE_EPOCH in date directive and "Generated on" line
+
+Co-authored-by: Chris Lamb <lamby@debian.org>
+Forwarded: https://sourceforge.net/p/docutils/patches/132/
+---
+ docutils/parsers/rst/directives/misc.py | 13 +++++++------
+ docutils/transforms/universal.py        |  8 +++++++-
+ 2 files changed, 14 insertions(+), 7 deletions(-)
+
+diff --git a/docutils/parsers/rst/directives/misc.py b/docutils/parsers/rst/directives/misc.py
+index be8d76e..20d48c9 100644
+--- a/docutils/parsers/rst/directives/misc.py
++++ b/docutils/parsers/rst/directives/misc.py
+@@ -7,6 +7,7 @@
+ __docformat__ = 'reStructuredText'
+ 
+ from pathlib import Path
++import os
+ import re
+ import time
+ from urllib.request import urlopen
+@@ -598,12 +599,12 @@ class Date(Directive):
+         #
+         # See also the discussion about \date \time \year in TeX
+         # http://tug.org/pipermail/tex-k/2016-May/002704.html
+-        # source_date_epoch = os.environ.get('SOURCE_DATE_EPOCH')
+-        # if (source_date_epoch):
+-        #     text = time.strftime(format_str,
+-        #                          time.gmtime(int(source_date_epoch)))
+-        # else:
+-        text = time.strftime(format_str)
++        source_date_epoch = os.environ.get('SOURCE_DATE_EPOCH')
++        if source_date_epoch:
++            text = time.strftime(format_str,
++                                 time.gmtime(int(source_date_epoch)))
++        else:
++            text = time.strftime(format_str)
+         return [nodes.Text(text)]
+ 
+ 
+diff --git a/docutils/transforms/universal.py b/docutils/transforms/universal.py
+index 16b4871..3e41059 100644
+--- a/docutils/transforms/universal.py
++++ b/docutils/transforms/universal.py
+@@ -20,6 +20,7 @@ Transforms needed by most or all documents:
+ 
+ __docformat__ = 'reStructuredText'
+ 
++import os
+ import re
+ import time
+ from docutils import nodes, utils
+@@ -73,7 +74,12 @@ class Decorations(Transform):
+                                     refuri=source),
+                     nodes.Text('.\n')])
+             if settings.datestamp:
+-                datestamp = time.strftime(settings.datestamp, time.gmtime())
++                source_date_epoch = os.environ.get('SOURCE_DATE_EPOCH')
++                if source_date_epoch:
++                    datestamp = time.strftime(settings.datestamp,
++                                              time.gmtime(int(source_date_epoch)))
++                else:
++                    datestamp = time.strftime(settings.datestamp, time.gmtime())
+                 text.append(nodes.Text('Generated on: ' + datestamp + '.\n'))
+             if settings.generator:
+                 text.extend([

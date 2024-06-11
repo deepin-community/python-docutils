@@ -1,5 +1,5 @@
 #! /usr/bin/env python3
-# $Id: test_error_reporting.py 9068 2022-06-13 12:05:08Z milde $
+# $Id: test_error_reporting.py 9277 2022-11-26 23:15:13Z milde $
 # Author: Günter Milde <milde@users.sf.net>
 # Copyright: This module has been placed in the public domain.
 
@@ -25,10 +25,15 @@ unless the minimal required Python version has this problem fixed.
 """
 
 from io import StringIO, BytesIO
-import os
+from pathlib import Path
 import sys
 import unittest
 import warnings
+
+if __name__ == '__main__':
+    # prepend the "docutils root" to the Python library path
+    # so we import the local `docutils` package.
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from docutils import frontend, utils
 import docutils.parsers.rst
@@ -188,19 +193,10 @@ class SafeStringTests_locale(unittest.TestCase):
             open(u'\xfc'.encode(sys.getfilesystemencoding(), 'replace'))
         except IOError as e:
             uioe = e
-    try:
-        os.chdir(b'\xc3\xbc')
-    except OSError as e:
-        bose = e
-    try:
-        os.chdir(u'\xfc')
-    except OSError as e:
-        uose = e
-    except UnicodeEncodeError:
-        try:
-            os.chdir(u'\xfc'.encode(sys.getfilesystemencoding(), 'replace'))
-        except OSError as e:
-            uose = e
+    bose = FileNotFoundError(2, 'The system cannot find the file specified')
+    bose.filename = b'\xc3\xbc'
+    uose = FileNotFoundError(2, 'The system cannot find the file specified')
+    uose.filename = '\xfc'
     # wrapped test data:
     wbioe = SafeString(bioe)
     wuioe = SafeString(uioe)

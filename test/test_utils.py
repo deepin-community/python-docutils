@@ -1,6 +1,6 @@
 #! /usr/bin/env python3
 
-# $Id: test_utils.py 9030 2022-03-05 23:28:32Z milde $
+# $Id: test_utils.py 9323 2023-01-17 17:20:12Z milde $
 # Author: David Goodger <goodger@python.org>
 # Copyright: This module has been placed in the public domain.
 
@@ -8,13 +8,21 @@
 Test module for utils/__init__.py.
 """
 
+from io import StringIO
 import os
+from pathlib import Path
 import sys
 import unittest
 
-from DocutilsTestSupport import docutils, utils, nodes
+if __name__ == '__main__':
+    # prepend the "docutils root" to the Python library path
+    # so we import the local `docutils` package.
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from io import StringIO
+import docutils
+from docutils import utils, nodes
+
+TEST_ROOT = Path(__file__).parent  # ./test/ from the docutils root
 
 
 class ReporterTests(unittest.TestCase):
@@ -266,6 +274,24 @@ class HelperFunctionTests(unittest.TestCase):
                          ['grc-ibycus-x-altquot', 'grc-ibycus',
                           'grc-x-altquot', 'grc'])
 
+    def test_xml_declaration(self):
+        # default is no encoding declaration
+        self.assertEqual(utils.xml_declaration(), '<?xml version="1.0"?>\n')
+        # if an encoding is passed, declare it
+        self.assertEqual(utils.xml_declaration('ISO-8859-2'),
+                         '<?xml version="1.0" encoding="ISO-8859-2"?>\n')
+        # ignore pseudo encoding name "unicode" introduced by
+        # `docutils.io.Output.encode()`
+        self.assertEqual(utils.xml_declaration('Unicode'),
+                         '<?xml version="1.0"?>\n')
+        # ... non-regarding case
+        self.assertEqual(utils.xml_declaration('UNICODE'),
+                         '<?xml version="1.0"?>\n')
+        # allow %s for later interpolation
+        # (used for part 'html_prolog', cf. docs/api/publisher.html)
+        self.assertEqual(utils.xml_declaration('%s'),
+                         '<?xml version="1.0" encoding="%s"?>\n')
+
     def test_column_width(self):
         self.assertEqual(utils.column_width('de'), 2)
         self.assertEqual(utils.column_width('dâ'), 2)  # pre-composed
@@ -292,11 +318,11 @@ class HelperFunctionTests(unittest.TestCase):
         # Build and return a path to `target`, relative to `source`:
         # Use '/' as path sep in result.
         self.assertEqual(utils.relative_path('spam', 'spam'), '')
-        source = os.path.join('h\xE4m', 'spam', 'fileA')
-        target = os.path.join('h\xE4m', 'spam', 'fileB')
+        source = os.path.join('häm', 'spam', 'fileA')
+        target = os.path.join('häm', 'spam', 'fileB')
         self.assertEqual(utils.relative_path(source, target), 'fileB')
-        source = os.path.join('h\xE4m', 'spam', 'fileA')
-        target = os.path.join('h\xE4m', 'fileB')
+        source = os.path.join('häm', 'spam', 'fileA')
+        target = os.path.join('häm', 'fileB')
         self.assertEqual(utils.relative_path(source, target), '../fileB')
         # if source is None, default to the cwd:
         target = os.path.join('eggs', 'fileB')
@@ -309,11 +335,11 @@ class HelperFunctionTests(unittest.TestCase):
         #                  os.path.abspath('fileB'))
         # Correctly process unicode instances:
         self.assertEqual(utils.relative_path('spam', 'spam'), '')
-        source = os.path.join('h\xE4m', 'spam', 'fileA')
-        target = os.path.join('h\xE4m', 'spam', 'fileB')
+        source = os.path.join('häm', 'spam', 'fileA')
+        target = os.path.join('häm', 'spam', 'fileB')
         self.assertEqual(utils.relative_path(source, target), 'fileB')
-        source = os.path.join('h\xE4m', 'spam', 'fileA')
-        target = os.path.join('h\xE4m', 'fileB')
+        source = os.path.join('häm', 'spam', 'fileA')
+        target = os.path.join('häm', 'fileB')
         self.assertEqual(utils.relative_path(source, target), '../fileB')
         # if source is None, default to the cwd:
         target = os.path.join('eggs', 'fileB')
@@ -322,17 +348,19 @@ class HelperFunctionTests(unittest.TestCase):
     def test_find_file_in_dirs(self):
         # Search for file `path` in the sequence of directories `dirs`.
         # Return the first expansion that matches an existing file.
-        dirs = ('nonex', '.', '..')
-        found = utils.find_file_in_dirs('HISTORY.txt', dirs)
-        # returns
-        # '..\\HISTORY.txt' on windows
-        # '../HISTORY.txt' on other platforms
-        # 'HISTORY.txt' if not called from docutils directory.
-        self.assertTrue(found.startswith('..'),
+        dirs = (os.path.join(TEST_ROOT, 'nonex'),
+                TEST_ROOT,
+                os.path.join(TEST_ROOT, '..'))
+        result = utils.find_file_in_dirs('alltests.py', dirs)
+        expected = os.path.join(TEST_ROOT, 'alltests.py').replace('\\', '/')
+        self.assertEqual(result, expected)
+        result = utils.find_file_in_dirs('HISTORY.txt', dirs)
+        expected = (TEST_ROOT / '..' / 'HISTORY.txt').as_posix()
+        self.assertEqual(result, expected)
+        # normalize for second check
+        self.assertTrue(os.path.relpath(result, TEST_ROOT).startswith('..'),
                         'HISTORY.txt not found in "..".')
         # Return `path` if the file exists in the cwd or if there is no match
-        self.assertEqual(utils.find_file_in_dirs('alltests.py', dirs),
-                         'alltests.py')
         self.assertEqual(utils.find_file_in_dirs('gibts/nicht.txt', dirs),
                          'gibts/nicht.txt')
 
@@ -355,15 +383,16 @@ class HelperFunctionTests(unittest.TestCase):
 
 class StylesheetFunctionTests(unittest.TestCase):
 
-    stylesheet_dirs = ['.', 'data']
+    stylesheet_dirs = [TEST_ROOT, os.path.join(TEST_ROOT, 'data')]
 
     def test_get_stylesheet_list_stylesheet_path(self):
         # look for stylesheets in stylesheet_dirs
         self.stylesheet = None
         self.stylesheet_path = 'ham.css, missing.css'
 
+        ham_css = os.path.join(TEST_ROOT, 'data', 'ham.css').replace('\\', '/')
         self.assertEqual(utils.get_stylesheet_list(self),
-                         ['data/ham.css', 'missing.css'])
+                         [ham_css, 'missing.css'])
 
     def test_get_stylesheet_list_stylesheet(self):
         # use stylesheet paths verbatim

@@ -7,8 +7,8 @@
 :Author: David Goodger (with input from many); open to all Docutils
          developers
 :Contact: docutils-develop@lists.sourceforge.net
-:Date: $Date: 2022-06-17 13:31:17 +0200 (Fr, 17. Jun 2022) $
-:Revision: $Revision: 9076 $
+:Date: $Date: 2022-11-02 23:39:16 +0100 (Mi, 02. Nov 2022) $
+:Revision: $Revision: 9201 $
 :Copyright: This document has been placed in the public domain.
 
 .. _Docutils: https://docutils.sourceforge.io/
@@ -2285,7 +2285,7 @@ Unimplemented Transforms
   The advantage of the current way of doing things is that parse-time
   system messages don't require a transform; they're already in the
   document.  This is valuable for testing (unit tests,
-  tools/quicktest.py).  So if we do decide to make a change, I think
+  tools/dev/quicktest.py).  So if we do decide to make a change, I think
   the insertion of parse-time system messages ought to remain as-is
   and the Messages transform ought to move all parse-time system
   messages (remove from their originally inserted positions, insert in
