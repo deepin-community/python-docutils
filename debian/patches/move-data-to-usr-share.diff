@@ -17,7 +17,7 @@ Last-Update: 2023-05-20
  9 files changed, 51 insertions(+), 16 deletions(-)
 
 diff --git a/docutils/__init__.py b/docutils/__init__.py
-index 34f806d..6ca1939 100644
+index 16af410..1c196f8 100644
 --- a/docutils/__init__.py
 +++ b/docutils/__init__.py
 @@ -289,3 +289,27 @@ class Component(SettingsSpec, TransformSpec):
@@ -49,7 +49,7 @@ index 34f806d..6ca1939 100644
 +    def _datadir(path, buildloc=None):
 +        return os.path.dirname(path)
 diff --git a/docutils/parsers/rst/directives/misc.py b/docutils/parsers/rst/directives/misc.py
-index 9b63267..be8d76e 100644
+index c16e943..2af3232 100644
 --- a/docutils/parsers/rst/directives/misc.py
 +++ b/docutils/parsers/rst/directives/misc.py
 @@ -12,6 +12,7 @@ import time
@@ -60,7 +60,7 @@ index 9b63267..be8d76e 100644
  from docutils import io, nodes, statemachine, utils
  from docutils.parsers.rst import Directive, convert_directive_function
  from docutils.parsers.rst import directives, roles, states
-@@ -50,7 +51,7 @@ class Include(Directive):
+@@ -64,7 +65,7 @@ class Include(Directive):
                     'class': directives.class_option,
                     'name': directives.unchanged}
  
@@ -70,7 +70,7 @@ index 9b63267..be8d76e 100644
      def run(self):
          """Include a file as part of the content of this reST file.
 diff --git a/docutils/writers/html4css1/__init__.py b/docutils/writers/html4css1/__init__.py
-index ce1673d..4c03c35 100644
+index 799d30e..2afe0cb 100644
 --- a/docutils/writers/html4css1/__init__.py
 +++ b/docutils/writers/html4css1/__init__.py
 @@ -17,6 +17,7 @@ __docformat__ = 'reStructuredText'
@@ -80,7 +80,7 @@ index ce1673d..4c03c35 100644
 +import docutils
  from docutils import frontend, nodes, writers
  from docutils.writers import _html_base
- from docutils.writers._html_base import PIL, url2pathname
+ from docutils.writers._html_base import PIL
 @@ -29,13 +30,13 @@ class Writer(writers._html_base.Writer):
  
      default_stylesheets = ['html4css1.css']
@@ -101,13 +101,13 @@ index ce1673d..4c03c35 100644
      # use a copy of the parent spec with some modifications
      settings_spec = frontend.filter_settings_spec(
 diff --git a/docutils/writers/html5_polyglot/__init__.py b/docutils/writers/html5_polyglot/__init__.py
-index b32c27c..cde9112 100644
+index c9bdf66..5fdf1da 100644
 --- a/docutils/writers/html5_polyglot/__init__.py
 +++ b/docutils/writers/html5_polyglot/__init__.py
-@@ -27,8 +27,10 @@ the style sheet "plain.css" improves reading experience.
+@@ -26,8 +26,10 @@ the style sheet "plain.css" improves reading experience.
+ """
  __docformat__ = 'reStructuredText'
  
- import mimetypes
 +import os.path
  from pathlib import Path
  
@@ -115,7 +115,7 @@ index b32c27c..cde9112 100644
  from docutils import frontend, nodes
  from docutils.writers import _html_base
  
-@@ -39,8 +41,8 @@ class Writer(_html_base.Writer):
+@@ -38,8 +40,8 @@ class Writer(_html_base.Writer):
      """Formats this writer supports."""
  
      default_stylesheets = ['minimal.css', 'plain.css']
@@ -127,7 +127,7 @@ index b32c27c..cde9112 100644
      # use a copy of the parent spec with some modifications
      settings_spec = frontend.filter_settings_spec(
 diff --git a/docutils/writers/latex2e/__init__.py b/docutils/writers/latex2e/__init__.py
-index 6875817..b238887 100644
+index d1960a7..52f28bf 100644
 --- a/docutils/writers/latex2e/__init__.py
 +++ b/docutils/writers/latex2e/__init__.py
 @@ -12,6 +12,7 @@ __docformat__ = 'reStructuredText'
@@ -152,7 +152,7 @@ index 6875817..b238887 100644
  
  
  class Writer(writers.Writer):
-@@ -592,7 +594,10 @@ def _read_block(fp):
+@@ -593,7 +595,10 @@ def _read_block(fp):
      return ''.join(block).rstrip()
  
  
@@ -165,7 +165,7 @@ index 6875817..b238887 100644
          line = line.strip('% \n')
          if not line.endswith('::'):
 diff --git a/docutils/writers/odf_odt/__init__.py b/docutils/writers/odf_odt/__init__.py
-index 46c7d91..8493b98 100644
+index c538af3..c736983 100644
 --- a/docutils/writers/odf_odt/__init__.py
 +++ b/docutils/writers/odf_odt/__init__.py
 @@ -370,13 +370,13 @@ class Writer(writers.Writer):
@@ -183,9 +183,9 @@ index 46c7d91..8493b98 100644
 +        os.path.join(docutils._datadir(__file__), default_template))
  
      settings_spec = (
-         'ODF-Specific Options',
+         'ODF-Specific Options.',
 diff --git a/docutils/writers/pep_html/__init__.py b/docutils/writers/pep_html/__init__.py
-index 37b08ec..5154a71 100644
+index dfde2e4..3df36ea 100644
 --- a/docutils/writers/pep_html/__init__.py
 +++ b/docutils/writers/pep_html/__init__.py
 @@ -12,6 +12,7 @@ __docformat__ = 'reStructuredText'
@@ -213,10 +213,10 @@ index 37b08ec..5154a71 100644
      settings_spec = html4css1.Writer.settings_spec + (
          'PEP/HTML Writer Options',
 diff --git a/docutils/writers/s5_html/__init__.py b/docutils/writers/s5_html/__init__.py
-index c349718..a741033 100644
+index 7014de3..e18fc82 100644
 --- a/docutils/writers/s5_html/__init__.py
 +++ b/docutils/writers/s5_html/__init__.py
-@@ -19,7 +19,7 @@ from docutils.writers import html4css1
+@@ -18,7 +18,7 @@ from docutils.writers import html4css1
  
  themes_dir_path = utils.relative_path(
      os.path.join(os.getcwd(), 'dummy'),
@@ -226,7 +226,7 @@ index c349718..a741033 100644
  
  def find_theme(name):
 diff --git a/test/test_parsers/test_rst/test_directives/test_include.py b/test/test_parsers/test_rst/test_directives/test_include.py
-index ca2698d..2453e11 100755
+index 99514a0..1d96b5a 100755
 --- a/test/test_parsers/test_rst/test_directives/test_include.py
 +++ b/test/test_parsers/test_rst/test_directives/test_include.py
 @@ -17,6 +17,7 @@ if __name__ == '__main__':
@@ -237,7 +237,7 @@ index ca2698d..2453e11 100755
  from docutils import parsers, utils
  from docutils.frontend import get_default_settings
  from docutils.parsers.rst import Parser
-@@ -93,7 +94,7 @@ latin2 = os.path.join(TEST_ROOT, 'data/latin2.txt')
+@@ -95,7 +96,7 @@ latin2 = os.path.join(TEST_ROOT, 'data/latin2.txt')
  utf_16_file = os.path.join(TEST_ROOT, 'data/utf-16-le-sig.txt')
  utf_16_error_str = ("UnicodeDecodeError: 'ascii' codec can't decode byte 0xff "
                      "in position 0: ordinal not in range(128)")

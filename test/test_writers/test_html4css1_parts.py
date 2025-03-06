@@ -1,6 +1,6 @@
 #! /usr/bin/env python3
 
-# $Id: test_html4css1_parts.py 9368 2023-04-28 21:26:36Z milde $
+# $Id: test_html4css1_parts.py 9642 2024-04-15 12:27:35Z milde $
 # Author: reggie dugard <reggie@users.sourceforge.net>
 # Copyright: This module has been placed in the public domain.
 
@@ -23,13 +23,22 @@ if __name__ == '__main__':
 
 import docutils
 import docutils.core
+from docutils.parsers.rst.directives.images import PIL
+
+
+ROOT_PREFIX = (Path(__file__).parent.parent/'functional'/'input').as_posix()
+if PIL:
+    SCALING_OUTPUT = 'style="width: 32.0px; height: 32.0px;" '
+else:
+    SCALING_OUTPUT = ''
 
 
 class Html4WriterPublishPartsTestCase(unittest.TestCase):
-
     """
     Test case for HTML writer via the publish_parts interface.
     """
+
+    maxDiff = None
 
     def test_publish(self):
         writer_name = 'html4'
@@ -46,7 +55,7 @@ class Html4WriterPublishPartsTestCase(unittest.TestCase):
                             **settings_overrides,
                         }
                     )
-                    self.assertEqual(self.format_output(parts), case_expected)
+                    self.assertEqual(case_expected, self.format_output(parts))
 
     standard_content_type_template = ('<meta http-equiv="Content-Type"'
                                       ' content="text/html; charset=%s" />\n')
@@ -62,6 +71,7 @@ class Html4WriterPublishPartsTestCase(unittest.TestCase):
         '<?xml version="1.0" encoding="%s"?>\n'
         '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" '
         '"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">\n')
+    standard_html_body_template = '<div class="document">\n%s</div>\n'
 
     def format_output(self, parts):
         """Minimize & standardize the output."""
@@ -81,8 +91,13 @@ class Html4WriterPublishPartsTestCase(unittest.TestCase):
         parts['meta'] = parts['meta'].replace(self.standard_meta_value, '')
         parts['html_head'] = parts['html_head'].replace(
             self.standard_html_meta_value, '...')
+        parts['html_head'] = parts['html_head'].replace(
+            '...<title>&lt;string&gt;</title>\n', '')
         parts['html_prolog'] = parts['html_prolog'].replace(
             self.standard_html_prolog, '')
+        parts['html_body'] = parts['html_body'].replace(
+            self.standard_html_body_template % parts['fragment'], '')
+        # remove empty keys and return
         return {k: v for k, v in parts.items() if v}
 
 
@@ -93,62 +108,39 @@ totest['title_promotion'] = ({'stylesheet_path': '',
 ["""\
 Simple String
 """,
-{'fragment': '''<p>Simple String</p>\n''',
- 'html_body': '''<div class="document">
-<p>Simple String</p>
-</div>\n''',
- 'html_head': '''...<title>&lt;string&gt;</title>\n'''
+{'fragment': '<p>Simple String</p>\n',
 }],
 ["""\
 Simple String with *markup*
 """,
-{'fragment': '''<p>Simple String with <em>markup</em></p>\n''',
- 'html_body': '''<div class="document">
-<p>Simple String with <em>markup</em></p>
-</div>\n''',
- 'html_head': '''...<title>&lt;string&gt;</title>\n'''
+{'fragment': '<p>Simple String with <em>markup</em></p>\n',
 }],
 ["""\
 Simple String with an even simpler ``inline literal``
 """,
-{'fragment': '''<p>Simple String with an even simpler <tt class="docutils literal">inline literal</tt></p>\n''',
- 'html_body': '''<div class="document">
-<p>Simple String with an even simpler <tt class="docutils literal">inline literal</tt></p>
-</div>\n''',
- 'html_head': '''...<title>&lt;string&gt;</title>\n'''
+{'fragment': '<p>Simple String with an even simpler <tt class="docutils literal">inline literal</tt></p>\n',
 }],
 ["""\
 Simple ``inline\xA0literal`` with NBSP
 """,
-{'fragment': '''<p>Simple <tt class="docutils literal">inline&nbsp;literal</tt> with NBSP</p>\n''',
- 'html_body': '''<div class="document">
-<p>Simple <tt class="docutils literal">inline&nbsp;literal</tt> with NBSP</p>
-</div>\n''',
- 'html_head': '''...<title>&lt;string&gt;</title>\n'''
+{'fragment': '<p>Simple <tt class="docutils literal">inline&nbsp;literal</tt> with NBSP</p>\n',
 }],
 ["""\
 A simple `anonymous reference`__
 
 __ http://www.test.com/test_url
 """,
-{'fragment': '''<p>A simple <a class="reference external" href="http://www.test.com/test_url">anonymous reference</a></p>\n''',
- 'html_body': '''<div class="document">
-<p>A simple <a class="reference external" href="http://www.test.com/test_url">anonymous reference</a></p>
-</div>\n''',
- 'html_head': '''...<title>&lt;string&gt;</title>\n'''
+{'fragment': '<p>A simple <a class="reference external" href="http://www.test.com/test_url">anonymous reference</a></p>\n',
 }],
 ["""\
 One paragraph.
 
 Two paragraphs.
 """,
-{'fragment': '''<p>One paragraph.</p>
-<p>Two paragraphs.</p>\n''',
- 'html_body': '''<div class="document">
+{'fragment': """\
 <p>One paragraph.</p>
 <p>Two paragraphs.</p>
-</div>\n''',
- 'html_head': '''...<title>&lt;string&gt;</title>\n'''
+""",
 }],
 ["""\
 A simple `named reference`_ with stuff in between the
@@ -156,13 +148,10 @@ reference and the target.
 
 .. _`named reference`: http://www.test.com/test_url
 """,
-{'fragment': '''<p>A simple <a class="reference external" href="http://www.test.com/test_url">named reference</a> with stuff in between the
-reference and the target.</p>\n''',
- 'html_body': '''<div class="document">
+{'fragment': """\
 <p>A simple <a class="reference external" href="http://www.test.com/test_url">named reference</a> with stuff in between the
 reference and the target.</p>
-</div>\n''',
- 'html_head': '''...<title>&lt;string&gt;</title>\n'''
+""",
 }],
 ["""\
 +++++
@@ -184,7 +173,8 @@ Another Section
 
 And even more stuff
 """,
-{'fragment': '''<p>Some stuff</p>
+{'fragment': """\
+<p>Some stuff</p>
 <div class="section" id="section">
 <h1>Section</h1>
 <p>Some more stuff</p>
@@ -192,8 +182,9 @@ And even more stuff
 <h2>Another Section</h2>
 <p>And even more stuff</p>
 </div>
-</div>\n''',
- 'html_body': '''<div class="document" id="title">
+</div>
+""",
+ 'html_body': """<div class="document" id="title">
 <h1 class="title">Title</h1>
 <h2 class="subtitle" id="subtitle">Subtitle</h2>
 <p>Some stuff</p>
@@ -205,12 +196,13 @@ And even more stuff
 <p>And even more stuff</p>
 </div>
 </div>
-</div>\n''',
- 'html_head': '''...<title>Title</title>\n''',
- 'html_subtitle': '''<h2 class="subtitle" id="subtitle">Subtitle</h2>\n''',
- 'html_title': '''<h1 class="title">Title</h1>\n''',
- 'subtitle': '''Subtitle''',
- 'title': '''Title'''
+</div>
+""",
+ 'html_head': '...<title>Title</title>\n',
+ 'html_subtitle': '<h2 class="subtitle" id="subtitle">Subtitle</h2>\n',
+ 'html_title': '<h1 class="title">Title</h1>\n',
+ 'subtitle': 'Subtitle',
+ 'title': 'Title'
 }],
 ["""\
 +++++
@@ -221,16 +213,17 @@ Title
 
 Some stuff
 """,
-{'docinfo': '''<table class="docinfo" frame="void" rules="none">
+{'docinfo': """<table class="docinfo" frame="void" rules="none">
 <col class="docinfo-name" />
 <col class="docinfo-content" />
 <tbody valign="top">
 <tr><th class="docinfo-name">Author:</th>
 <td>me</td></tr>
 </tbody>
-</table>\n''',
- 'fragment': '''<p>Some stuff</p>\n''',
- 'html_body': '''<div class="document" id="title">
+</table>
+""",
+ 'fragment': '<p>Some stuff</p>\n',
+ 'html_body': """<div class="document" id="title">
 <h1 class="title">Title</h1>
 <table class="docinfo" frame="void" rules="none">
 <col class="docinfo-name" />
@@ -241,12 +234,14 @@ Some stuff
 </tbody>
 </table>
 <p>Some stuff</p>
-</div>\n''',
- 'html_head': '''...<meta name="author" content="me" />
-<title>Title</title>\n''',
- 'html_title': '''<h1 class="title">Title</h1>\n''',
- 'meta': '''<meta name="author" content="me" />\n''',
- 'title': '''Title'''
+</div>
+""",
+ 'html_head': """...<meta name="author" content="me" />
+<title>Title</title>
+""",
+ 'html_title': '<h1 class="title">Title</h1>\n',
+ 'meta': '<meta name="author" content="me" />\n',
+ 'title': 'Title'
 }]
 ])
 
@@ -256,40 +251,24 @@ totest['no_title_promotion'] = ({'doctitle_xform': False,
 ["""\
 Simple String
 """,
-{'fragment': '''<p>Simple String</p>\n''',
- 'html_body': '''<div class="document">
-<p>Simple String</p>
-</div>\n''',
- 'html_head': '''...<title>&lt;string&gt;</title>\n'''
+{'fragment': '<p>Simple String</p>\n',
 }],
 ["""\
 Simple String with *markup*
 """,
-{'fragment': '''<p>Simple String with <em>markup</em></p>\n''',
- 'html_body': '''<div class="document">
-<p>Simple String with <em>markup</em></p>
-</div>\n''',
- 'html_head': '''...<title>&lt;string&gt;</title>\n'''
+{'fragment': '<p>Simple String with <em>markup</em></p>\n',
 }],
 ["""\
 Simple String with an even simpler ``inline literal``
 """,
-{'fragment': '''<p>Simple String with an even simpler <tt class="docutils literal">inline literal</tt></p>\n''',
- 'html_body': '''<div class="document">
-<p>Simple String with an even simpler <tt class="docutils literal">inline literal</tt></p>
-</div>\n''',
- 'html_head': '''...<title>&lt;string&gt;</title>\n'''
+{'fragment': '<p>Simple String with an even simpler <tt class="docutils literal">inline literal</tt></p>\n',
 }],
 ["""\
 A simple `anonymous reference`__
 
 __ http://www.test.com/test_url
 """,
-{'fragment': '''<p>A simple <a class="reference external" href="http://www.test.com/test_url">anonymous reference</a></p>\n''',
- 'html_body': '''<div class="document">
-<p>A simple <a class="reference external" href="http://www.test.com/test_url">anonymous reference</a></p>
-</div>\n''',
- 'html_head': '''...<title>&lt;string&gt;</title>\n'''
+{'fragment': '<p>A simple <a class="reference external" href="http://www.test.com/test_url">anonymous reference</a></p>\n',
 }],
 ["""\
 A simple `named reference`_ with stuff in between the
@@ -297,13 +276,10 @@ reference and the target.
 
 .. _`named reference`: http://www.test.com/test_url
 """,
-{'fragment': '''<p>A simple <a class="reference external" href="http://www.test.com/test_url">named reference</a> with stuff in between the
-reference and the target.</p>\n''',
- 'html_body': '''<div class="document">
+{'fragment': """\
 <p>A simple <a class="reference external" href="http://www.test.com/test_url">named reference</a> with stuff in between the
 reference and the target.</p>
-</div>\n''',
- 'html_head': '''...<title>&lt;string&gt;</title>\n'''
+""",
 }],
 ["""\
 +++++
@@ -325,22 +301,7 @@ Another Section
 
 And even more stuff
 """,
-{'fragment': '''<div class="section" id="title">
-<h1>Title</h1>
-<div class="section" id="not-a-subtitle">
-<h2>Not A Subtitle</h2>
-<p>Some stuff</p>
-<div class="section" id="section">
-<h3>Section</h3>
-<p>Some more stuff</p>
-<div class="section" id="another-section">
-<h4>Another Section</h4>
-<p>And even more stuff</p>
-</div>
-</div>
-</div>
-</div>\n''',
- 'html_body': '''<div class="document">
+{'fragment': """\
 <div class="section" id="title">
 <h1>Title</h1>
 <div class="section" id="not-a-subtitle">
@@ -356,24 +317,18 @@ And even more stuff
 </div>
 </div>
 </div>
-</div>\n''',
- 'html_head': '''...<title>&lt;string&gt;</title>\n'''
+""",
 }],
 ["""\
 * bullet
 * list
 """,
-{'fragment': '''<ul class="simple">
-<li>bullet</li>
-<li>list</li>
-</ul>\n''',
- 'html_body': '''<div class="document">
+{'fragment': """\
 <ul class="simple">
 <li>bullet</li>
 <li>list</li>
 </ul>
-</div>\n''',
- 'html_head': '''...<title>&lt;string&gt;</title>\n'''
+""",
 }],
 ["""\
 .. table::
@@ -385,21 +340,7 @@ And even more stuff
    |  3  |  4  |
    +-----+-----+
 """,
-{'fragment': '''<table border="1" class="docutils align-right">
-<colgroup>
-<col width="50%" />
-<col width="50%" />
-</colgroup>
-<tbody valign="top">
-<tr><td>1</td>
-<td>2</td>
-</tr>
-<tr><td>3</td>
-<td>4</td>
-</tr>
-</tbody>
-</table>\n''',
- 'html_body': '''<div class="document">
+{'fragment': """\
 <table border="1" class="docutils align-right">
 <colgroup>
 <col width="50%" />
@@ -414,8 +355,7 @@ And even more stuff
 </tr>
 </tbody>
 </table>
-</div>\n''',
- 'html_head': '''...<title>&lt;string&gt;</title>\n'''
+""",
 }],
 ["""\
 Not a docinfo.
@@ -427,23 +367,7 @@ Not a docinfo.
 :simple:
 :field: list
 """,
-{'fragment': '''<p>Not a docinfo.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field"><th class="field-name">This:</th><td class="field-body"><p class="first last" id="target">is</p>
-</td>
-</tr>
-<tr class="field"><th class="field-name">a:</th><td class="field-body"></td>
-</tr>
-<tr class="field"><th class="field-name">simple:</th><td class="field-body"></td>
-</tr>
-<tr class="field"><th class="field-name">field:</th><td class="field-body">list</td>
-</tr>
-</tbody>
-</table>\n''',
- 'html_body': '''<div class="document">
+{'fragment': """\
 <p>Not a docinfo.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -460,8 +384,7 @@ Not a docinfo.
 </tr>
 </tbody>
 </table>
-</div>\n''',
- 'html_head': '''...<title>&lt;string&gt;</title>\n'''
+""",
 }],
 ["""\
 Not a docinfo.
@@ -469,19 +392,7 @@ Not a docinfo.
 :This is: a
 :simple field list with loooong field: names
 """,
-{'fragment': '''<p>Not a docinfo.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field"><th class="field-name">This is:</th><td class="field-body">a</td>
-</tr>
-<tr class="field"><th class="field-name" colspan="2">simple field list with loooong field:</th></tr>
-<tr class="field"><td>&nbsp;</td><td class="field-body">names</td>
-</tr>
-</tbody>
-</table>\n''',
- 'html_body': '''<div class="document">
+{'fragment': """\
 <p>Not a docinfo.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -494,8 +405,20 @@ Not a docinfo.
 </tr>
 </tbody>
 </table>
-</div>\n''',
- 'html_head': '''...<title>&lt;string&gt;</title>\n'''
+""",
+ }],
+])
+
+totest['root_prefix'] = ({'root_prefix': ROOT_PREFIX,
+                          'stylesheet_path': '',
+                          'embed_stylesheet': False}, [
+
+["""\
+.. image:: /data/blue%20square.png
+   :scale: 100%
+""",
+{'fragment': '<img alt="/data/blue%20square.png"'
+             f' src="/data/blue%20square.png" {SCALING_OUTPUT}/>\n',
 }],
 ])
 

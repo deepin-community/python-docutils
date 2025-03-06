@@ -6,8 +6,8 @@
 
 :Author: Lea Wiemann, Docutils developers
 :Contact: docutils-develop@lists.sourceforge.net
-:Revision: $Revision: 9290 $
-:Date: $Date: 2022-12-01 22:12:57 +0100 (Do, 01. Dez 2022) $
+:Revision: $Revision: 9446 $
+:Date: $Date: 2023-09-06 01:03:38 +0200 (Mi, 06. Sep 2023) $
 :Copyright: This document has been placed in the public domain.
 
 .. _Docutils: https://docutils.sourceforge.io/
@@ -147,6 +147,8 @@ We'll assume that the Docutils "trunk" is checked out under the
 
    __ https://pip.pypa.io/en/stable/topics/local-project-installs/
       #editable-installs
+      
+   .. _manual install:
 
 2. Install "manually".
 
@@ -189,9 +191,7 @@ We'll assume that the Docutils "trunk" is checked out under the
          ln -s ~/projects/docutils/docutils/tools/docutils-cli.py \
                /usr/local/bin/docutils
 
-3. Do a regular install. Repeat after any change. ::
-
-       ./setup.py install
+3. Do a regular install. Repeat after any change.
 
    .. CAUTION::
 
@@ -206,7 +206,7 @@ Tip:
   shell script containing the following lines::
 
       # source this file
-      export PYTHONPATH=$PWD:$PWD
+      export PYTHONPATH=$PWD:$PYTHONPATH
       export PATH=$PWD/tools:$PATH
 
   Open a shell for this branch, ``cd`` to the ``docutils`` top-level

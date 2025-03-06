@@ -6,8 +6,8 @@
 
 :Author: David Goodger
 :Contact: docutils-develop@lists.sourceforge.net
-:Date: $Date: 2023-05-03 01:04:27 +0200 (Mi, 03. Mai 2023) $
-:Revision: $Revision: 9369 $
+:Date: $Date: 2023-06-26 19:48:28 +0200 (Mo, 26. Jun 2023) $
+:Revision: $Revision: 9408 $
 :Copyright: This document has been placed in the public domain.
 
 .. contents::
@@ -41,19 +41,16 @@ a description of the function arguments.
 publish_cmdline()
 -----------------
 
-Function for command-line front-end tools, like ``rst2html.py`` or
-`"console_scripts" entry points`_ like `core.rst2html()` with file I/O.
+Function for custom `command-line front-end tools`_ 
+(like ``tools/rst2html.py``) or "console_scripts" `entry points`_ 
+(like `core.rst2html()`) with file I/O.
 In addition to writing the output document to a file-like object, also
 returns it as `str` instance (rsp. `bytes` for binary output document
 formats).
 
-There are several examples in the ``tools/`` directory of the Docutils
-repository. A detailed analysis of one such tool is `Inside A Docutils
-Command-Line Front-End Tool`_.
-
-.. _"console_scripts" entry points:
+.. _command-line front-end tools: ../howto/cmdline-tool.html
+.. _entry points:
     https://packaging.python.org/en/latest/specifications/entry-points/
-.. _Inside A Docutils Command-Line Front-End Tool: ../howto/cmdline-tool.html
 
 
 publish_file()
@@ -445,25 +442,21 @@ Encodings
 .. important:: Details will change over the next Docutils versions.
    See RELEASE-NOTES_
 
-The default **input encoding** is UTF-8. A different encoding can be
-specified with the `input_encoding`_ setting.
+The **input encoding** can be specified with the `input_encoding`_ setting.
 
-The encoding of a reStructuredText source can also be given by a
+By default, the input encoding is detected from a
 `Unicode byte order mark` (BOM_) or a "magic comment" [#magic-comment]_
-similar to :PEP:`263`. This makes the input encoding both *visible* and
-*changeable* on a per-source basis.
-
-If the encoding is unspecified and decoding with UTF-8 fails, the locale's
-`preferred encoding`_ is used as a fallback (if it maps to a valid codec
-and differs from UTF-8).
-
+similar to :PEP:`263`. The fallback is "utf-8".
 The default behaviour differs from Python's `open()`:
 
-- The UTF-8 encoding is tried before the `preferred encoding`_.
-  (This is almost sure to fail if the actual source encoding differs.)
-- An `explicit encoding declaration` [#magic-comment]_ in the source
-  takes precedence over the `preferred encoding`_.
-- An optional BOM_ is removed from UTF-8 encoded sources.
+- An `explicit encoding declaration` ((BOM_) or a "magic comment"
+  [#magic-comment]_) in the source takes precedence over
+  the `preferred encoding`_.
+- An optional BOM_ is removed from sources.
+
+The default will change to "utf-8" in Docutils 0.22,
+the input encoding detection will be removed in Docutils 1.0.
+
 
 The default **output encoding** is UTF-8.
 A different encoding can be specified with the `output_encoding`_ setting.

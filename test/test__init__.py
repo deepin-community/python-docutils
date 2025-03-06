@@ -1,5 +1,5 @@
 #! /usr/bin/env python3
-# $Id: test__init__.py 9291 2022-12-01 21:13:16Z milde $
+# $Id: test__init__.py 9425 2023-06-30 14:56:47Z milde $
 # Authors: Günter Milde <milde@users.sf.net>,
 #          David Goodger <goodger@python.org>
 # Copyright: This module has been placed in the public domain.
@@ -26,11 +26,11 @@ class ApplicationErrorTests(unittest.TestCase):
 
     def test_message(self):
         err = docutils.ApplicationError('the message')
-        self.assertEqual(str(err), 'the message')
+        self.assertEqual('the message', str(err))
 
     def test_non_ASCII_message(self):
         err = docutils.ApplicationError('\u0169')
-        self.assertEqual(str(err), '\u0169')
+        self.assertEqual('\u0169', str(err))
 
 
 class VersionInfoTests(unittest.TestCase):

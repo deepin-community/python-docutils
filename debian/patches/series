@@ -3,6 +3,6 @@ testall-no-stdout-stderr-redirect.diff
 move-data-to-usr-share.diff
 no-local-roman.diff
 static-help-message.diff
-manpage-literal-blocks.diff
 source-date-epoch.diff
-tbl-preprocessor.diff
+fix-license-issue.diff
+verbose-tests.diff

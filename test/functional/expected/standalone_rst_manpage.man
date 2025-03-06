@@ -27,7 +27,7 @@ level margin: \\n[rst2man-indent\\n[rst2man-indent-level]]
 .\" new: \\n[rst2man-indent\\n[rst2man-indent-level]]
 .in \\n[rst2man-indent\\n[rst2man-indent-level]]u
 ..
-.TH "RST2MAN" 1 "2006-10-22" "0.1" "text processing"
+.TH "RST2MAN" "1" "2006-10-22" "0.1" "text processing"
 .SH NAME
 rst2man \- generate unix manpages from reStructured text
 .\" TODO: authors and author with name <email>
@@ -35,7 +35,7 @@ rst2man \- generate unix manpages from reStructured text
 .SH SYNOPSIS
 .INDENT 0.0
 .INDENT 3.5
-rst2man.py inputfile outputfile
+rst2man inputfile outputfile
 .UNINDENT
 .UNINDENT
 .SH DESCRIPTION
@@ -80,8 +80,10 @@ And a lot more standard docutils options.
 None yet.
 .SH SEE ALSO
 .sp
-\fI\%docutils\fP
-\fI\%linux man page howto\fP
+docutils <https://docutils.sourceforge.io>
+
+linux man page howto <http://tldp.org/HOWTO/Man-Page/>
+
 .sp
 and \fBman man\fP also \fBman 7 man\fP
 .SH BUGS

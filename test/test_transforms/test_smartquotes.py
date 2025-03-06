@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# $Id: test_smartquotes.py 9321 2023-01-17 15:40:27Z milde $
+# $Id: test_smartquotes.py 9480 2023-11-19 09:44:17Z milde $
 # :Copyright: © 2011 Günter Milde.
 # :Maintainer: docutils-develop@lists.sourceforge.net
 # :License: Released under the terms of the `2-Clause BSD license`_, in short:
@@ -32,6 +32,8 @@ from docutils.utils import new_document
 
 
 class TransformTestCase(unittest.TestCase):
+    maxDiff = None
+
     def test_transforms(self):
         parser = Parser()
         settings = get_default_settings(Parser)
@@ -49,7 +51,7 @@ class TransformTestCase(unittest.TestCase):
                     document.transformer.add_transform(TestMessages)
                     document.transformer.apply_transforms()
                     output = document.pformat()
-                    self.assertEqual(output, case_expected)
+                    self.assertEqual(case_expected, output)
 
         settings.language_code = 'de'
         for name, (transforms, cases) in totest_de.items():
@@ -66,7 +68,7 @@ class TransformTestCase(unittest.TestCase):
                     document.transformer.add_transform(FilterMessages, 890)
                     document.transformer.apply_transforms()
                     output = document.pformat()
-                    self.assertEqual(output, case_expected)
+                    self.assertEqual(case_expected, output)
 
         settings.smart_quotes = 'alternative'
         for name, (transforms, cases) in totest_de_alt.items():
@@ -80,7 +82,7 @@ class TransformTestCase(unittest.TestCase):
                     document.transformer.add_transform(TestMessages)
                     document.transformer.apply_transforms()
                     output = document.pformat()
-                    self.assertEqual(output, case_expected)
+                    self.assertEqual(case_expected, output)
 
         settings.smart_quotes = True
         settings.smartquotes_locales = [('de', '«»()'), ('nl', '„”’’')]
@@ -95,7 +97,7 @@ class TransformTestCase(unittest.TestCase):
                     document.transformer.add_transform(TestMessages)
                     document.transformer.apply_transforms()
                     output = document.pformat()
-                    self.assertEqual(output, case_expected)
+                    self.assertEqual(case_expected, output)
 
 
 totest = {}
@@ -183,7 +185,6 @@ ZWNJ\u200C"a" and\u200C'a',
 escaped space\\ "a" and\\ 'a',
 
 hyphen -"a", -'a'
-&mdash;"a",&mdash;'a'
 en dash –"a"–'a',
 em dash —"a"—'a'.
 
@@ -210,7 +211,6 @@ But not if followed by (optional punctuation and) whitespace:
         escaped space“a” and‘a’,
     <paragraph>
         hyphen -“a”, -‘a’
-        &mdash;“a”,&mdash;‘a’
         en dash –“a”–‘a’,
         em dash —“a”—‘a’.
     <paragraph>

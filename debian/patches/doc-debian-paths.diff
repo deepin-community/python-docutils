@@ -1,6 +1,6 @@
 From: Simon McVittie <smcv@debian.org>
 Date: Thu, 8 Oct 2015 11:57:03 -0700
-Subject: change paths in documentation to match Debian's
+Subject: Rename buildhtml.py to rst-buildhtml
 
 Change paths in documentation to match Debian's. Debian policy recommends not
 having extensions like .py on script names, and buildhtml seems too generic a
@@ -9,113 +9,14 @@ name.
 Forwarded: not-needed
 Last-Update: 2023-05-20
 ---
- docs/user/tools.txt | 44 ++++++++++++++++++++++++++++++++++++--------
- 1 file changed, 36 insertions(+), 8 deletions(-)
+ docs/user/tools.txt | 4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
 
 diff --git a/docs/user/tools.txt b/docs/user/tools.txt
-index 35fa884..667579a 100644
+index 4487527..57833da 100644
 --- a/docs/user/tools.txt
 +++ b/docs/user/tools.txt
-@@ -38,6 +38,10 @@ one argument (source) is specified, the standard output (stdout) is
- used for the destination.  If no arguments are specified, the standard
- input (stdin) is used for the source.
- 
-+In Debian these tools are installed in the normal system path, without the
-+``.py`` extension, according to Debian policy. 
-+buildhtml.py_ is installed as rst-buildhtml.
-+
- .. [#] The exceptions are buildhtml.py_ and rst2odt_prepstyles.py_.
- 
- .. note::
-@@ -115,6 +119,8 @@ rst2html.py
- :Parser: reStructuredText
- :Writer: html_
- 
-+In Debian this front end is installed as rst2html.
-+
- `rst2html.py` is the front-end for the default Docutils HTML writer.
- The default writer may change with the development of HTML, browsers,
- Docutils, and the web.
-@@ -138,6 +144,8 @@ rst2html4.py
- :Parser: reStructuredText
- :Writer: html4css1_
- 
-+In Debian this front end is installed as rst2html4.
-+
- The ``rst2html4.py`` front end reads standalone reStructuredText source
- files and produces `XHTML 1.0 Transitional`_ output.
- A CSS stylesheet is required for proper rendering; a simple but
-@@ -147,13 +155,13 @@ below).
- For example, to process a reStructuredText file "``test.txt``" into
- HTML::
- 
--    rst2html.py test.txt test.html
-+    rst2html test.txt test.html
- 
- Now open the "``test.html``" file in your favorite browser to see the
- results.  To get a footer with a link to the source file, date & time
- of processing, and links to the Docutils project, add some options::
- 
--    rst2html.py -stg test.txt test.html
-+    rst2html -stg test.txt test.html
- 
- 
- Stylesheets
-@@ -188,6 +196,8 @@ rst2html5.py
- :Parser: reStructuredText
- :Writer: html5_
- 
-+In Debian this front end is installed as rst2html5.
-+
- The ``rst2html5.py`` front end reads standalone reStructuredText source
- files and produces `HTML 5`_ output.
- Correct rendering of elements not directly supported by HTML depends on a
-@@ -205,6 +215,8 @@ rstpep2html.py
- :Parser: reStructuredText
- :Writer: pep_html_
- 
-+In Debian this front end is installed as rstpep2html.
-+
- ``rstpep2html.py`` reads a new-style PEP (marked up with reStructuredText)
- and produces `XHTML 1.0 Transitional`_.  It requires a template file and a
- stylesheet.  By default, it makes use of a "``pep-html-template``" file and
-@@ -215,7 +227,7 @@ configuration files.
- For example, to process a PEP into HTML::
- 
-     cd <path-to-docutils>/docs/peps
--    ../../tools/rstpep2html.py pep-0287.txt pep-0287.html
-+    rstpep2html pep-0287.txt pep-0287.html
- 
- The same result can be achieved with the genric front end::
- 
-@@ -234,6 +246,8 @@ rst2s5.py
- :Parser: reStructuredText
- :Writer: s5_html_
- 
-+In Debian this is installed as rst2s5.
-+
- The ``rst2s5.py`` front end reads standalone reStructuredText source
- files and produces (X)HTML output compatible with S5_, the "Simple
- Standards-based Slide Show System" by Eric Meyer.  A theme is required
-@@ -243,7 +257,7 @@ are available; see Themes_ below.
- For example, to process a reStructuredText file "``slides.txt``" into
- S5/HTML::
- 
--    rst2s5.py slides.txt slides.html
-+    rst2s5 slides.txt slides.html
- 
- Now open the "``slides.html``" file in your favorite browser, switch
- to full-screen mode, and enjoy the results.
-@@ -261,7 +275,7 @@ using the "``--theme``" option (for themes that come with Docutils) or
- the "``--theme-url``" option (for themes anywhere).  For example, the
- "medium-black" theme can be specified as follows::
- 
--    rst2s5.py --theme medium-black slides.txt slides.html
-+    rst2s5 --theme medium-black slides.txt slides.html
- 
- The theme will be copied to the ``ui/medium-black`` directory.
- 
-@@ -342,6 +356,8 @@ buildhtml.py
+@@ -340,12 +340,14 @@ buildhtml.py
  :Writers: html_, html5_, pep_html_
  :Config_: `[buildhtml application]`_
  
@@ -124,79 +25,10 @@ index 35fa884..667579a 100644
  The ``buildhtml.py`` script can be found in the ``/tools`` directory of
  the "docutils" source. It is not included in binary packages. [#]_
  
-@@ -351,7 +367,7 @@ too.  (Use the ``--local`` option to skip subdirectories.)
- 
  Usage::
  
 -    buildhtml.py [options] [<directory> ...]
 +    rst-buildhtml [options] [<directory> ...]
  
- After unpacking the Docutils source package, the following shell commands
- will generate HTML for all included documentation::
-@@ -391,11 +407,13 @@ rst2latex.py
- :Parser: reStructuredText
- :Writer: latex2e_
- 
-+In Debian this is installed as rst2latex.
-+
- The ``rst2latex.py`` front end reads standalone reStructuredText
- source files and produces LaTeX_ output. For example, to process a
- reStructuredText file "``test.txt``" into LaTeX::
- 
--    rst2latex.py test.txt test.tex
-+    rst2latex test.txt test.tex
- 
- The output file "``test.tex``" should then be processed with ``latex``
- or ``pdflatex`` to get a document in DVI, PostScript or PDF format for
-@@ -414,12 +432,14 @@ rst2xetex.py
- :Parser: reStructuredText
- :Writer: _`xelatex`
- 
-+On Debian this front end is installed as rst2xetex.
-+
- The ``rst2xetex.py`` front end reads standalone reStructuredText source
- files and produces `LaTeX` output for processing with Unicode-aware
- TeX engines (`LuaTeX`_ or `XeTeX`_). For example, to process a
- reStructuredText file "``test.txt``" into LaTeX::
- 
--    rst2xetex.py test.txt test.tex
-+    rst2xetex test.txt test.tex
- 
- The output file "``test.tex``" should then be processed with ``xelatex`` or
- ``lualatex`` to get a document in PDF format for printing or on-screen
-@@ -442,6 +462,8 @@ rst2man.py
- :Parser: reStructuredText
- :Writer: manpage_
- 
-+In Debian this front end is installed as rst2man.
-+
- The ``rst2man.py`` front end reads standalone reStructuredText source
- files and produces troff_ sources for Unix man pages.
- 
-@@ -459,6 +481,8 @@ rst2odt.py
- :Parser: reStructuredText
- :Writer: odt_
- 
-+In Debian this front end is installed as rst2odt.
-+
- The ``rst2odt.py`` front end reads standalone reStructuredText
- source files and produces ODF/.odt files that can be read, edited,
- printed, etc with OpenOffice_ ``oowriter`` or LibreOffice_ ``lowriter``.
-@@ -508,6 +532,8 @@ rst2xml.py
- :Parser: reStructuredText
- :Writer: _`XML` (Docutils native)
- 
-+In Debian this is installed as rst2xml.
-+
- The ``rst2xml.py`` front end produces Docutils-native XML output.
- This can be transformed with standard XML tools such as XSLT
- processors into arbitrary final forms. An example is the xml2rst_ processor
-@@ -526,6 +552,8 @@ rst2pseudoxml.py
- :Parser: reStructuredText
- :Writer: _`Pseudo-XML`
- 
-+In Debian this is installed as rst2pseudoxml.
-+
- ``rst2pseudoxml.py`` is used for debugging the Docutils "Reader to
- Transform to Writer" pipeline.  It produces a compact pretty-printed
- "pseudo-XML", where nesting is indicated by indentation (no end-tags).
+ Use ``buildhtml.py`` to generate ``*.html`` from reStructuredText
+ source files in each <directory> given, and their subdirectories too.

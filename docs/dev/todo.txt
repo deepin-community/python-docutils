@@ -7,8 +7,8 @@
 :Author: David Goodger (with input from many); open to all Docutils
          developers
 :Contact: docutils-develop@lists.sourceforge.net
-:Date: $Date: 2022-11-02 23:39:16 +0100 (Mi, 02. Nov 2022) $
-:Revision: $Revision: 9201 $
+:Date: $Date: 2023-11-25 22:09:40 +0100 (Sa, 25. Nov 2023) $
+:Revision: $Revision: 9488 $
 :Copyright: This document has been placed in the public domain.
 
 .. _Docutils: https://docutils.sourceforge.io/
@@ -99,9 +99,9 @@ Converting from an SVN dump file is faster than from a checkout.
     http://www.catb.org/esr/reposurgeon/repository-editing.html
 __ https://git.wiki.kernel.org/index.php/
    Interfaces,_frontends,_and_tools#Subversion
-__ http://www.catb.org/esr/reposurgeon/repository-editing.html#conversion   
+__ http://www.catb.org/esr/reposurgeon/repository-editing.html#conversion
 __ http://www.catb.org/esr/reposurgeon/repository-editing.html
-   #_reading_subversion_repositories   
+   #_reading_subversion_repositories
 
 
 Adam Turner wrote a conversion Makefile and ``.lift`` scripts that
@@ -137,12 +137,14 @@ Code cleanup and modernization:
 
   - Get graphical installer.
   - Make rst2html.py an .exe file using py2exe.
+    (Is this still required after we have "console scripts" entry points?
+    GM 2023-06-25)
 
 * .. _GUI:
 
   The user interface is very difficult to use for most Windows users;
   you can't really expect them to use the command line.  We need some
-  kind of GUI that can launch rst2html.py, and save the HTML output to
+  kind of GUI that can launch ``rst2html``, and save the HTML output to
   a file, and launch a browser.  What's important is that we get
   settings to work with the GUI.  So we need some way to dynamically
   generate a list of settings for the GUI.  The current settings_spec
@@ -571,8 +573,8 @@ Code cleanup and modernization:
 
 * docutils_update: Check for a ``Makefile`` in a directory, and run
   ``make`` if found?  This would allow for variant processing on
-  specific source files, such as running rst2s5.py instead of
-  rst2html.py.
+  specific source files, such as running ``rst2s5`` instead of
+  ``rst2html``.
 
 * Add a "disable table of contents" setting?  The S5 writer could set
   it as a default.  Rationale:
@@ -661,10 +663,6 @@ No such mechanism exists in HTML.
 
   .. _OpenOffice.org XML: http://xml.openoffice.org/
   .. _object references: rst/alternatives.html#object-references
-
-See also the `Modified rst2html
-<http://www.loria.fr/~rougier/coding/article/rst2html.py>`__
-by Nicolas Rougier for a sample implementation.
 
 
 Documentation
@@ -1180,7 +1178,7 @@ Misc
 
   - The line numbers of definition list items are wrong::
 
-        $ rst2pseudoxml.py --expose-internal-attribute line
+        $ rst2pseudoxml --expose-internal-attribute line
         1
           2
           3
@@ -1330,7 +1328,7 @@ Idea from Jim Fulton: an external lookup table of targets:
 
       .. _Another Document: another.txt
 
-      rst2html.py --convert-links "another.txt bar.txt" foo.txt
+      rst2html --convert-links "another.txt bar.txt" foo.txt
 
     That is, name the files for which extensions should be converted.
 
@@ -1340,11 +1338,11 @@ Idea from Jim Fulton: an external lookup table of targets:
 
     Note that in most cases, people will be able to use globs::
 
-      rst2html.py --convert-link-extensions-for "`echo *.txt`" foo.txt
+      rst2html --convert-link-extensions-for "`echo *.txt`" foo.txt
 
     It might be nice to be able to use multiple arguments, as in::
 
-      rst2html.py --convert-link-extensions-for *.txt -- foo.txt
+      rst2html --convert-link-extensions-for *.txt -- foo.txt
 
     > Handle documents only, or objects (images, etc.) also?
 
@@ -2344,6 +2342,25 @@ HTML Writer
 * Add a tool tip ("title" attribute?) to footnote back-links
   identifying them as such.  Text in Docutils language module.
 
+* Set HTML "width" and "height" attributes with the original size (read
+  from the image) to prevent *layout shifts*:
+  
+    Layout shifts are very disrupting to the user, especially if you have
+    already started reading the article and suddenly you are thrown off
+    by a jolt of movement, and you have to find your place again.
+    
+    -- `Setting Height And Width On Images Is Important Again`__
+  
+  - If there are no size options (``:widht:``, ``:height:``, ``:scale:``)
+    in the "image" directive and    
+    the image is *local* and can be read and interpreted by PIM.
+    (if not, silently skip).
+  
+  - Alternatively, if the only size option is ``:scale: 100%`` and the
+    image can be read with urllib (*opt-in* for the "costly" variant).
+
+__ https://www.smashingmagazine.com/2020/03/setting-height-width-images-important-again/.
+  
 
 PEP/HTML Writer
 ===============
@@ -2827,10 +2844,10 @@ Front-End Tools
 
      Display output on success, but keep it brief.
      provide a --quiet option to suppress all non-essential output.
-   
+
      Consider chaining several args as input and use --output
      (or redirection) for output.
-   
+
      -- https://clig.dev/#help
 
 .. _partial parsing:

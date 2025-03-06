@@ -1,6 +1,6 @@
 #! /usr/bin/env python3
 
-# $Id: test___init__.py 9277 2022-11-26 23:15:13Z milde $
+# $Id: test__init__.py 9518 2024-01-26 22:46:31Z milde $
 # Author: Lea Wiemann <LeWiemann@gmail.com>
 # Copyright: This module has been placed in the public domain.
 

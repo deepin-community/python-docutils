@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# $Id: test_settings.py 9296 2022-12-02 14:08:52Z aa-turner $
+# $Id: test_settings.py 9507 2024-01-07 10:21:21Z milde $
 # Author: David Goodger <goodger@python.org>
 # Copyright: This module has been placed in the public domain.
 
@@ -143,7 +143,7 @@ class ConfigFileTests(unittest.TestCase):
         rd_expected = expected.pop('record_dependencies', None)
         if rd_expected is not None:
             self.assertEqual(str(rd_result), str(rd_expected))
-        self.assertEqual(result, expected)
+        self.assertEqual(expected, result)
 
     def test_nofiles(self):
         self.compare_output(self.files_settings(),
@@ -287,56 +287,81 @@ class HelperFunctionsTests(unittest.TestCase):
                )
 
     def test_validate_boolean(self):
-        for t in self.boolean_settings:
-            self.assertEqual(
-                frontend.validate_boolean(None, t[0], self.option_parser),
-                t[1])
+        for v, result in self.boolean_settings:
+            self.assertEqual(frontend.validate_boolean(v), result)
 
     def test_validate_ternary(self):
         tests = (
                  ('500V', '500V'),
                  ('parrot', 'parrot'),
                 )
-        for t in self.boolean_settings + tests:
+        for v, result in self.boolean_settings + tests:
+            self.assertEqual(frontend.validate_ternary(v), result)
+
+    def test_validate_threshold(self):
+        tests = (('1', 1),
+                 ('info', 1),
+                 ('warning', 2),
+                 ('error', 3),
+                 ('severe', 4),
+                 ('none', 5),
+                 )
+        for v, result in tests:
             self.assertEqual(
-                frontend.validate_ternary(None, t[0], self.option_parser),
-                t[1])
+                frontend.validate_threshold(v), result)
+        with self.assertRaisesRegex(LookupError, "unknown threshold: 'debug'"):
+            frontend.validate_threshold('debug')
 
     def test_validate_colon_separated_string_list(self):
-        tests = (
-                    ('a', ['a']),
-                    ('a:b', ['a', 'b']),
-                    (['a'], ['a']),
-                    (['a', 'b:c'], ['a', 'b', 'c']),
-                )
-        for t in tests:
-            self.assertEqual(frontend.validate_colon_separated_string_list(
-                                 None, t[0], None),
-                             t[1])
+        tests = (('a', ['a']),
+                 ('a:b', ['a', 'b']),
+                 (['a'], ['a']),
+                 (['a', 'b:c'], ['a', 'b', 'c']),
+                 )
+        for v, result in tests:
+            self.assertEqual(
+                frontend.validate_colon_separated_string_list(v), result)
 
     def test_validate_comma_separated_list(self):
-        tests = (
-                    ('a', ['a']),
-                    ('a,b', ['a', 'b']),
-                    (['a'], ['a']),
-                    (['a', 'b,c'], ['a', 'b', 'c']),
-                )
-        for t in tests:
-            self.assertEqual(
-                    frontend.validate_comma_separated_list(None, t[0], None),
-                    t[1])
+        tests = (('a', ['a']),
+                 ('a,b', ['a', 'b']),
+                 (['a'], ['a']),
+                 (['a', 'b,c'], ['a', 'b', 'c']),
+                 )
+        for v, result in tests:
+            self.assertEqual(frontend.validate_comma_separated_list(v), result)
+
+    def test_validate_math_output(self):
+        tests = (('', []),
+                 ('LaTeX ', ['latex', '']),
+                 ('MathML', ['mathml', '']),
+                 ('MathML  PanDoc', ['mathml', 'pandoc']),
+                 ('HTML  math.css, X.css', ['html', 'math.css, X.css']),
+                 ('MathJax  /MathJax.js', ['mathjax', '/MathJax.js']),
+                 )
+        for v, result in tests:
+            self.assertEqual(frontend.validate_math_output(v), result)
+
+    def test_validate_math_output_errors(self):
+        tests = (('XML', 'Unknown math output format: "XML",\n'
+                  "    choose from ('html', 'latex', 'mathml', 'mathjax')."),
+                 ('MathML blame', 'MathML converter "blame" not supported,\n'
+                  "    choose from ('', 'latexml', 'ttm', 'blahtexml', "
+                  "'pandoc')."),
+                 )
+        for value, message in tests:
+            with self.assertRaises(LookupError) as cm:
+                frontend.validate_math_output(value)
+            self.assertEqual(message, str(cm.exception))
 
     def test_validate_url_trailing_slash(self):
-        tests = (
-                    ('', './'),
-                    (None, './'),
-                    ('http://example.org', 'http://example.org/'),
-                    ('http://example.org/', 'http://example.org/'),
-                )
-        for t in tests:
-            self.assertEqual(
-                    frontend.validate_url_trailing_slash(None, t[0], None),
-                    t[1])
+        tests = (('', './'),
+                 (None, './'),
+                 ('http://example.org', 'http://example.org/'),
+                 ('http://example.org/', 'http://example.org/'),
+                 )
+        for v, result in tests:
+            self.assertEqual(frontend.validate_url_trailing_slash(v), result)
 
     def test_validate_smartquotes_locales(self):
         tests = (
@@ -345,10 +370,8 @@ class HelperFunctionsTests(unittest.TestCase):
             ([('sd', '«»°°'), 'ds:°°«»'], [('sd', '«»°°'), ('ds', '°°«»')]),
             ('frs:« : »:((:))', [('frs', ['« ', ' »', '((', '))'])]),
             )
-        for t in tests:
-            self.assertEqual(
-                    frontend.validate_smartquotes_locales(None, t[0], None),
-                    t[1])
+        for v, result in tests:
+            self.assertEqual(frontend.validate_smartquotes_locales(v), result)
 
     def test_set_conditions_deprecation_warning(self):
         reporter = utils.Reporter('test', 1, 4)

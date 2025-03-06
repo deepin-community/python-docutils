@@ -1,6 +1,6 @@
 #! /usr/bin/env python3
 
-# $Id: test_utils.py 9323 2023-01-17 17:20:12Z milde $
+# $Id: test__init__.py 9518 2024-01-26 22:46:31Z milde $
 # Author: David Goodger <goodger@python.org>
 # Copyright: This module has been placed in the public domain.
 
@@ -17,12 +17,13 @@ import unittest
 if __name__ == '__main__':
     # prepend the "docutils root" to the Python library path
     # so we import the local `docutils` package.
-    sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+    sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
 import docutils
-from docutils import utils, nodes
+from docutils import nodes, utils
+import docutils.utils.math
 
-TEST_ROOT = Path(__file__).parent  # ./test/ from the docutils root
+TEST_ROOT = Path(__file__).parents[1]  # ./test/ from the docutils root
 
 
 class ReporterTests(unittest.TestCase):
@@ -324,16 +325,22 @@ class HelperFunctionTests(unittest.TestCase):
         source = os.path.join('häm', 'spam', 'fileA')
         target = os.path.join('häm', 'fileB')
         self.assertEqual(utils.relative_path(source, target), '../fileB')
+        source = os.path.join('häm', 'fileA')
+        target = os.path.join('..', 'spam', 'fileB')
+        self.assertEqual(utils.relative_path(source, target),
+                         '../../spam/fileB')
         # if source is None, default to the cwd:
         target = os.path.join('eggs', 'fileB')
         self.assertEqual(utils.relative_path(None, target), 'eggs/fileB')
         # If there is no common prefix, return the absolute path to `target`:
-        # source = '/foo/bar/fileA' # POSIX
-        #   TODO: how to specify an absolute path independent of the OS?
-        # target = os.path.join('eggs', 'fileB')
-        # self.assertEqual(utils.relative_path(source, target),
-        #                  os.path.abspath('fileB'))
-        # Correctly process unicode instances:
+        if os.sep == '/':
+            source = '/foo/bar/fileA'
+        else:
+            source = r'C:\foo\bar\fileA'
+        target = os.path.join('eggs', 'fileB')
+        self.assertEqual(utils.relative_path(source, target),
+                         os.path.abspath('eggs/fileB'))
+        # Correctly process characters outside the ASCII range:
         self.assertEqual(utils.relative_path('spam', 'spam'), '')
         source = os.path.join('häm', 'spam', 'fileA')
         target = os.path.join('häm', 'spam', 'fileB')
@@ -353,10 +360,10 @@ class HelperFunctionTests(unittest.TestCase):
                 os.path.join(TEST_ROOT, '..'))
         result = utils.find_file_in_dirs('alltests.py', dirs)
         expected = os.path.join(TEST_ROOT, 'alltests.py').replace('\\', '/')
-        self.assertEqual(result, expected)
+        self.assertEqual(expected, result)
         result = utils.find_file_in_dirs('HISTORY.txt', dirs)
         expected = (TEST_ROOT / '..' / 'HISTORY.txt').as_posix()
-        self.assertEqual(result, expected)
+        self.assertEqual(expected, result)
         # normalize for second check
         self.assertTrue(os.path.relpath(result, TEST_ROOT).startswith('..'),
                         'HISTORY.txt not found in "..".')

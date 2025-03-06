@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-# $Id: test_s5.py 9369 2023-05-02 23:04:27Z milde $
+# $Id: test_s5.py 9425 2023-06-30 14:56:47Z milde $
 # Author: David Goodger <goodger@python.org>
 # Copyright: This module has been placed in the public domain.
 
@@ -31,6 +31,7 @@ class WriterPublishTestCase(unittest.TestCase):
             'strict_visitor': True,
             'stylesheet_path': '/test.css',
             'embed_stylesheet': False,
+            'report_level': 3,  # suppress "can't copy themes" warning
         }
         for name, cases in totest_1.items():
             for casenum, (case_input, case_expected) in enumerate(cases):
@@ -40,7 +41,7 @@ class WriterPublishTestCase(unittest.TestCase):
                         writer_name=writer_name,
                         settings_overrides=settings.copy()
                         ).decode()
-                    self.assertEqual(output, case_expected)
+                    self.assertEqual(case_expected, output)
 
         settings['hidden_controls'] = False
         settings['view_mode'] = 'outline'
@@ -52,7 +53,7 @@ class WriterPublishTestCase(unittest.TestCase):
                         writer_name=writer_name,
                         settings_overrides=settings.copy()
                         ).decode()
-                    self.assertEqual(output, case_expected)
+                    self.assertEqual(case_expected, output)
 
 
 if platform.system() == "Windows":

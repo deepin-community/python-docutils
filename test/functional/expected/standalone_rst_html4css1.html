@@ -3,7 +3,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-<meta name="generator" content="Docutils 0.20.1: https://docutils.sourceforge.io/" />
+<meta name="generator" content="Docutils 0.21.2: https://docutils.sourceforge.io/" />
 <meta content="reStructuredText, test, parser" name="keywords" />
 <meta content="A test document, containing at least one example of each reStructuredText construct." lang="en" name="description" />
 <meta name="author" content="David Goodger" />
@@ -38,7 +38,7 @@ A1B 2C3
 </pre>
 </td></tr>
 <tr><th class="docinfo-name">Contact:</th>
-<td><a class="first last reference external" href="mailto:goodger&#64;python.org">goodger&#64;python.org</a></td></tr>
+<td><a class="reference external first last" href="mailto:goodger&#64;python.org">goodger&#64;python.org</a></td></tr>
 <tr><th class="docinfo-name">Authors:</th>
 <td>Me
 <br />Myself
@@ -84,7 +84,7 @@ transforms to after the document title, subtitle, and docinfo. -->
 They are transformed from section titles after parsing. -->
 <!-- bibliographic fields (which also require a transform): -->
 <div class="contents topic" id="table-of-contents">
-<p class="topic-title">Table of Contents</p>
+<p class="topic-title"><a class="reference internal" href="#top">Table of Contents</a></p>
 <ul class="auto-toc simple">
 <li><a class="reference internal" href="#structural-elements" id="toc-entry-1">1&nbsp;&nbsp;&nbsp;Structural Elements</a><ul class="auto-toc">
 <li><a class="reference internal" href="#section-title" id="toc-entry-2">1.1&nbsp;&nbsp;&nbsp;Section Title</a></li>
@@ -314,11 +314,13 @@ doesn't get stripped away.)</p>
 and long descriptions</td></tr>
 <tr><td class="option-group">
 <kbd><span class="option">--long</span></kbd></td>
-<td>options can be long also</td></tr>
+<td>options can be long, too</td></tr>
 <tr><td class="option-group">
 <kbd><span class="option">--input=<var>file</var></span></kbd></td>
-<td>long options can also have
-arguments</td></tr>
+<td>long options can also have arguments</td></tr>
+<tr><td class="option-group">
+<kbd><span class="option">/V</span></kbd></td>
+<td>DOS/VMS-style option</td></tr>
 <tr><td class="option-group" colspan="2">
 <kbd><span class="option">--very-long-option</span></kbd></td>
 </tr>
@@ -336,9 +338,15 @@ regardless of where it starts.</p>
 <kbd><span class="option">-1 <var>file</var></span>, <span class="option">--one=<var>file</var></span>, <span class="option">--two <var>file</var></span></kbd></td>
 </tr>
 <tr><td>&nbsp;</td><td>Multiple options with arguments.</td></tr>
+<tr><td class="option-group" colspan="2">
+<kbd><span class="option">-f <var>&lt;[path]file&gt;</var></span></kbd></td>
+</tr>
+<tr><td>&nbsp;</td><td>Option argumens must start with a letter
+or be wrapped in angle brackets.</td></tr>
 <tr><td class="option-group">
-<kbd><span class="option">/V</span></kbd></td>
-<td>DOS/VMS-style options too</td></tr>
+<kbd><span class="option">-d <var>&lt;src dest&gt;</var></span></kbd></td>
+<td>Angle brackets are also required if an
+option expects more than one argument.</td></tr>
 </tbody>
 </table>
 <p>There must be at least two spaces between the option and the
@@ -579,7 +587,9 @@ document (a document-wide <a class="reference internal" href="#table-of-contents
 <div class="section" id="images-and-figures">
 <h3><a class="toc-backref" href="#toc-entry-47">2.14.2&nbsp;&nbsp;&nbsp;Images and Figures</a></h3>
 <p>An image directive (also clickable -- a hyperlink reference):</p>
-<a class="reference internal image-reference" href="#directives"><img alt="../../../docs/user/rst/images/title.png" class="class1 class2" src="../../../docs/user/rst/images/title.png" style="width: 70%;" /></a>
+<a class="reference internal image-reference" href="#directives">
+<img alt="../../../docs/user/rst/images/title.png" class="class1 class2" src="../../../docs/user/rst/images/title.png" style="width: 70%;" />
+</a>
 <p>Image with multiple IDs:</p>
 <span id="image-target-2"></span><span id="image-target-1"></span><img alt="../../../docs/user/rst/images/biohazard.png" id="image-target-3" src="../../../docs/user/rst/images/biohazard.png" />
 <p>A centered image:</p>
@@ -642,8 +652,8 @@ layout.</p>
 <p>This paragraph might flow around the figure.</p>
 <p>The specific behavior depends upon the style sheet and the browser or
 rendering software used.</p>
-<p>A centered figure:</p>
-<div class="figure align-center">
+<p>A centred figure, 40% wide:</p>
+<div class="figure align-center" style="width: 40%">
 <img alt="../../../docs/user/rst/images/biohazard.png" src="../../../docs/user/rst/images/biohazard.png" style="width: 40px;" />
 <p class="caption">This is the caption.</p>
 <div class="legend">
@@ -1276,74 +1286,86 @@ supported by all backends/output formats (LaTeX, e.g., supports the PDF
 or Postscript formats for vector graphics instead). Rendering behaviour
 varies, depending on the SVG image itself, the method used to put the
 image in the document, and the viewing agent.</p>
+<div class="figure align-center" style="width: 75%">
+<object data="../../../docs/user/rst/images/title-scaling.svg" style="width: 40%;" type="image/svg+xml">../../../docs/user/rst/images/title-scaling.svg</object>
+<p class="caption">Figure with image occupying 40% of the figure width.</p>
+<div class="legend">
+The <cite>viewBox</cite> attribute in the image file enables scaling
+also in <tt class="docutils literal">&lt;object&gt;</tt> and <tt class="docutils literal">&lt;svg&gt;</tt> nodes.</div>
+</div>
 <p>All up-to-date HTML browsers support SVG, however not all do this fully
-and in the same manner. Many older versions, especially IE &lt; 9, have
+and in the same manner. Some older browsers, especially IE &lt; 9, have
 deficiencies or require plug-ins (i.e. don't support the <tt class="docutils literal">&lt;img&gt;</tt> tag).
-The <cite>html4css1</cite> writer includes SVG images using <tt class="docutils literal">&lt;object&gt;</tt> tags,
-the <cite>html5</cite> writer uses <tt class="docutils literal">&lt;img&gt;</tt> tags.</p>
-<p>If the image is wrapped in <tt class="docutils literal">&lt;object&gt;</tt> or <tt class="docutils literal">&lt;svg&gt;</tt> tags, it depends on the
-&quot;viewBox&quot; declaration inside the image's root <tt class="docutils literal">&lt;svg&gt;</tt> element whether an
-SVG image is scaled or clipped/padded. Images wrapped in <tt class="docutils literal">&lt;img&gt;</tt> are
-always scaled.</p>
-<ul>
-<li><object class="first align-right" data="../../../docs/user/rst/images/title-scaling.svg" style="width: 50%;" type="image/svg+xml">../../../docs/user/rst/images/title-scaling.svg</object>
-<p>An image occupying 50% of the line width. The &quot;viewBox&quot; attribute in
-the image file enables auto-scaling also in <tt class="docutils literal">&lt;object&gt;</tt> tags and
-embedded SVG.</p>
-</li>
-<li><object class="first align-right" data="../../../docs/user/rst/images/title.svg" style="width: 50%; height: 15px;" type="image/svg+xml">../../../docs/user/rst/images/title.svg</object>
-<p>An image without &quot;viewBox&quot; in a box 50% wide and 15&nbsp;pixles high.
-This image is scaled, if wrapped in an <tt class="docutils literal">&lt;img&gt;</tt> tag but clipped in
-an <tt class="docutils literal">&lt;object&gt;</tt> tag or within SVG.</p>
-</li>
-<li><object class="first align-right" data="../../../docs/user/rst/images/title-scaling.svg" style="width: 50%; height: 1.5em;" type="image/svg+xml">../../../docs/user/rst/images/title-scaling.svg</object>
-<p>A right aligned image with &quot;viewBox&quot;, 50% wide and 1.5 em high.
-(SVG images keep the aspect ratio unless the &quot;preserveAspectRatio&quot;
-attribute is <tt class="docutils literal">&quot;none&quot;</tt>.)</p>
-</li>
-<li><p class="first">An inline image <object data="../../../docs/user/rst/images/biohazard-scaling.svg" style="height: 0.8em;" type="image/svg+xml">inline-svg</object> scaled to a height of 0.8 em.</p>
-</li>
-<li><object class="first align-right" data="../../../docs/user/rst/images/biohazard-scaling.svg" style="height: 1em;" type="image/svg+xml">../../../docs/user/rst/images/biohazard-scaling.svg</object>
-<p>An image 1 em high, right aligned:</p>
-</li>
-<li><p class="first">An image 5 mm x 5 mm, centred, with hyperlink reference:</p>
-<a class="reference internal image-reference" href="#svg-images"><object class="align-center" data="../../../docs/user/rst/images/biohazard-scaling.svg" style="width: 5mm; height: 5mm;" type="image/svg+xml">../../../docs/user/rst/images/biohazard-scaling.svg</object></a>
-</li>
-<li><object class="first align-right" data="../../../docs/user/rst/images/biohazard.svg" style="width: 4cm; height: 2em;" type="image/svg+xml">../../../docs/user/rst/images/biohazard.svg</object>
-<p>An image without &quot;viewBox&quot; in a  4 cm x 2 em box.</p>
-</li>
-</ul>
-<p>Older versions of <cite>webkit</cite> based browsers (chromium, safari, midori,
+Older versions of <cite>webkit</cite> based browsers (chromium, safari, midori,
 konqueror) support the <tt class="docutils literal">&lt;img&gt;</tt> tag but don't display contained bitmap
 images.</p>
+<p>The &quot;html4css1&quot; writer includes SVG images as <tt class="docutils literal">&lt;object&gt;</tt> elements,
+the &quot;html5&quot; writer uses <tt class="docutils literal">&lt;svg&gt;</tt> for embedded images and <tt class="docutils literal">&lt;img&gt;</tt>
+else. The element type influences several aspects of image behaviour:</p>
 <ul>
-<li><object class="first align-right" data="../../../docs/user/rst/images/biohazard-bitmap.svg" style="width: 3em;" type="image/svg+xml">../../../docs/user/rst/images/biohazard-bitmap.svg</object>
-<p>A small SVG image with embedded bitmap, The <tt class="docutils literal">:width:</tt> is set to 3&nbsp;em
-in the rST source. Does not scale if wrapped in <tt class="docutils literal">&lt;object&gt;</tt> tags
-because there is no &quot;viewBox&quot; attribute.</p>
+<li><p class="first">Due to security/privacy considerations, browsers may block <tt class="docutils literal">&lt;object&gt;</tt>
+data from 3rd party sources.</p>
 </li>
-<li><object class="first align-right" data="../../../docs/user/rst/images/biohazard-bitmap-scaling.svg" style="width: 3em;" type="image/svg+xml">../../../docs/user/rst/images/biohazard-bitmap-scaling.svg</object>
-<p>An SVG image with embedded bitmap and &quot;viewBox&quot;, 3&nbsp;em wide.</p>
+<li><p class="first">If an image is included as <tt class="docutils literal">&lt;object&gt;</tt> or <tt class="docutils literal">&lt;svg&gt;</tt>,
+it depends on the <cite>viewBox</cite> declaration of the root <tt class="docutils literal">&lt;svg&gt;</tt> element
+whether it is scaled or clipped/padded.
+Images in <tt class="docutils literal">&lt;img&gt;</tt> elements are always scaled.</p>
+<object class="align-left" data="../../../docs/user/rst/images/biohazard-scaling.svg" style="height: 1.2em;" type="image/svg+xml">../../../docs/user/rst/images/biohazard-scaling.svg</object>
+<p>Image with <cite>viewBox</cite>, 1.2&nbsp;em high, left aligned and <object data="../../../docs/user/rst/images/biohazard-scaling.svg" style="height: 1.2em;" type="image/svg+xml">inline-svg</object> inline.</p>
+<object class="align-left" data="../../../docs/user/rst/images/biohazard-scaling.svg" style="width: 15mm; height: 5mm;" type="image/svg+xml">../../../docs/user/rst/images/biohazard-scaling.svg</object>
+<p>Image with <cite>viewBox</cite>, 5&nbsp;mm x 15&nbsp;mm.</p>
+<object class="align-left" data="../../../docs/user/rst/images/biohazard.svg" style="width: 15mm; height: 5mm;" type="image/svg+xml">../../../docs/user/rst/images/biohazard.svg</object>
+<p>Image without <cite>viewBox</cite>, 5&nbsp;mm x 15&nbsp;mm.</p>
+<object class="align-left" data="../../../docs/user/rst/images/biohazard-bitmap-scaling.svg" style="width: 2em;" type="image/svg+xml">../../../docs/user/rst/images/biohazard-bitmap-scaling.svg</object>
+<p>Image with embedded bitmap and <cite>viewBox</cite>, 2&nbsp;em wide.</p>
+<object class="align-left" data="../../../docs/user/rst/images/biohazard-bitmap.svg" style="width: 2em;" type="image/svg+xml">../../../docs/user/rst/images/biohazard-bitmap.svg</object>
+<p>Image with embedded bitmap without <cite>viewBox</cite>.</p>
+</li>
+<li><p class="first">SVG images with <cite>viewBox</cite> keep the aspect ratio unless the
+<cite>preserveAspectRatio</cite> attribute is <tt class="docutils literal">&quot;none&quot;</tt>.
+The following two images are 25% wide and 1&nbsp;em high:</p>
+<object class="align-left" data="../../../docs/user/rst/images/title-scaling.svg" style="width: 25%; height: 1em;" type="image/svg+xml">../../../docs/user/rst/images/title-scaling.svg</object>
+<p>Image with <cite>viewBox</cite>.</p>
+<object class="align-left" data="../../../docs/user/rst/images/title.svg" style="width: 25%; height: 1em;" type="image/svg+xml">../../../docs/user/rst/images/title.svg</object>
+<p>Image without <cite>viewBox</cite>.</p>
+<a class="reference external image-reference" href="http://oreillymedia.github.io/svg-essentials-examples/ch14/animated_clock_js.svg">
+<object class="align-right" data="http://oreillymedia.github.io/svg-essentials-examples/ch14/animated_clock_js.svg" style="height: 3em;" type="image/svg+xml">[animated clock]</object>
+</a>
+</li>
+<li><p class="first">Hyperlinks and script actions attached to SVG elements are ignored in
+images included as <tt class="docutils literal">&lt;img&gt;</tt>. Hyperlinks in images included as
+<tt class="docutils literal">&lt;object&gt;</tt> are opened in the &quot;object frame&quot;. Hyperlinks specified in
+the rST source (with the <tt class="docutils literal">:target:</tt> directive option) work in
+<tt class="docutils literal">&lt;img&gt;</tt> and <tt class="docutils literal">&lt;svg&gt;</tt> elements but are ignored in images included as
+<tt class="docutils literal">&lt;object&gt;</tt> (unless the object is blocked).</p>
+<a class="reference internal image-reference" href="#svg-images">
+<object class="align-left" data="../input/data/object-with-hyperlink.svg" style="width: 2.4em;" type="image/svg+xml">../input/data/object-with-hyperlink.svg</object>
+</a>
+<a class="reference internal image-reference" href="#svg-images">
+<object class="align-right" data="../input/data/interactive-button.svg" type="image/svg+xml">../input/data/interactive-button.svg</object>
+</a>
+<p>Image with a link attached to the upper rectangle;
+interactive clock and button aligned to the right.</p>
+<a class="reference internal image-reference" href="#svg-images">
+<object class="align-left" data="../input/data/object-with-hyperlink.svg" style="width: 2.4em;" type="image/svg+xml">../input/data/object-with-hyperlink.svg</object>
+</a>
+<a class="reference internal image-reference" href="#svg-images">
+<object class="align-right" data="../input/data/interactive-button.svg" type="image/svg+xml">../input/data/interactive-button.svg</object>
+</a>
+<p>Embedded interactive SVG images.</p>
 </li>
 </ul>
-<p>SVG images can also be put in figures:</p>
-<blockquote>
-<div class="figure align-center">
-<object data="../../../docs/user/rst/images/title-scaling.svg" style="width: 290px; height: 28px;" type="image/svg+xml">reStructuredText, the markup syntax</object>
-<p class="caption">SVG image in a figure.</p>
-</div>
-</blockquote>
 </div>
 <div class="section" id="swf-images">
 <h2><a class="toc-backref" href="#toc-entry-44">2.25&nbsp;&nbsp;&nbsp;SWF Images</a></h2>
-<p>Shockwave Flash is an image/movie format that most modern web browsers
-support via a plugin. It is sometimes blocked due to privacy/security
-concerns.</p>
+<p>The &quot;Shockwave Flash&quot; image/movie format requires a browser plugin.
+It is sometimes blocked due to privacy/security concerns and widely
+replaced by SVG and native video support in HTML5.</p>
 <p>Images with extension <tt class="docutils literal">.swf</tt> are placed inside &lt;object&gt; elements.
 For complete control over display options use raw HTML.</p>
 <object class="align-left" data="../../../docs/user/rst/images/biohazard.swf" style="width: 4cm; height: 2em;" type="application/x-shockwave-flash">[biohazard.swf]</object>
 <p>An SWF image in a  4 cm x 2 em box, left aligned.</p>
-<p>An inline SWF image <object data="../../../docs/user/rst/images/biohazard.swf" style="width: 0.8em; height: 0.8em;" type="application/x-shockwave-flash">inline-swf</object> scaled to 0.8 em x 0.8 em.</p>
+<p>An inline SWF image <object data="../../../docs/user/rst/images/biohazard.swf" style="width: 0.8em; height: 0.8em;" type="application/x-shockwave-flash">[biohazard.swf]</object> scaled to 0.8 em x 0.8 em.</p>
 </div>
 </div>
 <div class="section" id="error-handling">
@@ -1359,16 +1381,16 @@ section, &quot;Docutils System Messages&quot;:</p>
 <p class="system-message-title">System Message: ERROR/3 (<tt class="docutils">functional/input/data/standard.txt</tt>, line 99); <em><a href="#problematic-1">backlink</a></em></p>
 Undefined substitution referenced: &quot;problematic&quot;.</div>
 <div class="system-message" id="system-message-2">
-<p class="system-message-title">System Message: ERROR/3 (<tt class="docutils">functional/input/data/standard.txt</tt>, line 387); <em><a href="#footnote-reference-8">backlink</a></em></p>
+<p class="system-message-title">System Message: ERROR/3 (<tt class="docutils">functional/input/data/standard.txt</tt>, line 390); <em><a href="#footnote-reference-8">backlink</a></em></p>
 Unknown target name: &quot;5&quot;.</div>
 <div class="system-message" id="system-message-3">
-<p class="system-message-title">System Message: ERROR/3 (<tt class="docutils">functional/input/data/standard.txt</tt>, line 396); <em><a href="#citation-reference-3">backlink</a></em></p>
+<p class="system-message-title">System Message: ERROR/3 (<tt class="docutils">functional/input/data/standard.txt</tt>, line 399); <em><a href="#citation-reference-3">backlink</a></em></p>
 Unknown target name: &quot;nonexistent&quot;.</div>
 <div class="system-message" id="system-message-4">
-<p class="system-message-title">System Message: ERROR/3 (<tt class="docutils">functional/input/data/standard.txt</tt>, line 423); <em><a href="#problematic-2">backlink</a></em></p>
+<p class="system-message-title">System Message: ERROR/3 (<tt class="docutils">functional/input/data/standard.txt</tt>, line 426); <em><a href="#problematic-2">backlink</a></em></p>
 Unknown target name: &quot;hyperlink reference without a target&quot;.</div>
 <div class="system-message" id="system-message-5">
-<p class="system-message-title">System Message: ERROR/3 (<tt class="docutils">functional/input/data/standard.txt</tt>, line 436); <em><a href="#problematic-3">backlink</a></em></p>
+<p class="system-message-title">System Message: ERROR/3 (<tt class="docutils">functional/input/data/standard.txt</tt>, line 439); <em><a href="#problematic-3">backlink</a></em></p>
 Duplicate target name, cannot be used as a unique reference: &quot;duplicate target names&quot;.</div>
 </div>
 </div>

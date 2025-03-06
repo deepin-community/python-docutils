@@ -1,5 +1,5 @@
 #! /usr/bin/env python3
-# $Id: test_docinfo.py 9351 2023-04-17 20:26:33Z milde $
+# $Id: test_docinfo.py 9425 2023-06-30 14:56:47Z milde $
 # Author: David Goodger <goodger@python.org>
 # Copyright: This module has been placed in the public domain.
 
@@ -45,7 +45,7 @@ class TransformTestCase(unittest.TestCase):
                     # messages added by `TestMessages` are filtered, too:
                     document.transformer.add_transform(FilterMessages, 890)
                     document.transformer.apply_transforms()
-                    self.assertEqual(document.pformat(), case_expected)
+                    self.assertEqual(case_expected, document.pformat())
 
     def test_transforms(self):
         self.check_output(totest, self.settings)

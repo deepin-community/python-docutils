@@ -1,6 +1,6 @@
 #! /usr/bin/env python3
 
-# $Id: test_figures.py 9277 2022-11-26 23:15:13Z milde $
+# $Id: test_figures.py 9496 2023-12-01 13:25:40Z milde $
 # Author: David Goodger <goodger@python.org>
 # Copyright: This module has been placed in the public domain.
 
@@ -23,6 +23,8 @@ from docutils.utils import new_document
 
 
 class ParserTestCase(unittest.TestCase):
+    maxDiff = None
+
     def test_parser(self):
         parser = Parser()
         settings = get_default_settings(Parser)
@@ -33,7 +35,7 @@ class ParserTestCase(unittest.TestCase):
                     document = new_document('test data', settings.copy())
                     parser.parse(case_input, document)
                     output = document.pformat()
-                    self.assertEqual(output, case_expected)
+                    self.assertEqual(case_expected, output)
 
 
 totest = {}
@@ -96,13 +98,14 @@ totest['figures'] = [
    :height: 100
    :width: 200
    :scale: 50
+   :loading: embed
 
    A picture with image options and a caption.
 """,
 """\
 <document source="test data">
     <figure>
-        <image height="100" scale="50" uri="picture.png" width="200">
+        <image height="100" loading="embed" scale="50" uri="picture.png" width="200">
         <caption>
             A picture with image options and a caption.
 """],
@@ -112,6 +115,7 @@ totest['figures'] = [
    :alt: alternate text
    :width: 200
    :scale: 50
+   :loading: lazy
    :figwidth: 300
    :figclass: class1 class2
    :name: fig:pix
@@ -121,7 +125,7 @@ totest['figures'] = [
 """\
 <document source="test data">
     <figure classes="class1 class2" width="300px">
-        <image alt="alternate text" height="100" ids="fig-pix" names="fig:pix" scale="50" uri="picture.png" width="200">
+        <image alt="alternate text" height="100" ids="fig-pix" loading="lazy" names="fig:pix" scale="50" uri="picture.png" width="200">
         <caption>
             A picture with image options on individual lines, and this caption.
 """],
