@@ -6,8 +6,8 @@
 
 :Authors: David Goodger; Lea Wiemann; open to all Docutils developers
 :Contact: docutils-develop@lists.sourceforge.net
-:Date: $Date: 2023-05-11 16:23:48 +0200 (Do, 11. Mai 2023) $
-:Revision: $Revision: 9382 $
+:Date: $Date: 2024-04-23 20:54:26 +0200 (Di, 23. Apr 2024) $
+:Revision: $Revision: 9649 $
 :Copyright: This document has been placed in the public domain.
 
 .. _Docutils: https://docutils.sourceforge.io/
@@ -39,6 +39,18 @@ Steps to take and watch
 
   Check what was changed by ``set_version.sh``.
 
+  Change acchordingly docutils/__init__.py ::
+
+    __version_info__ = VersionInfo(
+        major=0,
+        minor=21,
+        micro=0,
+        releaselevel='candidate',  # one of 'alpha', 'beta', 'candidate', 'final'
+        serial=1,  # pre-release number (0 for final releases and snapshots)
+        release=False  # True for official releases and pre-releases
+        ) 
+
+
   Run tests ::
 
     export PYTHONWARNINGS=default
@@ -51,30 +63,63 @@ Steps to take and watch
 
 * Generate wheel and source-distribution::
 
-    python3 setup.py sdist
-    python3 setup.py bdist_wheel
+    python3 -m pip install flit
+    python3 -m flit build 
 
-* check sdist for html-files in docutils.egg-info.
-* Upload wheel and source to test.pypi::
+  or ::
 
-    python3 -m twine upload --repository-url https://test.pypi.org/legacy/ dist/*
+    python3 -m pip install build
+    python3 -m build .
 
-  Test in venv. NOTE use --pre for prereleases::
+  check file sizes: the 0.21.2 wheel was 574K the sdist 2,2M.
+
+* Upload wheel and source to test.pypi.
+  
+  Set repository and key in ~/.pypirc with a <server-name> and
+  password token::
+
+    python3 -m twine upload --repository <server-name> dist/*
+
+  Change directory outside of checkout and test in venv. 
+  NOTE use --pre for prereleases::
 
     python3 -m venv du3 ; cd du3
     export PYTHONPATH= ; . bin/activate
 
-    python -m pip install --index-url https://test.pypi.org/simple/ --no-deps docutils
+    pip install --index-url https://test.pypi.org/simple/ --no-deps docutils
 
     cp -Lr ../docutils-code/docutils/test .
     python test/alltests.py
 
-    python -m pip uninstall docutils
+  Ignore missing HISTORY.txt it is not in the wheel file.
+  if ok ::
+
     deactivate ; cd .. ; rm -r du3
+  
+  Test the sdist::
+
+    python3 -m venv du3s ; cd du3s
+    export PYTHONPATH= ; . bin/activate
+
+    pip install --index-url https://test.pypi.org/simple/ --no-binary docutils docutils
+
+  sdist installation fails with subprocess not finding flit_core .
+  test.pypi has flit 3.5.1 but installs 0.5 preinstalling flit_core did not work
+  either ... why.
+  
+  postbone sdist test to pypi::
+
+    cp -Lr ../docutils-code/docutils/test .
+    python test/alltests.py
+
+  Ignore ``test_find_file_in_dirs`` fails because HISTORY.txt is missing or/and
+  missing pil.
+
+    deactivate ; cd .. ; rm -r du3s
 
 * Commit changes ... the changed version number.
 
-* tag #.# (Note: only directory docutils is copied)::
+* If final release tag #.# (Note: only directory docutils is copied)::
 
     svn copy svn+ssh://grubert@svn.code.sf.net/p/docutils/code/trunk/docutils \
              svn+ssh://grubert@svn.code.sf.net/p/docutils/code/tags/docutils-#.# \
@@ -83,18 +128,32 @@ Steps to take and watch
 * Update your source directory.
 * Rebuild wheel and source-distribution ::
 
-    python3 setup.py sdist
-    python3 setup.py bdist_wheel
+    python3 -m flit build 
 
 * Now upload to pypi::
 
-    python3 -m twine upload  dist/docutils-#.#*
+    python3 -m twine upload --repository <server-name> dist/docutils-#.#*
 
 * Remove previous package from local cache::
 
     find .cache/pip/wheels -name docutils\*whl -exec rm -v -i {} \;
 
-* and test::
+* Test the sdist::
+
+    python3 -m venv du3s ; cd du3s
+    export PYTHONPATH= ; . bin/activate
+
+    pip install --no-binary docutils docutils
+
+    cp -Lr ../docutils-code/docutils/test .
+    python test/alltests.py
+
+  Ignore ``test_find_file_in_dirs`` fails because HISTORY.txt is missing or/and
+  missing pil.
+
+    deactivate ; cd .. ; rm -r du3s
+
+* and wheel::
 
     python3 -m venv du3 ; cd du3
     export PYTHONPATH= ; . bin/activate
@@ -107,6 +166,10 @@ Steps to take and watch
 
 * Notify to docutils-developer and user.
 
+For candidate releases change version to rc#+1dev.
+
+For final releases continue
+
 * upload source and generated html to sf-htdocs/#.# ::
 
     mkdir tmp1
@@ -116,7 +179,6 @@ Steps to take and watch
     python3 tools/buildhtml.py .
     find . -name \*.pyc -exec rm -v {} \;
     find . -name __pycache__ -exec rmdir -v {} \;
-    rm -r docutils.egg-info
     rsync -e ssh -r -t ./ web.sourceforge.net:/home/project-web/docutils/htdocs/#.#
 
 * Check web/index.txt for necessary corrections.
@@ -127,7 +189,6 @@ Steps to take and watch
   - Select docutils-#.#.tar.gz as default for all OS.
 
 * set_version #.{#+1}b.dev
-* test with py3
 * docutils/HISTORY.txt: add title "Changes Since #.#"
 * run sandbox/infrastructure/docutils-update.local
 

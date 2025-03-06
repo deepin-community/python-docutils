@@ -1,5 +1,5 @@
 #! /usr/bin/env python3
-# $Id: test_east_asian_text.py 9277 2022-11-26 23:15:13Z milde $
+# $Id: test_east_asian_text.py 9425 2023-06-30 14:56:47Z milde $
 # Author: David Goodger <goodger@python.org>
 # Copyright: This module has been placed in the public domain.
 
@@ -32,7 +32,7 @@ class ParserTestCase(unittest.TestCase):
                     document = new_document('test data', settings.copy())
                     parser.parse(case_input, document)
                     output = document.pformat()
-                    self.assertEqual(output, case_expected)
+                    self.assertEqual(case_expected, output)
 
 
 totest = {}

@@ -1,12 +1,12 @@
 .. include:: docs/header0.txt
 
 =========================
- README: Docutils 0.20.1
+ README: Docutils 0.21.2
 =========================
 
 :Author: David Goodger
 :Contact: goodger@python.org
-:Date: $Date: 2023-05-09 20:32:19 +0200 (Di, 09. Mai 2023) $
+:Date: $Date: 2024-04-23 20:54:26 +0200 (Di, 23. Apr 2024) $
 :Web site: https://docutils.sourceforge.io/
 :Copyright: This document has been placed in the public domain.
 
@@ -74,8 +74,9 @@ Dependencies
 To run the code, Python_ must be installed.
 (Python is pre-installed with most Linux distributions.)
 
-* Since version 0.19, Docutils requires Python 3.7 or later.
-* Docutils 0.16 to 0.18 require Python 2.7 or 3.5+.
+* Since version 0.21, Docutils requires Python 3.9 or later.
+* Docutils versions 0.19 to 0.20.1 require Python 3.7 or later.
+* Docutils versions 0.16 to 0.18 require Python 2.7 or 3.5+.
 
 .. _Python: https://www.python.org/.
 
@@ -132,7 +133,8 @@ The `Python Packaging User Guide`_ gives details how to
 
          pip install -e .  # editable install
          pip install .     # regular install
-         python setup.py   # regular install with setuptools
+
+     or do a `"manual" install`_.
 
   4. Optional steps:
 
@@ -161,6 +163,7 @@ The `Python Packaging User Guide`_ gives details how to
 .. _"editable" install:
     https://pip.pypa.io/en/stable/topics/local-project-installs/
     #editable-installs
+.. _"manual" install: docs/dev/repository.html#manual-install
 
 
 GNU/Linux, BSDs, Unix, Mac OS X, etc.
@@ -243,9 +246,6 @@ Project Files & Directories
 * THANKS.txt: List of contributors.
 
 * setup.py: Installation script.  See "Installation" below.
-
-* install.py: Quick & dirty installation script.  Just run it.  For
-  any kind of customization or help though, setup.py must be used.
 
 * docutils: The project source directory, installed as a Python
   package.
@@ -392,7 +392,7 @@ list.
 .. _project page: https://sourceforge.net/p/docutils
 .. _Docutils-users: docs/user/mailing-lists.html#docutils-users
 
-
+
 ..
    Local Variables:
    mode: indented-text

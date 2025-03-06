@@ -219,8 +219,10 @@ Unsupported in ODT.
 }
 
 Note, that the \textquotedbl{}reference name\textquotedbl{} for this section is derived from the
-content \emph{before} substitution. This may be exploited to get intelligible
-IDs after \href{https://docutils.sourceforge.io/docs/ref/rst/directives.html\#identifier-normalization}{identifier normalization} of the section's reference name.
+content \emph{before} substitution. You can link to it with the \href{https://docutils.sourceforge.io/docs/ref/rst/restructuredtext.html\#hyperlink-references}{phrase
+reference} \textquotedbl{}\hyperref[substitutions-fail]{substitutions fail}\textquotedbl{}.
+This behaviour may be exploited to get intelligible IDs after \href{https://docutils.sourceforge.io/docs/ref/rst/directives.html\#identifier-normalization}{identifier
+normalization} of the section's reference name.
 
 % This file is used by the standalone_rst_latex test.
 
@@ -239,7 +241,6 @@ is contained in a quote
 \begin{quote}
 \begin{DUoptionlist}
 \item[-{}-help]  show help
-
 \item[-v]  verbose
 \end{DUoptionlist}
 \end{quote}
@@ -248,10 +249,8 @@ is contained in a quote
 \item[{In a definition list:}] \leavevmode
 \begin{DUoptionlist}
 \item[-{}-help]  show help
-
 \item[-v]  verbose
 \end{DUoptionlist}
-
 \end{description}
 
 
@@ -617,6 +616,7 @@ adipisicing elit
  \\
 \hline
 
+\label{nested-table}
 \noindent\makebox[\linewidth][r]{%
 \setlength{\DUtablewidth}{\dimexpr\linewidth-3\arrayrulewidth\relax}%
 \begin{tabular}{|p{\DUcolumnwidth{0.150}}|p{\DUcolumnwidth{0.150}}|}
@@ -679,7 +679,6 @@ in narrow column
 \begin{description}
 \item[{definition:}] 
 list
-
 \end{description}
  & 
 cell 3, 2
@@ -855,7 +854,6 @@ description term
 
 \item[{{[}bracketed{]}}] 
 description term
-
 \end{description}
 
 The OT1 font-encoding differs from ASCII for the less-than, greater-than
@@ -869,13 +867,13 @@ and bar characters (< | >) except for typewriter font \DUroletitlereference{cmtt
 
 In LaTeX, we must set an explicit anchor (\texttt{\textbackslash{}phantomsection}) for a
 %
-\phantomsection\label{hypertarget-in-plain-text}hypertarget in plain text or in a figure but not in a longtable or
-caption:
+\phantomsection\label{hypertarget-in-plain-text}hypertarget in plain text or in a figure but not in a table title
+or figure caption:
 
 \setlength{\DUtablewidth}{\dimexpr\linewidth-4\arrayrulewidth\relax}%
 \begin{longtable}{|p{\DUcolumnwidth{0.150}}|p{\DUcolumnwidth{0.150}}|p{\DUcolumnwidth{0.150}}|}
 \caption{Table with %
-\label{hypertarget-in-table-title}hypertarget in table title.}\\
+\label{hypertarget-in-table-title}hypertarget in table title.\label{table-label}}\\
 \hline
 
 False
@@ -886,7 +884,6 @@ None
  \\
 \hline
 \end{longtable}
-\label{table-label}
 
 \begin{figure}
 \phantomsection\label{figure-label}
@@ -904,6 +901,7 @@ Legend with %
 
 See \hyperref[hypertarget-in-plain-text]{hypertarget in plain text},
 \hyperref[table-label]{table label}, \hyperref[hypertarget-in-table-title]{hypertarget in table title},
+\hyperref[nested-table]{nested table},
 \hyperref[figure-label]{figure label}, \hyperref[hypertarget-in-figure-caption]{hypertarget in figure caption},
 \hyperref[hypertarget-in-figure-legend]{hypertarget in figure legend}, and
 \hyperref[image-label]{image label}.
@@ -921,7 +919,6 @@ Long URLs should be wrapped in the PDF. This can be achieved with the
 \item[{Example:}] 
 a long URL that should wrap in the output
 \url{https://docutils.sourceforge.io/docs/user/latex.html\#id79}
-
 \end{description}
 
 If the argument contains any \textquotedbl{}\%\textquotedbl{}, \textquotedbl{}\#\textquotedbl{}, or \textquotedbl{}\textasciicircum{}\textasciicircum{}\textquotedbl{}, or ends with \texttt{\textbackslash{}}, it can't

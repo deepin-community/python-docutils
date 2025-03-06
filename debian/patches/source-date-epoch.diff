@@ -10,7 +10,7 @@ Forwarded: https://sourceforge.net/p/docutils/patches/132/
  2 files changed, 14 insertions(+), 7 deletions(-)
 
 diff --git a/docutils/parsers/rst/directives/misc.py b/docutils/parsers/rst/directives/misc.py
-index be8d76e..20d48c9 100644
+index 2af3232..33dcaac 100644
 --- a/docutils/parsers/rst/directives/misc.py
 +++ b/docutils/parsers/rst/directives/misc.py
 @@ -7,6 +7,7 @@
@@ -21,7 +21,7 @@ index be8d76e..20d48c9 100644
  import re
  import time
  from urllib.request import urlopen
-@@ -598,12 +599,12 @@ class Date(Directive):
+@@ -610,12 +611,12 @@ class Date(Directive):
          #
          # See also the discussion about \date \time \year in TeX
          # http://tug.org/pipermail/tex-k/2016-May/002704.html
@@ -41,7 +41,7 @@ index be8d76e..20d48c9 100644
  
  
 diff --git a/docutils/transforms/universal.py b/docutils/transforms/universal.py
-index 16b4871..3e41059 100644
+index 00d57b4..41bc4cc 100644
 --- a/docutils/transforms/universal.py
 +++ b/docutils/transforms/universal.py
 @@ -20,6 +20,7 @@ Transforms needed by most or all documents:

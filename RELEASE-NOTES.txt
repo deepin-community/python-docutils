@@ -6,8 +6,8 @@
 
 :Contact: grubert@users.sourceforge.net
 :Maintainer: docutils-develop@lists.sourceforge.net
-:Date: $Date: 2023-05-16 16:49:41 +0200 (Di, 16. Mai 2023) $
-:Revision: $Revision: 9387 $
+:Date: $Date: 2024-04-23 20:54:26 +0200 (Di, 23. Apr 2024) $
+:Revision: $Revision: 9649 $
 :Web site: https://docutils.sourceforge.io/
 :Copyright: This document has been placed in the public domain.
 
@@ -20,38 +20,8 @@ For a more detailed list of changes, please see the Docutils `HISTORY`_.
 Future changes
 ==============
 
-Drop support for Python 3.7 and 3.8 in Docutils 0.21.
-
 Command line interface
 ----------------------
-
-* Docutils 0.21 will provide ``rst2*`` "console_scripts" `entry points`_
-  (without the ``.py`` extension) instead of installing the
-  ``rst2*.py`` `front end tools`_ in the binary PATH. [#]_
-
-  You may use the ``docutils`` `generic command line front end tool`_
-  as a future-proof command, for example:
-
-  .. code:: diff
-
-     - rst2latex.py --use-latex-abstract FAQ.txt > FAQ.tex
-     + docutils --writer=latex --use-latex-abstract FAQ.txt > FAQ.tex
-
-  Exceptions:
-    The ``rstpep2html.py`` and ``rst2odt_prepstyles.py`` scripts
-    will be retired.
-
-    Use ``docutils --reader=pep --writer=pep_html`` for a PEP preview. [#]_
-
-    Use ``python -m docutils.writers.odf_odt.prepstyles``
-    to `strip the page size`__ from an ODT writer stylesheet.
-
-    __ docs/user/odt.html#page-size
-
-  .. [#] Some Linux distributions already use the short names.
-  .. [#] The final rendering is done by a Sphinx-based build system
-         (cf. :PEP:`676`).
-
 
 * The _`command-line usage pattern` will change:
 
@@ -75,20 +45,24 @@ Command line interface
 .. _entry points:
     https://packaging.python.org/en/latest/specifications/entry-points/
 
+Document Tree / Docutils DTD
+----------------------------
+
+* Allow multiple <term> elements in a <definition_list_item>
+  in Docutils 0.22 (cf. `feature-requests:60`__).
+  Third-party writers may need adaption.
+
+  __ https://sourceforge.net/p/docutils/feature-requests/60/
+
+* Do not lowercase reference names in the `refname attribute`_
+  (matching hyperlinks, footnotes, and citations remains case insensitive),
+  and drop the ``name`` attribute from <reference> nodes
+  in Docutils 1.0.
+
+.. _refname attribute: docs/ref/doctree.html#refname
 
 `Input encoding`_
 -----------------
-
-* Raise `UnicodeError` (instead of falling back to the locale encoding)
-  if decoding the source with the default encoding (UTF-8) fails and
-  Python is started in `UTF-8 mode`_. (Docutils 0.21)
-
-  Raise `UnicodeError` (instead of falling back to "latin1") if both,
-  default and locale encoding, fail. (Docutils 0.21)
-
-* Only remove BOM (U+FEFF ZWNBSP at start of data), no other ZWNBSPs.
-  Only remove BOM with `input_encoding`_ values None, '', 'utf-8-sig',
-  'utf-16', and 'utf-32'. (Docutils 0.21)
 
 * Change the default input encoding from ``None`` (auto-detect) to
   "utf-8" in Docutils 0.22.
@@ -114,12 +88,6 @@ Writers
 
 * "html5" writer:
 
-  - Stop setting the "footnote-reference" class value for footnote
-    references in Docutils 0.21.
-    Since 0.18, you can use the CSS selector
-    ``[role="doc-noteref"]`` instead of ``.footnote-reference``
-    (see minimal.css for examples).
-
   - Move attribution behind the blockquote to comply with the `"living
     standard"`__. (HTML5__ allows <cite> elements inside a blockquote.)
 
@@ -127,7 +95,25 @@ Writers
     __ https://www.w3.org/TR/2014/REC-html5-20141028/grouping-content.html
        #the-blockquote-element
 
-  - Change the default value for math_output_ to "MathML" in Docutils 0.22.
+  - Change the default value for math_output_ to "MathML"
+    in Docutils 0.22.
+
+  - Unitless image_ :width: and :hight: values and dimensions
+    read from the image due to a :scale: option will be written as
+    "width" and "hight" attributes instead of "style" rules to allow
+    specification of the aspect ratio to `prevent jank when loading
+    images`__ without overwriting an image size set in a CSS stylesheet
+    in Docutils 0.22 (cf.  `feature-requests:102`__).
+    The current behaviour is kept for dimensions with value, so
+    users may specify, e.g. ``:width: 50px`` instead of ``:width: 50``
+    to override CSS stylesheet rules.
+
+    __ https://developer.mozilla.org/en-US/docs/Learn/Performance/Multimedia
+       #rendering_strategy_preventing_jank_when_loading_images
+    __ https://sourceforge.net/p/docutils/feature-requests/102/
+
+  - Change the default value of the initial_header_level_ setting to None
+    (<h2> if there is a document title, else <h1>) in Docutils 1.0.
 
   - Remove option ``--embed-images`` (obsoleted by "image_loading_")
     in Docutils 2.0.
@@ -143,30 +129,24 @@ Writers
   - Remove ``use_verbatim_when_possible`` setting
     (use literal_block_env_: verbatim) in Docutils 2.0.
 
-* "null" writer: output will change to the empty string in Docutils 0.22.
+  - Don't wrap references with custom reference-label_ in
+    a ``\hyperref`` command in Docutils 0.22.
+    Specify, e.g., "ref" instead of "ref*" to keep generating hyperlinks.
+
+    .. _reference-label: docs/user/config.html#reference-label
+
+* "null" writer: output will change to the empty string
+  in Docutils 0.22.
+
+* "manpage" writer:
+
+  - No more changing case in to uppercase, leave it to the source.
 
 Misc
 ----
 
-* "csv-table_" directive:
-
-  - Use the same CSV format for the main CSV data and the :header: option
-    (as specified in the documentation since addition of "csv-table_")
-    in Docutils 0.21.
-
-  - Move `parsers.rst.directives.Table.process_header_option()` to
-    `parsers.rst.directives.CSVTable` in Docutils 0.21.
-
-  - Remove `parsers.rst.directives.CSVTable.HeaderDialect`
-    in Docutils 0.22.
-
-* Remove the compatibility hacks `nodes.reprunicode` and `nodes.ensure_str()`
-  in Docutils 0.21 or later. They are not required with Python 3.x.
-
-* Remove file ``install.py`` in Docutils 0.21.
-  See README.txt__ for alternatives.
-
-  __ README.html#installation
+* Remove `parsers.rst.directives.CSVTable.HeaderDialect`
+  in Docutils 0.22.
 
 * Remove the "rawsource" argument from `nodes.Text.__init__()`
   in Docutils 2.0.
@@ -188,17 +168,17 @@ Misc
 
   __ docs/ref/transforms.html
 
-* docutils/parsers/rst/languages/
+* Remove mistranslated localizations of the "admonition" directive name in
+  Docutils 0.22.
 
-  Fix mistranslated localizations of the "admonition" directive name in
-  Docutils 0.21 (or later). In Docutils, "admonition" is used as a
-  generic term for "advice"/"caveat"/"remark", not a reprimand.
-  Use the English term (or specific admonitions) instead of "aanmaning",
-  "ammonizione", "Ermahnung", "exhortacion", "formaning", "upomnienie",
-  or "vermaning" to avoid errors in future conversions.
+  Use the English term, matching translations introduced in Docutils 0.21,
+  or specific admonitions instead of "aanmaning" (nl),
+  "admonition" (fr), "ammonizione" (it), "ermahnung" (de),
+  "exhortación" (es), "formaning" (da), "sciigo" (eo),
+  "upomnienie" (pl), "vermaning" (af),
+  to avoid errors in future conversions.
 
 .. _front end tools: docs/user/tools.html
-.. _input encoding:
 .. _input_encoding: docs/user/config.html#input-encoding
 .. _math_output: docs/user/config.html#math-output
 .. _UTF-8 mode: https://docs.python.org/3/library/os.html#utf8-mode
@@ -213,7 +193,136 @@ Misc
 .. _literal_block_env: docs/user/config.html#literal-block-env
 .. _use_latex_citations: docs/user/config.html#use-latex-citations
 .. _buildhtml.py: docs/user/tools.html#buildhtml-py
+
+
+Release 0.21.2b.dev (unpublished)
+=================================
+
+* Document Tree / Docutils DTD
+
+  - Remove declaration of unsupported element <info>.
+  - Remove <decoration> from content declaration of <section> elements.
+
+
+Release 0.21.2 (2024-04-23)
+===========================
+
+* Declare support for languages Georgian and Catalan (Valencian).
+
+* Fix test failures.
+
+
+Release 0.21.1 (2024-04-10)
+===========================
+
+The sdist in 0.21 was incomplete
+
+- pypi allows no file replacing
+- adding a postrelease suffix "post1": docutils-0.21.post1.tar.gz
+  works on pypi, but fails with pip because the metadata differs.
+
+  But if the metadata is 0.21.post1 pypi makes it a new release.
+
+  0.21.1 is the same code except for the version number.
+
+
+Release 0.21 (2024-04-09)
+=========================
+
+* General:
+
+  - Drop support for Python 3.7 and 3.8.
+
+  - Provide ``rst2*`` "console_scripts" `entry points`_
+    (without the ``.py`` extension) instead of installing the
+    ``rst2*.py`` `front end tools`_ in the binary PATH. [#]_
+
+    Exceptions: ``rstpep2html.py`` and ``rst2odt_prepstyles.py``:
+
+    - Use ``docutils --reader=pep --writer=pep_html`` for a PEP preview. [#]_
+    - Use ``python -m docutils.writers.odf_odt.prepstyles``
+      to `strip the page size`__ from an ODT writer stylesheet.
+
+    __ docs/user/odt.html#page-size
+
+  .. [#] Some Linux distributions already use the short names.
+  .. [#] The final rendering is done by a Sphinx-based build system
+         (cf. :PEP:`676`).
+
+* reStructuredText:
+
+  - Use the same CSV format for the ``:header:`` option and the main data
+    of the "csv-table_" directive.
+
+  - New option "loading" for the `"image" directive`_.
+    Sets the new attribute loading__ of the <image> doctree element.
+
+  __ docs/ref/doctree.html#loading
+
+* Configuration changes:
+
+  - New configuration setting root_prefix_.
+    Configurable root directory for included files.
+
+  - New configuration setting sources_ for the "buildhtml.py" application.
+
+  - Simpler and more secure `input encoding`_ default behaviour:
+
+    Do not use the locale encoding as fallback if Python is started in
+    `UTF-8 mode`_. Stop using "latin1" as second fallback.
+
+    Remove BOM (U+FEFF ZWNBSP at start of data) only if the `input_encoding`_
+    configuration setting is None, '', 'utf-8-sig', 'utf-16', or 'utf-32'.
+    Do not remove other ZWNBSPs.
+
+* Output changes:
+
+  HTML5:
+    Stop setting the "footnote-reference" class value for footnote
+    references. Use the CSS selector ``[role="doc-noteref"]``
+    (works since Docutils 0.18, see minimal.css for examples).
+
+    Fix MathML rendering problems in Chrome/Chromium based browsers.
+
+    Embed SVG images as ``<svg>`` instead of data-URI.
+
+  manpage:
+    Use .EE/.EX macros for literal blocks.
+
+    Render URI references (do not use .UR/.UE).
+
+    Use box option for tables.
+
+* Removed objects:
+
+  `docutils.nodes.reprunicode`, `docutils.nodes.ensure_str()`
+    Python 2 compatibility hacks
+  `docutils.utils.Reporter.set_conditions()`
+    obsolete
+  `docutils.core.Publisher.setup_option_parser()`
+    internal, obsolete
+
+* New files:
+
+  ``docutils/writers/html5_polyglot/italic-field-names.css``
+    Alternative style for Docutils field-lists.
+
+* Removed files:
+
+  ``install.py``, ``setup.py``
+    Metadata is now stored in ``pyproject.toml``,
+    supported by pip_ since version 19.0 (2019-01-22).
+    See README__ for installation alternatives.
+
+  __ README.html#installation
+
+* Bugfixes and improvements (see HISTORY_).
+
+.. _input encoding: docs/api/publisher.html#encodings
 .. _csv-table: docs/ref/rst/directives.html#csv-table
+.. _"image" directive: docs/ref/rst/directives.html#image
+.. _root_prefix: docs/user/config.html#root-prefix
+.. _sources: docs/user/config.html#sources
 
 
 Release 0.20.1 (2023-05-17)
@@ -249,8 +358,6 @@ Release 0.20 (2023-05-04)
     are now ignored by the "xetex" writer.
     Place common settings in section `[latex writers]`_.
 
-    .. _[latex writers]: docs/user/config.html#latex-writers
-
   - New command line setting output_. Obsoletes the ``<destination>``
     positional argument (cf. `future changes`__).
 
@@ -269,15 +376,15 @@ Release 0.20 (2023-05-04)
   - Removed. Use the coverage.py_ project instead,
     ``coverage run test/alltests.py`` and ``coverage report``.
 
-  .. _coverage.py: https://pypi.org/project/coverage/
-
 * tools/
 
   - Moved ``quicktest.py`` to ``tools/dev/``.
 
 * Bugfixes and improvements (see HISTORY_).
 
+.. _[latex writers]: docs/user/config.html#latex-writers
 .. _output: docs/user/config.html#output
+.. _coverage.py: https://pypi.org/project/coverage/
 
 
 Release 0.19 (2022-07-05)
@@ -298,9 +405,6 @@ Release 0.19 (2022-07-05)
 * After package installation, the CLI commands ``python -m docutils`` and
   ``docutils`` start the `generic command line front end tool`_.
 
-  .. _generic command line front end tool:
-      docs/user/tools.html#generic-command-line-front-end
-
 * Support parsing "Markdown" input with 3rd party parsers
   myst_, pycmark_, or recommonmark_.
 
@@ -311,6 +415,8 @@ Release 0.19 (2022-07-05)
 
 * Various bugfixes and improvements (see HISTORY_).
 
+.. _generic command line front end tool:
+    docs/user/tools.html#generic-command-line-front-end
 .. _myst: https://pypi.org/project/myst-docutils
 .. _pycmark: https://pypi.org/project/pycmark/
 .. _recommonmark: https://pypi.org/project/recommonmark/
@@ -363,7 +469,6 @@ Release 0.18 (2021-10-26)
       widths, if the `"widths" option`_ is set and not "auto".
       The table-style__ setting "colwidths-grid" restores the current default.
 
-      .. _"widths" option: __ docs/ref/rst/directives.html#table
       __ docs/user/config.html#table-style
 
     - Items of a definition list with class argument "details" are
@@ -398,6 +503,8 @@ Release 0.18 (2021-10-26)
      admonitions are now environments.
 
 * New standard Docutils doctree node: <meta__>.
+
+  __ docs/ref/doctree.html#meta
 
 * New configuration settings:
 
@@ -434,9 +541,9 @@ Release 0.18 (2021-10-26)
   Fix spelling errors in documentation and docstrings.
   Thanks to Dimitri Papadopoulos.
 
-__ docs/ref/doctree.html#meta
+.. _"widths" option: __ docs/ref/rst/directives.html#table
 .. _identifier normalization:
-   docs/ref/rst/directives.html#identifier-normalization
+    docs/ref/rst/directives.html#identifier-normalization
 .. _id_prefix: docs/user/config.html#id-prefix
 .. _auto_id_prefix: docs/user/config.html#auto-id-prefix
 .. _details disclosure elements:
@@ -550,9 +657,6 @@ without the use of the ``2to3`` tool.
     "html4" or "html5" (deprecated in favour of the `"writer" setting`_
     in Docutils 0.18).
 
-  .. _"writer" setting:
-     docs/user/config.html#writer-buildhtml-application
-
 * docutils/io.py
 
   - Remove the `handle_io_errors` argument from io.FileInput/Output.
@@ -561,9 +665,10 @@ without the use of the ``2to3`` tool.
 
   - If `auto_id_prefix`_ ends with "%", this is replaced with the tag name.
 
-  .. _auto_id_prefix: docs/user/config.html#auto-id-prefix
-
 * Various bugfixes and improvements (see HISTORY_).
+
+.. _"writer" setting: docs/user/config.html#writer-buildhtml-application
+.. _auto_id_prefix: docs/user/config.html#auto-id-prefix
 
 
 Release 0.15 (2019-07-20)
@@ -646,8 +751,6 @@ Release 0.13.1 (2016-12-09)
 
   - New HTML writer generating `HTML 5`_.
 
-  .. _HTML 5: https://www.w3.org/TR/html5/
-
 * tools/
 
   - New front-end ``rst2html5.py``.
@@ -662,6 +765,8 @@ Release 0.13.1 (2016-12-09)
   better tablewidth auto, ...
 
 * rst.el: The problem with ``electric-indent-mode`` has been fixed.
+
+.. _HTML 5: https://www.w3.org/TR/html5/
 
 
 Release 0.12 (2014-07-06)
@@ -700,8 +805,6 @@ Release 0.11 (2013-07-22)
   - Avoid repeated class declarations in html4css1 writer
     (modified version of patch [ 104 ]).
 
-  .. _math-output: docs/user/config.html#math-output
-
 * docutils/writers/latex2e/__init__.py
 
   - Drop the simple algorithm replacing straight double quotes with
@@ -711,12 +814,14 @@ Release 0.11 (2013-07-22)
     where stylesheets are found. Used by `stylesheet_path` when expanding
     relative path arguments.
 
-  .. _SmartQuotes: docs/user/config.html#smart-quotes
-
 * docutils/writers/manpage.py
 
   - Fix [3607063] handle lines starting with a period.
   - Fix option separating comma was bold (thanks to Bill Morris).
+
+.. _math-output: docs/user/config.html#math-output
+.. _SmartQuotes: docs/user/config.html#smart-quotes
+
 
 Release 0.10 (2012-12-16)
 =========================
@@ -914,9 +1019,9 @@ Components:
   - Drop the special `output_encoding`__ default ("latin-1").
     The Docutils wide default (usually "UTF-8") is used instead.
 
-__ docs/user/config.html#docutils-footnotes
-__ docs/user/latex.html#hyperlinks
-__ docs/user/latex.html#output-encoding
+  __ docs/user/config.html#docutils-footnotes
+  __ docs/user/latex.html#hyperlinks
+  __ docs/user/latex.html#output-encoding
 
 * manpage writer:
 
@@ -956,9 +1061,9 @@ and convertible to 3.1 code.
     (aligning the figure not its contents).
   - Align images with class "align-[right|center|left]"
     (allows setting the alignment of an image in a figure).
-  - Hard tabs in literal inclusions are replaced by spaces. This is
-    configurable via the new "tab-width" option of the "include" directive
-    (a negative tab-width prevents tab expansion).
+  - Hard tabs **in literal inclusions** are replaced by spaces.
+    This is configurable via the new ``:tab-width:`` option of the
+    `"include" directive`_ (a negative tab-width prevents tab expansion).
 
 * HTML writer:
 
@@ -997,6 +1102,9 @@ and convertible to 3.1 code.
 * manpage writer:
 
   - moved from sandbox to Doctutils core.
+
+.. _"include" directive:
+    docs/ref/rst/directives.html#including-an-external-document-fragment
 
 
 Release 0.5 (2008-06-25)
@@ -1072,7 +1180,7 @@ Components:
   multi-platform, multi-browser HTML slide shows.
 
   __ docs/user/slide-shows.html
-  __ docs/user/tools.html#rst2s5-py
+  __ docs/user/tools.html#rst2s5
 
 * The newlatex2e writer is nearing completion.
 
@@ -1092,9 +1200,9 @@ reStructuredText:
   __ docs/ref/rst/directives.html#title
   __ docs/ref/rst/directives.html#date
 
-* Length units are now supported for image__ sizes.
+* Length units are now supported for image_ sizes.
 
-  __ docs/ref/rst/directives.html#image
+  .. _image: docs/ref/rst/directives.html#image
 
 * Added `standard definition files`__ for special characters etc.
 

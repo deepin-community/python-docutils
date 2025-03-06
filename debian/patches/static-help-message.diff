@@ -16,10 +16,10 @@ Last-Update: 2023-05-20
  4 files changed, 8 insertions(+), 5 deletions(-)
 
 diff --git a/docutils/frontend.py b/docutils/frontend.py
-index 4ad6780..1cbd32a 100644
+index 2499c62..2e6e1a3 100644
 --- a/docutils/frontend.py
 +++ b/docutils/frontend.py
-@@ -589,8 +589,8 @@ class OptionParser(optparse.OptionParser, docutils.SettingsSpec):
+@@ -693,8 +693,8 @@ class OptionParser(optparse.OptionParser, docutils.SettingsSpec):
            ['--output-encoding-error-handler'],
            {'default': 'strict', 'validator': validate_encoding_error_handler}),
           ('Specify text encoding and optionally error handler '
@@ -31,10 +31,10 @@ index 4ad6780..1cbd32a 100644
            {'metavar': '<name[:handler]>', 'default': default_error_encoding,
             'validator': validate_encoding_and_error_handler}),
 diff --git a/test/data/help/docutils.txt b/test/data/help/docutils.txt
-index 0811544..6aba767 100644
+index 3cf41a5..ebebe89 100644
 --- a/test/data/help/docutils.txt
 +++ b/test/data/help/docutils.txt
-@@ -70,7 +70,8 @@ General Docutils Options
+@@ -72,7 +72,8 @@ General Docutils Options
                          "xmlcharrefreplace", "backslashreplace".
  --error-encoding=<name[:handler]>, -e <name[:handler]>
                          Specify text encoding and optionally error handler for
@@ -45,10 +45,10 @@ index 0811544..6aba767 100644
                          Specify the error handler for unencodable characters
                          in error output.  Default: backslashreplace.
 diff --git a/test/data/help/rst2html.txt b/test/data/help/rst2html.txt
-index e517011..512026d 100644
+index ea38342..5a84642 100644
 --- a/test/data/help/rst2html.txt
 +++ b/test/data/help/rst2html.txt
-@@ -71,7 +71,8 @@ General Docutils Options
+@@ -73,7 +73,8 @@ General Docutils Options
                          "xmlcharrefreplace", "backslashreplace".
  --error-encoding=<name[:handler]>, -e <name[:handler]>
                          Specify text encoding and optionally error handler for
@@ -59,10 +59,10 @@ index e517011..512026d 100644
                          Specify the error handler for unencodable characters
                          in error output.  Default: backslashreplace.
 diff --git a/test/data/help/rst2latex.txt b/test/data/help/rst2latex.txt
-index 6153c60..2ab6095 100644
+index adf8551..1e2dc01 100644
 --- a/test/data/help/rst2latex.txt
 +++ b/test/data/help/rst2latex.txt
-@@ -71,7 +71,8 @@ General Docutils Options
+@@ -73,7 +73,8 @@ General Docutils Options
                          "xmlcharrefreplace", "backslashreplace".
  --error-encoding=<name[:handler]>, -e <name[:handler]>
                          Specify text encoding and optionally error handler for

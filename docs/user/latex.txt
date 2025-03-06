@@ -6,8 +6,8 @@
 
 :Author: Engelbert Gruber, Günter Milde
 :Contact: docutils-develop@lists.sourceforge.net
-:Revision: $Revision: 9124 $
-:Date: $Date: 2022-09-13 12:29:51 +0200 (Di, 13. Sep 2022) $
+:Revision: $Revision: 9616 $
+:Date: $Date: 2024-04-07 15:17:23 +0200 (So, 07. Apr 2024) $
 :Copyright: This document has been placed in the public domain.
 :Abstract: This document covers topics specific to Docutils' LaTeX_ export.
 
@@ -93,18 +93,20 @@ Length units
 LaTeX supports all `length units`_ defined for Docutils plus the
 following less common units:
 
-:pt: typewriter's (or LaTeX) point (1 pt = 1/72.27 in)
+.. class:: narrow 
+
 :dd: didôt (1 dd = 1238/1157 pt)
 :cc: cîcero (1 cc = 12 dd)
 :sp: scaled point (1sp = 1/65536pt)
+:bp: "big" point (`DTP point`) (1 bp  = 1/72 in)
 
 .. attention:: Different definitions of the unit "pt"!
 
    * In Docutils (as well as CSS) the unit symbol "pt" denotes the
-     `Postscript point` or `DTP point`.
+     `Postscript point` (`DTP point`).
 
-   * LaTeX uses "pt" for the `LaTeX point`, which is unknown to Docutils and
-     0.3 % smaller.
+   * LaTeX uses "pt" for the typewriter's (or LaTeX) point,
+     which is unknown to Docutils and 0.3 % smaller.
 
    * The `DTP point` is available in LaTeX as "bp" (big point):
 
@@ -132,21 +134,21 @@ source, including:
 _`pdflatex`
   Generates a PDF document directly from the LaTeX file.
   Export your document with the _`LaTeX2e writer` (writer
-  name "``latex``", frontend tool rst2latex.py_).
+  name "``latex``", frontend tool rst2latex_).
 
 _`xelatex` or _`lualatex`
   The `XeTeX`_ and LuaTeX_ engines work with input files in UTF-8 encoding
   and system fonts. Export your document with the _`XeLaTeX writer` (writer
-  name "``xetex``", frontend tool rst2xetex.py_).
+  name "``xetex``", frontend tool rst2xetex_).
 
-You may need to call latex two or three times to get internal references
+You may need to call LaTeX two or three times to get internal references
 correct.
 
 .. _documentoptions: config.html#documentoptions
 .. _xetex: http://tug.org/xetex/
 .. _luatex: http://luatex.org/
-.. _rst2latex.py: tools.html#rst2latex-py
-.. _rst2xetex.py: tools.html#rst2xetex-py
+.. _rst2latex: tools.html#rst2latex
+.. _rst2xetex: tools.html#rst2xetex
 
 _`rubber`
   The Rubber__ wrapper for LaTeX and friends can be used to automatically
@@ -173,7 +175,7 @@ Options can be specified as
 
 * configuration settings.
 
-Run ``rst2latex.py --help`` to get a list of available options;
+Run ``rst2latex --help`` to get a list of available options;
 see `Docutils Configuration`_ for details.
 
 .. _Docutils Configuration: config.html
@@ -1128,6 +1130,8 @@ URLs are typeset with the "url" package (loaded implicitly by "hyperref").
 The font of URLs can be defined with the ``\urlstyle`` command. Valid
 arguments are
 
+.. class:: field-indent-4em
+
 :same:  normal text font, Docutils default,
 :tt:    teletype (monospaced), LaTeX default,
 :rm:    roman,
@@ -1710,7 +1714,7 @@ With use-latex-toc (default since release 0.6):
    require local ToCs at lower level, turn off the use-latex-toc_ option.
 
 .. _use-latex-toc: config.html#use-latex-toc
-.. _contents directive: ../ref/rst/directives.html#contents
+.. _contents directive: ../ref/rst/directives.html#table-of-contents
 .. _minitoc: https://ctan.org/pkg/minitoc
 .. _minitoc documentation:
    https://mirrors.ctan.org/macros/latex/contrib/minitoc/minitoc.pdf
@@ -1742,17 +1746,24 @@ titles
 ------
 
 The titles of admonitions_, sidebar_, and `topic element`_ use
-the ``\DUtitle`` command.
+the ``\DUtitle`` command which can be re-defined in the corresponding
+DUCLASS environment.
+
+* The re-definition is local to the environment, so you don't need to 
+  save/restore the original function.
+
+* In the nested function redefinition, the argument placeholder requires
+  two hashes, ``#1`` → ``##1``!
 
 Example 1:
   a centered and somewhat larger title for topcis::
 
      \newcommand*{\DUCLASStopic}{
-       \renewcommand*{\DUtitle}[1]{\subsection*{\centering #1}
+       \renewcommand*{\DUtitle}[1]{\subsection*{\centering ##1}}
      }
 
 Example 2:
-  a right-pointing hand as title for the "attention" directive::
+  a right-pointing hand as title for the "attention" admonition::
 
     \usepackage{pifont}
     \newcommand*{\DUCLASSattention}{
@@ -1764,7 +1775,7 @@ Example 2:
 
     \usepackage{pifont}
     \newcommand*{\DUCLASSattention}{
-      \newcommand*{\DUtitle}[1]{\ding{43} #1}
+      \renewcommand*{\DUtitle}[1]{\ding{43} ##1}
     }
 
 
@@ -1788,6 +1799,8 @@ Example:
 
 Note:
   8-bit LaTeX comes with two options for UTF-8 support,
+  
+  .. class:: field-indent-4em
 
   :utf8:  by the standard `inputenc`_ package with only limited coverage
           (mainly accented characters).

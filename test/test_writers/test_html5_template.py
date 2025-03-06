@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-# $Id: test_html5_template.py 9369 2023-05-02 23:04:27Z milde $
+# $Id: test_html5_template.py 9425 2023-06-30 14:56:47Z milde $
 # Author: David Goodger <goodger@python.org>
 # Copyright: This module has been placed in the public domain.
 
@@ -44,7 +44,7 @@ class WriterPublishTestCase(unittest.TestCase):
                             'stylesheet_path': '/test.css',
                             'embed_stylesheet': False,
                         }).decode()
-                    self.assertEqual(output, case_expected)
+                    self.assertEqual(case_expected, output)
 
 
 if platform.system() == "Windows":

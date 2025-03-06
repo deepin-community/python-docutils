@@ -1,0 +1,22 @@
+From: Dmitry Shachnev <mitya57@debian.org>
+Date: Sun, 28 Apr 2024 12:33:55 +0300
+Subject: Run tests with verbosity=2
+
+Forwarded: not-needed
+---
+ test/alltests.py | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/test/alltests.py b/test/alltests.py
+index c4bbe72..8cf71d4 100755
+--- a/test/alltests.py
++++ b/test/alltests.py
+@@ -86,7 +86,7 @@ if __name__ == '__main__':
+     print(f'Working directory: {os.getcwd()}')
+     print(f'Docutils package: {os.path.dirname(docutils.__file__)}')
+     sys.stdout.flush()
+-    result = unittest.TextTestRunner(resultclass=NumbersTestResult).run(suite)
++    result = unittest.TextTestRunner(resultclass=NumbersTestResult, verbosity=2).run(suite)
+     finish = time.time()
+     print(f'Elapsed time: {finish - start:.3f} seconds')
+     sys.exit(not result.wasSuccessful())

@@ -1,5 +1,5 @@
 #! /usr/bin/env python3
-# $Id: test_literal_blocks.py 9301 2022-12-02 17:13:54Z milde $
+# $Id: test_literal_blocks.py 9425 2023-06-30 14:56:47Z milde $
 # :Copyright: © 2020 Günter Milde.
 # :License: Released under the terms of the `2-Clause BSD license`_, in short:
 #
@@ -38,7 +38,7 @@ class RecommonmarkParserTestCase(unittest.TestCase):
                     document = new_document('test data', settings.copy())
                     parser.parse(case_input, document)
                     output = document.pformat()
-                    self.assertEqual(output, case_expected)
+                    self.assertEqual(case_expected, output)
 
 
 totest = {}

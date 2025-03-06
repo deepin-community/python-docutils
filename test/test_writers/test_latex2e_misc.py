@@ -1,5 +1,5 @@
 #! /usr/bin/env python3
-# $Id: test_latex2e_misc.py 9368 2023-04-28 21:26:36Z milde $
+# $Id: test_latex2e_misc.py 9425 2023-06-30 14:56:47Z milde $
 # Author: Günter Milde
 # Maintainer: docutils-develop@lists.sourceforge.net
 # :Copyright: 2020 Günter Milde,
@@ -81,7 +81,7 @@ class PublishTestCase(unittest.TestCase):
             'version',
             'whole'
             ]
-        self.assertEqual(sorted(parts.keys()), documented_parts)
+        self.assertEqual(documented_parts, sorted(parts.keys()))
 
 
 class WarningsTestCase(unittest.TestCase):

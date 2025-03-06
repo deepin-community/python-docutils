@@ -6,11 +6,10 @@
 .. include:: data/list_table.txt
 .. include:: data/custom_roles.txt
 
-.. HTML Specific
-
 .. include:: data/html5-features.txt
 .. include:: data/html5-text-level-tags.txt
 
+.. include:: data/svg_images.txt
 .. include:: data/errors.txt
 
 .. footer:: |HTML 5| |validator| |valid-CSS2|

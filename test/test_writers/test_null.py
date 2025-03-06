@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-# $Id: test_null.py 9277 2022-11-26 23:15:13Z milde $
+# $Id: test_null.py 9425 2023-06-30 14:56:47Z milde $
 # Author: Lea Wiemann <LeWiemann@gmail.com>
 # Copyright: This module has been placed in the public domain.
 
@@ -36,7 +36,7 @@ class WriterPublishTestCase(unittest.TestCase):
                     )
                     if isinstance(output, bytes):
                         output = output.decode('utf-8')
-                    self.assertEqual(output, case_expected)
+                    self.assertEqual(case_expected, output)
 
 
 totest = {}

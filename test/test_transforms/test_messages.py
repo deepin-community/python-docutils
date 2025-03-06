@@ -1,6 +1,6 @@
 #! /usr/bin/env python3
 
-# $Id: test_messages.py 9277 2022-11-26 23:15:13Z milde $
+# $Id: test_messages.py 9425 2023-06-30 14:56:47Z milde $
 # Author: David Goodger <goodger@python.org>
 # Copyright: This module has been placed in the public domain.
 
@@ -40,7 +40,7 @@ class TransformTestCase(unittest.TestCase):
                     document.transformer.add_transform(TestMessages)
                     document.transformer.apply_transforms()
                     output = document.pformat()
-                    self.assertEqual(output, case_expected)
+                    self.assertEqual(case_expected, output)
 
 
 totest = {}

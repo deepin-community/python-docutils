@@ -1,5 +1,5 @@
 #! /usr/bin/env python3
-# $Id: test_html5_polyglot_misc.py 9369 2023-05-02 23:04:27Z milde $
+# $Id: test_html5_polyglot_misc.py 9501 2023-12-14 22:38:58Z milde $
 # Authors: Lea Wiemann, Dmitry Shachnev, Günter Milde
 # Maintainer: docutils-develop@lists.sourceforge.net
 # Copyright: This module has been placed in the public domain.
@@ -163,7 +163,7 @@ class SettingsTestCase(unittest.TestCase):
                        'output_encoding': 'unicode',
                        }
         with self.assertWarnsRegex(FutureWarning,
-                                   '"embed_images" will be removed'):
+                                   '"embed_images"\n  will be removed'):
             core.publish_string('warnings test', writer_name='html5',
                                 settings_overrides=my_settings)
 
@@ -175,8 +175,8 @@ math_css = relpath(TEST_ROOT, 'functional/input/data/math.css')
 
 class MathTestCase(unittest.TestCase):
 
-    """Attention: This class tests the current implementation of maths support
-    which is open to change in future Docutils releases. """
+    """Provisional: This class tests the current implementation of maths
+    support which is open to change in future Docutils releases. """
 
     mathjax_script = '<script type="text/javascript" src="%s">'
     default_mathjax_url = ('file:/usr/share/javascript/mathjax/MathJax.js'

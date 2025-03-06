@@ -6,8 +6,8 @@
 
 :Author: Lea Wiemann, the Docutils team
 :Contact: docutils-develop@lists.sourceforge.net
-:Revision: $Revision: 9107 $
-:Date: $Date: 2022-07-06 15:59:57 +0200 (Mi, 06. Jul 2022) $
+:Revision: $Revision: 9510 $
+:Date: $Date: 2024-01-12 12:32:31 +0100 (Fr, 12. Jän 2024) $
 :Copyright: This document has been placed in the public domain.
 
 .. title:: Docutils Links
@@ -264,7 +264,7 @@ Convert other formats to reStructuredText:
   .. _sxw2rest: https://twb.ath.cx/~twb/darcs/sxw2rest/
 
 * xml2rst_, an XSLT stylesheet written by Stefan Merten, converts XML
-  dumps of the document tree (e.g. created with rst2xml.py) back to
+  dumps of the document tree (e.g. created with ``rst2xml``) back to
   reStructuredText.
 
   .. _xml2rst: http://www.merten-home.de/FreeSoftware/xml2rst/index.html
@@ -456,3 +456,6 @@ Presentations
   .. _rst2outline: https://docutils.sourceforge.io/sandbox/rst2outline/
 
 * Pandoc_ can also be used to produce slides
+
+.. TODO: update with input from
+   https://stackoverflow.com/questions/2746692/restructuredtext-tool-support

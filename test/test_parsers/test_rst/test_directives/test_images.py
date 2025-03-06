@@ -1,6 +1,6 @@
 #! /usr/bin/env python3
 
-# $Id: test_images.py 9277 2022-11-26 23:15:13Z milde $
+# $Id: test_images.py 9496 2023-12-01 13:25:40Z milde $
 # Author: David Goodger <goodger@python.org>
 # Copyright: This module has been placed in the public domain.
 
@@ -33,7 +33,7 @@ class ParserTestCase(unittest.TestCase):
                     document = new_document('test data', settings.copy())
                     parser.parse(case_input, document)
                     output = document.pformat()
-                    self.assertEqual(output, case_expected)
+                    self.assertEqual(case_expected, output)
 
 
 try:
@@ -476,6 +476,20 @@ totest['images'] = [
 <document source="test data">
     <reference refuri="path with spaces/target with spaces across lines.html">
         <image uri="path with spaces/name with spaces.png">
+"""],
+["""
+.. image:: test.png
+   :loading: embed
+.. image:: test.png
+   :loading: link
+.. image:: test.png
+   :loading: lazy
+""",
+"""\
+<document source="test data">
+    <image loading="embed" uri="test.png">
+    <image loading="link" uri="test.png">
+    <image loading="lazy" uri="test.png">
 """],
 ]
 

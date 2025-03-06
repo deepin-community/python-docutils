@@ -1,5 +1,5 @@
 #! /usr/bin/env python3
-# $Id: test_SimpleTableParser.py 9277 2022-11-26 23:15:13Z milde $
+# $Id: test_SimpleTableParser.py 9425 2023-06-30 14:56:47Z milde $
 # Author: David Goodger <goodger@python.org>
 # Copyright: This module has been placed in the public domain.
 
@@ -31,7 +31,7 @@ class SimpleTableParserTestCase(unittest.TestCase):
                         output = parser.parse(lines_input)
                     except Exception as details:
                         output = f'{details.__class__.__name__}: {details}'
-                    self.assertEqual(output, case_expected)
+                    self.assertEqual(case_expected, output)
 
 
 totest = {}

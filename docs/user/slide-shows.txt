@@ -5,7 +5,7 @@
 =================================
 
 :Authors: David Goodger & Chris Liechti
-:Date:    $Date: 2022-06-15 13:31:09 +0200 (Mi, 15. Jun 2022) $
+:Date:    $Date: 2024-03-14 17:34:48 +0100 (Do, 14. Mär 2024) $
 
 .. This document has been placed in the public domain.
 
@@ -15,11 +15,11 @@
    Docutils_/reStructuredText_ and S5_.
 
    This document serves both as a user manual and as a usage example
-   of the s5_html.py writer and the rst2s5.py front end.
+   of the s5_html.py writer and the ``rst2s5`` front end.
 
    To view this document as a slide show see
-   https://docutils.sourceforge.io/docs/user/slide-shows.s5.html (or `your
-   local copy <slide-shows.s5.html>`__).
+   https://docutils.sourceforge.io/docs/user/slide-shows.s5.html or `your
+   local copy <slide-shows.s5.html>`__.
 
 .. contents::
    :class: handout
@@ -69,7 +69,7 @@ Introduction
 
 .. class:: handout
 
-   ``rst2s5.py`` is a Docutils_ front end that outputs HTML for use
+   rst2s5_ is a Docutils_ front end that outputs HTML for use
    with S5_, a "Simple Standards-based Slide Show System" by Eric
    Meyer.
 
@@ -115,11 +115,13 @@ Introduction
 
   A variety of themes are available.  See `Example Themes`_, below.
 
-* ``rst2s5.py``
+* rst2s5_
 
   .. class:: handout
 
-  The front-end tool to generate S5 slide shows.
+  The console script to generate S5 slide shows.
+  
+  .. _rst2s5: tools.html#rst2s5
 
 .. topic:: Keyboard Controls
    :class: handout
@@ -322,7 +324,7 @@ Caveats
    .. container:: handout
 
       The ``--no-toc-backlinks`` option is the default for the S5/HTML
-      writer (``toc_backlinks=0`` setting).  Other values for this
+      writer (``toc_backlinks=False`` setting).  Other values for this
       setting will change the CSS class of headings such that they
       won't show up correctly in the slide show.
 
@@ -361,15 +363,20 @@ Generating a Slide Show (1)
 
 2. Run the command::
 
-       rst2s5.py slides.txt slides.html
+       rst2s5 slides.txt --output=slides.html
 
-3. Specify an S5 theme with the ``--theme`` option.
+3. Optionally, specify an S5 theme with the ``--theme`` option.
 
    .. class:: handout
 
    Docutils will copy the S5 theme files into a ``ui/<theme>`` folder
-   beside the output HTML file.  A slide show can also link to an
-   existing theme using the ``--theme-url`` option.
+   beside the output HTML file. [#copy-theme]_ A slide show can also link
+   to an existing theme using the ``--theme-url`` option.
+
+   .. [#copy-theme] Theme files can only be copied by Docutils, if the
+      output_ destination path is specified.
+   
+   .. _output: config.html#output
 
 
 Generating a Slide Show (2)
@@ -646,7 +653,7 @@ Making a Custom Theme
 
 .. class:: incremental
 
-1. Run "``rst2s5.py --theme <base-theme> <doc>.txt <doc>.html``".
+1. Run "``rst2s5 --theme <base-theme> <doc>.txt <doc>.html``".
 
    .. class:: handout
 
@@ -661,7 +668,7 @@ Making a Custom Theme
    Start with ``pretty.css``; edit ``framing.css`` if you need to make
    layout changes.
 
-4. Run "``rst2s5.py --theme-url ui/<new-theme> <doc>.txt <doc>.html``".
+4. Run "``rst2s5 --theme-url ui/<new-theme> <doc>.txt <doc>.html``".
 
    .. class:: handout
 

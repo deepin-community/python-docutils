@@ -3,7 +3,7 @@
 export PYTHONWARNINGS=d
 export PYTHONHASHSEED=random
 
-export PYBUILD_TEST_ARGS=SOURCE_DATE_EPOCH= {interpreter} test/alltests.py --verbose && \
+export PYBUILD_TEST_ARGS=SOURCE_DATE_EPOCH= {interpreter} test/alltests.py && \
 	PYTHONWARNINGS=ignore::DeprecationWarning {interpreter} $(CURDIR)/tools/test/test_buildhtml.py --verbose
 
 scripts = \
@@ -42,13 +42,14 @@ override_dh_auto_build:
 	dh_auto_build
 	# Build documentation:
 	PYTHONPATH=. LC_ALL=C.UTF-8 python3 tools/buildhtml.py \
-		--local --link-stylesheet --traceback \
+		--local --link-stylesheet --traceback --writer=html5 \
 		.
 	PYTHONPATH=. LC_ALL=C.UTF-8 python3 tools/buildhtml.py \
-		--link-stylesheet --traceback \
+		--link-stylesheet --traceback --writer=html5 \
 		docs
 	( ls *.html && find docs/ -name '*.html' ) \
 	| xargs perl -0777 -p -i -e $(pre_localize_css)$(pre_strip_images)
+	sed -i 's,$(CURDIR),,' docs/user/rst/demo.html
 
 override_dh_auto_test:
 	dh_auto_test -- --system custom
@@ -67,12 +68,13 @@ override_dh_auto_install:
 	find debian/tmp/ -type d -empty -delete
 	# Set the Debian package marker to use the build-time Debian paths
 	sed -i -e 's/^\(_debian_package\) = 0/\1 = "build"/' debian/tmp/usr/lib/python3*/dist-packages/docutils/__init__.py
-	# Give scripts canonical names
-	set -ex && for exe in $(filter-out docutils rst-buildhtml,$(scripts)); do \
-		mv debian/tmp/usr/bin/$$exe.py debian/tmp/usr/bin/$$exe; \
-	done
 	install tools/buildhtml.py debian/tmp/usr/bin/rst-buildhtml
-	sed -i -e "1 s,^#!.*,#!/usr/bin/python3," debian/tmp/usr/bin/rst-buildhtml
+	install tools/rst2odt_prepstyles.py debian/tmp/usr/bin/rst2odt_prepstyles
+	install tools/rstpep2html.py debian/tmp/usr/bin/rstpep2html
+	sed -i -e "1 s,^#!.*,#!/usr/bin/python3," \
+		debian/tmp/usr/bin/rst-buildhtml \
+		debian/tmp/usr/bin/rst2odt_prepstyles \
+		debian/tmp/usr/bin/rstpep2html
 	# Make the man pages (we want to do this *after* renaming all the
 	# tools, because their executable name goes into the --help output,
 	# and with _debian_package = "_build" set, to make sure that data paths

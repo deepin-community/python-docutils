@@ -19,6 +19,8 @@ General Docutils Options
 --date, -d              Include the date at the end of the document (UTC).
 --time, -t              Include the time & date (UTC).
 --no-datestamp          Do not include a datestamp of any kind.
+--root-prefix=<path>    Base directory for absolute paths when reading from
+                        the local filesystem. Default "/".
 --source-link, -s       Include a "View document source" link.
 --source-url=<URL>      Use <URL> for a source link; implies --source-link.
 --no-source-link        Do not include a "View document source" link.
@@ -193,7 +195,7 @@ HTML Writer Options
                         "MathJax", or "LaTeX") and option(s). (default: "HTML
                         math.css")
 --xml-declaration       Prepend an XML declaration.
---no-xml-declaration    Omit the XML declaration.
+--no-xml-declaration    Omit the XML declaration (default).
 --cloak-email-addresses
                         Obfuscate email addresses to confuse harvesters while
                         still keeping email links usable with standards-

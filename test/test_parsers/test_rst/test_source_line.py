@@ -1,5 +1,5 @@
 #! /usr/bin/env python3
-# $Id: test_source_line.py 9277 2022-11-26 23:15:13Z milde $
+# $Id: test_source_line.py 9500 2023-12-14 22:38:49Z milde $
 # Author: Günter Milde
 # Maintainer: docutils-develop@lists.sourceforge.net
 # :Copyright: 2021 Günter Milde,
@@ -43,6 +43,8 @@ TEST_ROOT = os.path.abspath(os.path.join(__file__, '..', '..', '..'))
 
 
 class TransformTestCase(unittest.TestCase):
+    maxDiff = None
+
     def test_transforms(self):
         parser = Parser()
         settings = get_default_settings(Parser)
@@ -59,7 +61,7 @@ class TransformTestCase(unittest.TestCase):
                     document.transformer.add_transform(TestMessages)
                     document.transformer.apply_transforms()
                     output = document.pformat()
-                    self.assertEqual(output, case_expected)
+                    self.assertEqual(case_expected, output)
 
 
 mydir = os.path.join(TEST_ROOT, 'test_parsers/test_rst')
@@ -79,9 +81,11 @@ With *inline* element in line 2.
      in line 6
 
 * bullet list in line 9
-* second item in line 10
+*
+  second item in line 10
+  paragraph starts in line 11
 
-1. enumerated list in line 12
+#. enumerated list in line 14
 """,
 """\
 <document source="test data">
@@ -98,16 +102,17 @@ With *inline* element in line 2.
             attribution
             in line 6
     <bullet_list bullet="*" internal:line="9" internal:source="test data">
-        <list_item internal:source="test data">
+        <list_item internal:line="9" internal:source="test data">
             <paragraph internal:line="9" internal:source="test data">
                 bullet list in line 9
-        <list_item internal:source="test data">
-            <paragraph internal:line="10" internal:source="test data">
+        <list_item internal:line="10" internal:source="test data">
+            <paragraph internal:line="11" internal:source="test data">
                 second item in line 10
-    <enumerated_list enumtype="arabic" internal:line="12" internal:source="test data" prefix="" suffix=".">
-        <list_item internal:source="test data">
-            <paragraph internal:line="12" internal:source="test data">
-                enumerated list in line 12
+                paragraph starts in line 11
+    <enumerated_list enumtype="arabic" internal:line="14" internal:source="test data" prefix="" suffix=".">
+        <list_item internal:line="14" internal:source="test data">
+            <paragraph internal:line="14" internal:source="test data">
+                enumerated list in line 14
 """],
 ["""\
 Paragraph
@@ -167,11 +172,11 @@ Paragraph
         <attribution internal:line="16" internal:source="test data">
             attribution in line 16
 """],
-["""\
+[f"""\
 Paragraph
 
-.. include:: %s
-""" % include14,
+.. include:: {include14}
+""",
 f"""\
 <document source="test data">
     <paragraph internal:line="1" internal:source="test data">
@@ -189,16 +194,28 @@ f"""\
             attribution
             in line 6
     <bullet_list bullet="*" internal:line="9" internal:source="{include14}">
-        <list_item internal:source="{include14}">
+        <list_item internal:line="9" internal:source="{include14}">
             <paragraph internal:line="9" internal:source="{include14}">
                 bullet list in line 9
-        <list_item internal:source="{include14}">
+        <list_item internal:line="10" internal:source="{include14}">
             <paragraph internal:line="10" internal:source="{include14}">
                 second item in line 10
     <enumerated_list enumtype="arabic" internal:line="12" internal:source="{include14}" prefix="" suffix=".">
-        <list_item internal:source="{include14}">
+        <list_item internal:line="12" internal:source="{include14}">
             <paragraph internal:line="12" internal:source="{include14}">
                 enumerated list in line 12
+    <admonition classes="admonition-line-14" internal:line="14" internal:source="{include14}">
+        <title internal:line="14" internal:source="{include14}">
+            line 14
+        <paragraph internal:line="16" internal:source="{include14}">
+            Generic admonition text in line 16
+    <definition_list internal:line="18" internal:source="{include14}">
+        <definition_list_item internal:line="18" internal:source="{include14}">
+            <term internal:line="18" internal:source="{include14}">
+                term on line 18
+            <definition internal:line="19" internal:source="{include14}">
+                <paragraph internal:line="19" internal:source="{include14}">
+                    definition in line 19
 """],
 ["""\
 Paragraph
@@ -229,6 +246,30 @@ Final paragraph in line 11
             attribution in line 9
     <paragraph internal:line="11" internal:source="test data">
         Final paragraph in line 11
+"""],
+["""\
+Paragraph
+
+.. image:: line-3.png
+   :width: 3em
+
+.. figure:: line-6.png
+
+   caption on line 8
+
+Final paragraph in line 10
+""",
+"""\
+<document source="test data">
+    <paragraph internal:line="1" internal:source="test data">
+        Paragraph
+    <image internal:line="3" internal:source="test data" uri="line-3.png" width="3em">
+    <figure internal:line="6" internal:source="test data">
+        <image internal:line="6" internal:source="test data" uri="line-6.png">
+        <caption internal:line="8" internal:source="test data">
+            caption on line 8
+    <paragraph internal:line="10" internal:source="test data">
+        Final paragraph in line 10
 """],
 ])
 

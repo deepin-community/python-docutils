@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-# $Id: test_filter_messages.py 9277 2022-11-26 23:15:13Z milde $
+# $Id: test_filter_messages.py 9425 2023-06-30 14:56:47Z milde $
 # :Copyright: © 2021 Günter Milde.
 # :Maintainer: docutils-develop@lists.sourceforge.net
 # :License: Released under the terms of the `2-Clause BSD license`_, in short:
@@ -49,7 +49,7 @@ class TransformTestCase(unittest.TestCase):
                     document.transformer.add_transform(TestMessages)
                     document.transformer.apply_transforms()
                     output = document.pformat()
-                    self.assertEqual(output, case_expected)
+                    self.assertEqual(case_expected, output)
 
 
 totest = {}
