@@ -9,14 +9,14 @@ name.
 Forwarded: not-needed
 Last-Update: 2023-05-20
 ---
- docs/user/tools.txt | 4 +++-
+ docs/user/tools.rst | 4 +++-
  1 file changed, 3 insertions(+), 1 deletion(-)
 
-diff --git a/docs/user/tools.txt b/docs/user/tools.txt
-index 4487527..57833da 100644
---- a/docs/user/tools.txt
-+++ b/docs/user/tools.txt
-@@ -340,12 +340,14 @@ buildhtml.py
+diff --git a/docs/user/tools.rst b/docs/user/tools.rst
+index 9cf4537..6d3d51d 100644
+--- a/docs/user/tools.rst
++++ b/docs/user/tools.rst
+@@ -344,12 +344,14 @@ buildhtml.py
  :Writers: html_, html5_, pep_html_
  :Config_: `[buildhtml application]`_
  

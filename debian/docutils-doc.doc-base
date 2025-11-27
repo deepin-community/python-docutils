@@ -13,7 +13,7 @@ Files:
   /usr/share/doc/docutils-doc/docs/*/*/*.html
 
 Format: Text
-Index: /usr/share/doc/docutils-doc/docs/index.txt
+Index: /usr/share/doc/docutils-doc/docs/index.rst
 Files:
-  /usr/share/doc/docutils-doc/docs/*/*.txt
-  /usr/share/doc/docutils-doc/docs/*/*/*.txt
+  /usr/share/doc/docutils-doc/docs/*/*.rst
+  /usr/share/doc/docutils-doc/docs/*/*/*.rst

@@ -3,12 +3,11 @@
 % rubber: set program xelatex
 \usepackage{fontspec}
 % \defaultfontfeatures{Scale=MatchLowercase}
-% straight double quotes (defined T1 but missing in TU):
+% straight double quotes (defined in T1 but missing in TU):
 \ifdefined \UnicodeEncodingName
   \DeclareTextCommand{\textquotedbl}{\UnicodeEncodingName}{%
     {\addfontfeatures{RawFeature=-tlig,Mapping=}\char34}}%
 \fi
-\usepackage{ifthen}
 \usepackage{alltt}
 \usepackage{amsmath}
 \usepackage{polyglossia}
@@ -34,11 +33,10 @@
 %%% User specified packages and stylesheets
 
 %%% Fallback definitions for Docutils-specific commands
-\usepackage{docutils}[2020/08/28]
+\usepackage{docutils}[2025-08-06]
 \newcounter{enumv}
 
 \DUprovidelength{\pdfpxdimen}{1bp}
-
 
 \providecommand*{\DUCLASScontents}{%
   \renewenvironment{itemize}%
@@ -48,16 +46,18 @@
     {\end{list}}%
 }
 % hyperlinks:
-\ifthenelse{\isundefined{\hypersetup}}{
-  \usepackage[colorlinks=true,linkcolor=blue,urlcolor=blue]{hyperref}
+\ifdefined\hypersetup
+\else
+  \usepackage[hyperfootnotes=false,
+              colorlinks=true,linkcolor=blue,urlcolor=blue]{hyperref}
   \usepackage{bookmark}
   \urlstyle{same} % normal text font (alternatives: tt, rm, sf)
-}{}
+\fi
 \hypersetup{
   pdftitle={reStructuredText Test Document},
   pdfkeywords={reStructuredText, test, parser},
   pdfinfo={description={A test document, containing at least one example of each reStructuredText construct.}},
-  pdfauthor={David Goodger;Me;Myself;I}
+  pdfauthor={David Goodger; Me; Myself; I}
 }
 
 \title{reStructuredText Test Document%
@@ -77,33 +77,20 @@
 % Docinfo
 \begin{center}
 \begin{tabularx}{\DUdocinfowidth}{lX}
-\textbf{Author}: &
-	David Goodger \\
-\textbf{Address}: &
-	{\raggedright
+\textbf{Author}: & David Goodger \\
+\textbf{Address}: & {\raggedright
 123 Example Street\\
 Example, EX  Canada\\
-A1B 2C3 } \\
-\textbf{Contact}: &
-	\href{mailto:goodger@python.org}{goodger@python.org} \\
-\textbf{Author}: &
-	Me \\
-\textbf{Author}: &
-	Myself \\
-\textbf{Author}: &
-	I \\
-\textbf{Organization}: &
-	humankind \\
-\textbf{Date}: &
-	Now, or yesterday.  Or maybe even \emph{before} yesterday. \\
-\textbf{Status}: &
-	This is a “work in progress” \\
-\textbf{Revision}: &
-	is managed by a version control system. \\
-\textbf{Version}: &
-	1 \\
+A1B 2C3} \\
+\textbf{Contact}: & \href{mailto:goodger@python.org}{goodger@python.org} \\
+\textbf{Authors}: & Me, Myself, I \\
+\textbf{Organization}: & humankind \\
+\textbf{Date}: & Now, or yesterday.  Or maybe even \emph{before} yesterday. \\
+\textbf{Status}: & This is a “work in progress” \\
+\textbf{Revision}: & is managed by a version control system. \\
+\textbf{Version}: & 1 \\
 \textbf{Copyright}: &
-	This document has been placed in the public domain. You
+  This document has been placed in the public domain. You
 may do with it as you wish. You may copy, modify,
 redistribute, reattribute, sell, buy, rent, lease,
 destroy, or improve it, quote it at length, excerpt,
@@ -148,7 +135,6 @@ reStructuredText construct.
 
 \pagebreak[4] % start ToC on new page
 
-\phantomsection\label{table-of-contents}
 \pdfbookmark[1]{Table of Contents}{table-of-contents}
 
 \begin{DUclass}{contents}
@@ -397,7 +383,7 @@ Paragraph 2 of item 2.
 \item Nested item 3.
 
 \item This nested list should be compacted by the HTML writer.
-%
+
 \phantomsection\label{target}
 % Even if this item contains a target and a comment.
 \end{itemize}
@@ -703,12 +689,12 @@ Python-specific usage examples; begun with ">>>"
 %
 \DUfootnotetext{footnote-1}{footnote-reference-1}{1}{%
 A footnote contains body elements, consistently indented by at
-least 3 spaces.
+least 1 space.
 
 This is the footnote’s second paragraph.
 }
 %
-\DUfootnotetext{label}{footnote-reference-3}{2}{\phantomsection\label{label}%
+\DUfootnotetext{label}{footnote-reference-3}{2}{%
 Footnotes may be numbered, either manually (as in\DUfootnotemark{footnote-reference-5}{footnote-1}{1}) or
 automatically using a “\#”-prefixed label.  This footnote has a
 label so it can be referred to from multiple places, both as a
@@ -800,7 +786,6 @@ this: %
   \label{directives}%
 }
 
-\phantomsection\label{contents}
 
 \begin{DUclass}{contents}
 \begin{DUclass}{local}
@@ -852,12 +837,12 @@ document (a document-wide \hyperref[table-of-contents]{table of contents}).
 
 An image directive (also clickable – a hyperlink reference):
 
-\hyperref[directives]{\includegraphics[width=0.700\linewidth]{../../../docs/user/rst/images/title.png}}
+\hyperref[directives]{\includegraphics[width=0.7\linewidth]{../../../docs/user/rst/images/title.png}}
 
 Image with multiple IDs:
 
-\includegraphics{../../../docs/user/rst/images/biohazard.png}
 \phantomsection\label{image-target-3}\label{image-target-2}\label{image-target-1}
+\includegraphics{../../../docs/user/rst/images/biohazard.png}
 
 A centered image:
 
@@ -894,7 +879,7 @@ An image 2 cm wide and 15 pixel high:
 Relative units allow adaption of the image to the screen or paper size.
 An image occupying 50\% of the line width:
 
-\includegraphics[width=0.500\linewidth]{../../../docs/user/rst/images/title.png}
+\includegraphics[width=0.5\linewidth]{../../../docs/user/rst/images/title.png}
 
 A \emph{figure} is an image with a caption and/or a legend.  With page-based output
 media, figures might float to a different position if this helps the page
@@ -903,7 +888,7 @@ layout.
 \begin{DUclass}{figclass1}
 \begin{DUclass}{figclass2}
 \begin{figure}
-\noindent\makebox[\linewidth][c]{\includegraphics[width=258bp]{../../../docs/user/rst/images/title.png}}
+\noindent\makebox[\linewidth][c]{\href{https://docutils.sourceforge.io/rst.html}{\includegraphics[width=258bp]{../../../docs/user/rst/images/title.png}}}
 \caption{Plaintext markup syntax and parser system.}
 \begin{DUlegend}
 \setlength{\DUtablewidth}{\linewidth}%
@@ -941,7 +926,7 @@ A left-aligned figure, 70\% wide:
 \begin{DUclass}{figclass2}
 \begin{figure} % align = "left"
 \noindent\makebox[\linewidth][c]{\includegraphics[width=40\pdfpxdimen]{../../../docs/user/rst/images/biohazard.png}}
-\caption{This is the caption.}
+\caption{\label{caption-label}\DUrole{captionclass1}{\DUrole{captionclass2}{This is the caption.}}}
 \begin{DUlegend}
 This is the legend.
 
@@ -1505,7 +1490,7 @@ Docutils uses LaTeX syntax for math directives and roles:
 \texttt{\DUrole{code}{\DUrole{tex}{\textbackslash{}alpha = f(x)}}} prints $\alpha = f(x)$.
 
 The \texttt{:code:} option of the \DUroletitlereference{include} directive sets the included content
-as a code block, here the rst file \texttt{header\_footer.txt} with line numbers:
+as a code block, here the rst file \texttt{header\_footer.rst} with line numbers:
 
 \begin{DUclass}{code}
 \begin{DUclass}{rst}
@@ -1534,7 +1519,7 @@ An inline image (\includegraphics{../../../docs/user/rst/images/biohazard.png}) 
 
 A Unicode example:
 
-(Substitution definitions are not visible in the HTML source.)
+(Substitution definitions are only visible in the rST source.)
 
 
 \subsection{2.16   Comments%
@@ -1551,7 +1536,7 @@ Here’s one:
 % 
 % Comments may contain non-ASCII characters: ä ö ü æ ø å
 
-(View the HTML source to see the comment.)
+(View the HTML/LaTeX/… source to see the comment.)
 
 
 \subsection{2.17   Raw text%
@@ -1584,7 +1569,7 @@ paragraph 2
 \end{DUclass}
 
 % currently not implemented in LaTeX:
-% .. include:: data/header_footer.txt
+% .. include:: data/header_footer.rst
 
 
 \subsection{2.19   Colspanning tables%
@@ -1731,7 +1716,7 @@ body row 3
 Here’s a list table exercising all features:
 
 \begin{DUclass}{test}
-\setlength{\DUtablewidth}{0.950\linewidth}%
+\setlength{\DUtablewidth}{0.95\linewidth}%
 \begin{longtable}{|p{0.133\DUtablewidth}|p{0.110\DUtablewidth}|p{0.249\DUtablewidth}|}
 \caption{list table with integral header}\\
 \hline
@@ -1864,6 +1849,7 @@ See \hyperref[eq-m]{eq:M} and \hyperref[eq-schrodinger]{eq:schrödinger} below.
 
 The determinant of the matrix
 %
+\phantomsection
 \begin{equation*}
 \mathbf{M} = \left(\begin{matrix}a&b\\c&d\end{matrix}\right)
 \label{eq-m}
@@ -1884,6 +1870,7 @@ directives:
 
 The Schrödinger equation
 %
+\phantomsection
 \begin{equation*}
 i\hbar \frac{\partial }{\partial t}\Psi  = \hat{H}\Psi ,
 \label{eq-schrodinger}
@@ -1893,7 +1880,7 @@ physical system changes in time.
 
 \begin{description}
 \item[{Math-Accents:}] \leavevmode
-\setlength{\DUtablewidth}{1.000\linewidth}%
+\setlength{\DUtablewidth}{1\linewidth}%
 \begin{longtable*}{p{0.315\DUtablewidth}p{0.315\DUtablewidth}p{0.315\DUtablewidth}}
 
 $\acute{a}$      \texttt{\textbackslash{}acute\{a\}}
@@ -2013,7 +2000,7 @@ This is a \DUroletitlereference{\DUrole{custom-title-reference}{customized title
 }
 
 This section tests class handling for block level elements by the LaTeX
-writer. See the input file \texttt{classes\_latex.txt} for the raw LaTeX code used
+writer. See the input file \texttt{classes\_latex.rst} for the raw LaTeX code used
 to style the examples.
 
 An “epigraph” directive is exported as “quote” wrapped in a “DUclass”
@@ -2143,64 +2130,69 @@ section, “Docutils System Messages”:
 \section[Docutils System Messages]{\color{red}Docutils System Messages%
 }
 
+\raisebox{1em}{\hypertarget{system-message-1}{}}
 \begin{DUclass}{system-message}
 \begin{DUadmonition}
-\DUtitle{system-message
-\raisebox{1em}{\hypertarget{system-message-1}{}}}
+\DUtitle{\color{red}System Message}
 
-{\color{red}ERROR/3} in \texttt{functional/input/data/standard.txt}, line~99
+ERROR/3 in \texttt{functional/input/data/standard.rst}, line~99
 
 \hyperlink{problematic-1}{
 Undefined substitution referenced: \textquotedbl{}problematic\textquotedbl{}.
-}\end{DUadmonition}
+}
+\end{DUadmonition}
 \end{DUclass}
 
+\raisebox{1em}{\hypertarget{system-message-2}{}}
 \begin{DUclass}{system-message}
 \begin{DUadmonition}
-\DUtitle{system-message
-\raisebox{1em}{\hypertarget{system-message-2}{}}}
+\DUtitle{\color{red}System Message}
 
-{\color{red}ERROR/3} in \texttt{functional/input/data/standard.txt}, line~390
+ERROR/3 in \texttt{functional/input/data/standard.rst}, line~390
 
 \hyperlink{footnote-reference-8}{
 Unknown target name: \textquotedbl{}5\textquotedbl{}.
-}\end{DUadmonition}
+}
+\end{DUadmonition}
 \end{DUclass}
 
+\raisebox{1em}{\hypertarget{system-message-3}{}}
 \begin{DUclass}{system-message}
 \begin{DUadmonition}
-\DUtitle{system-message
-\raisebox{1em}{\hypertarget{system-message-3}{}}}
+\DUtitle{\color{red}System Message}
 
-{\color{red}ERROR/3} in \texttt{functional/input/data/standard.txt}, line~399
+ERROR/3 in \texttt{functional/input/data/standard.rst}, line~399
 
 \hyperlink{citation-reference-3}{
 Unknown target name: \textquotedbl{}nonexistent\textquotedbl{}.
-}\end{DUadmonition}
+}
+\end{DUadmonition}
 \end{DUclass}
 
+\raisebox{1em}{\hypertarget{system-message-4}{}}
 \begin{DUclass}{system-message}
 \begin{DUadmonition}
-\DUtitle{system-message
-\raisebox{1em}{\hypertarget{system-message-4}{}}}
+\DUtitle{\color{red}System Message}
 
-{\color{red}ERROR/3} in \texttt{functional/input/data/standard.txt}, line~426
+ERROR/3 in \texttt{functional/input/data/standard.rst}, line~426
 
 \hyperlink{problematic-2}{
 Unknown target name: \textquotedbl{}hyperlink reference without a target\textquotedbl{}.
-}\end{DUadmonition}
+}
+\end{DUadmonition}
 \end{DUclass}
 
+\raisebox{1em}{\hypertarget{system-message-5}{}}
 \begin{DUclass}{system-message}
 \begin{DUadmonition}
-\DUtitle{system-message
-\raisebox{1em}{\hypertarget{system-message-5}{}}}
+\DUtitle{\color{red}System Message}
 
-{\color{red}ERROR/3} in \texttt{functional/input/data/standard.txt}, line~439
+ERROR/3 in \texttt{functional/input/data/standard.rst}, line~439
 
 \hyperlink{problematic-3}{
 Duplicate target name, cannot be used as a unique reference: \textquotedbl{}duplicate target names\textquotedbl{}.
-}\end{DUadmonition}
+}
+\end{DUadmonition}
 \end{DUclass}
 
 \end{document}

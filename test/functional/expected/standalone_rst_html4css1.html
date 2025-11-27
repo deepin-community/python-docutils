@@ -3,7 +3,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-<meta name="generator" content="Docutils 0.21.2: https://docutils.sourceforge.io/" />
+<meta name="generator" content="Docutils 0.22.3: https://docutils.sourceforge.io/" />
 <meta content="reStructuredText, test, parser" name="keywords" />
 <meta content="A test document, containing at least one example of each reStructuredText construct." lang="en" name="description" />
 <meta name="author" content="David Goodger" />
@@ -476,7 +476,7 @@ Python-specific usage examples; begun with &quot;&gt;&gt;&gt;&quot;
 <colgroup><col class="label" /><col /></colgroup>
 <tbody valign="top">
 <tr><td class="label">[1]</td><td><em>(<a class="fn-backref" href="#footnote-reference-1">1</a>, <a class="fn-backref" href="#footnote-reference-5">2</a>, <a class="fn-backref" href="#footnote-reference-9">3</a>)</em> <p>A footnote contains body elements, consistently indented by at
-least 3 spaces.</p>
+least 1 space.</p>
 <p class="last">This is the footnote's second paragraph.</p>
 </td></tr>
 </tbody>
@@ -617,7 +617,9 @@ An image occupying 50% of the line width:</p>
 media, figures might float to a different position if this helps the page
 layout.</p>
 <div class="figclass1 figclass2 figure">
+<a class="reference external image-reference" href="https://docutils.sourceforge.io/rst.html">
 <img alt="reStructuredText, the markup syntax" class="class1 class2" src="../../../docs/user/rst/images/title.png" style="width: 258px;" />
+</a>
 <p class="caption">Plaintext markup syntax and parser system.</p>
 <div class="legend">
 <table border="1" class="docutils">
@@ -643,7 +645,7 @@ layout.</p>
 <p>A left-aligned figure, 70% wide:</p>
 <div class="figclass1 figclass2 figure align-left" style="width: 70%">
 <img alt="reStructuredText, the markup syntax" class="class1 class2" src="../../../docs/user/rst/images/biohazard.png" style="width: 40px;" />
-<p class="caption">This is the caption.</p>
+<p class="captionclass1 captionclass2 caption" id="caption-label">This is the caption.</p>
 <div class="legend">
 <p>This is the legend.</p>
 <p>The legend may consist of several paragraphs.</p>
@@ -1037,7 +1039,7 @@ paragraph.</p>
 <p>Docutils uses LaTeX syntax for math directives and roles:
 <code class="tex">\alpha = f(x)</code> prints <span class="formula"><i>α</i> = <i>f</i>(<i>x</i>)</span>.</p>
 <p>The <tt class="docutils literal">:code:</tt> option of the <cite>include</cite> directive sets the included content
-as a code block, here the rst file <tt class="docutils literal">header_footer.txt</tt> with line numbers:</p>
+as a code block, here the rst file <tt class="docutils literal">header_footer.rst</tt> with line numbers:</p>
 <pre class="code rst literal-block">
 <span class="ln">1 </span>.. header:: Document header
 <span class="ln">2 </span>.. footer:: Document footer
@@ -1053,7 +1055,7 @@ e.g., HTML META tags or ODT file properties.</p>
 <h2><a class="toc-backref" href="#toc-entry-34">2.15&nbsp;&nbsp;&nbsp;Substitution Definitions</a></h2>
 <p>An inline image (<img alt="EXAMPLE" src="../../../docs/user/rst/images/biohazard.png" />) example:</p>
 <p>A Unicode example:</p>
-<p>(Substitution definitions are not visible in the HTML source.)</p>
+<p>(Substitution definitions are only visible in the rST source.)</p>
 </div>
 <div class="section" id="comments">
 <h2><a class="toc-backref" href="#toc-entry-35">2.16&nbsp;&nbsp;&nbsp;Comments</a></h2>
@@ -1065,7 +1067,7 @@ targets, directives, or substitution definitions.
 Double-dashes - - "- -" - - must be escaped somehow in HTML output.
 
 Comments may contain non-ASCII characters: ä ö ü æ ø å -->
-<p>(View the HTML source to see the comment.)</p>
+<p>(View the HTML/LaTeX/... source to see the comment.)</p>
 </div>
 <div class="section" id="raw-text">
 <h2><a class="toc-backref" href="#toc-entry-36">2.17&nbsp;&nbsp;&nbsp;Raw text</a></h2>
@@ -1378,19 +1380,19 @@ section, &quot;Docutils System Messages&quot;:</p>
 <div class="system-messages section">
 <h1>Docutils System Messages</h1>
 <div class="system-message" id="system-message-1">
-<p class="system-message-title">System Message: ERROR/3 (<tt class="docutils">functional/input/data/standard.txt</tt>, line 99); <em><a href="#problematic-1">backlink</a></em></p>
+<p class="system-message-title">System Message: ERROR/3 (<tt class="docutils">functional/input/data/standard.rst</tt>, line 99); <em><a href="#problematic-1">backlink</a></em></p>
 Undefined substitution referenced: &quot;problematic&quot;.</div>
 <div class="system-message" id="system-message-2">
-<p class="system-message-title">System Message: ERROR/3 (<tt class="docutils">functional/input/data/standard.txt</tt>, line 390); <em><a href="#footnote-reference-8">backlink</a></em></p>
+<p class="system-message-title">System Message: ERROR/3 (<tt class="docutils">functional/input/data/standard.rst</tt>, line 390); <em><a href="#footnote-reference-8">backlink</a></em></p>
 Unknown target name: &quot;5&quot;.</div>
 <div class="system-message" id="system-message-3">
-<p class="system-message-title">System Message: ERROR/3 (<tt class="docutils">functional/input/data/standard.txt</tt>, line 399); <em><a href="#citation-reference-3">backlink</a></em></p>
+<p class="system-message-title">System Message: ERROR/3 (<tt class="docutils">functional/input/data/standard.rst</tt>, line 399); <em><a href="#citation-reference-3">backlink</a></em></p>
 Unknown target name: &quot;nonexistent&quot;.</div>
 <div class="system-message" id="system-message-4">
-<p class="system-message-title">System Message: ERROR/3 (<tt class="docutils">functional/input/data/standard.txt</tt>, line 426); <em><a href="#problematic-2">backlink</a></em></p>
+<p class="system-message-title">System Message: ERROR/3 (<tt class="docutils">functional/input/data/standard.rst</tt>, line 426); <em><a href="#problematic-2">backlink</a></em></p>
 Unknown target name: &quot;hyperlink reference without a target&quot;.</div>
 <div class="system-message" id="system-message-5">
-<p class="system-message-title">System Message: ERROR/3 (<tt class="docutils">functional/input/data/standard.txt</tt>, line 439); <em><a href="#problematic-3">backlink</a></em></p>
+<p class="system-message-title">System Message: ERROR/3 (<tt class="docutils">functional/input/data/standard.rst</tt>, line 439); <em><a href="#problematic-3">backlink</a></em></p>
 Duplicate target name, cannot be used as a unique reference: &quot;duplicate target names&quot;.</div>
 </div>
 </div>

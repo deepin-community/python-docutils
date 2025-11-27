@@ -15,7 +15,6 @@ scripts = \
 	rst2latex \
 	rst2man \
 	rst2odt \
-	rst2odt_prepstyles \
 	rst2pseudoxml \
 	rst2s5 \
 	rst2xetex \
@@ -31,8 +30,8 @@ pre_strip_images = $(pre_strip_images1)$(pre_strip_images2)
 	dh $@ --with python3,xml_core --buildsystem=pybuild
 
 override_dh_auto_build:
-	# Remove convenience copy of the roman module
-	rm -f docutils/utils/roman.py
+	# Remove convenience copy of the roman_numerals module
+	rm -f docutils/utils/_roman_numerals.py test/test_utils/test__roman_numerals.py
 	# Check if move-data-to-usr-share.diff is up-to-date
 	if grep -r __file__ --include='*.py' docutils/ | grep -vw '_datadir'; then \
 		echo "Error: Some uses of __file__ are not guarded by _datadir()." \
@@ -69,18 +68,16 @@ override_dh_auto_install:
 	# Set the Debian package marker to use the build-time Debian paths
 	sed -i -e 's/^\(_debian_package\) = 0/\1 = "build"/' debian/tmp/usr/lib/python3*/dist-packages/docutils/__init__.py
 	install tools/buildhtml.py debian/tmp/usr/bin/rst-buildhtml
-	install tools/rst2odt_prepstyles.py debian/tmp/usr/bin/rst2odt_prepstyles
 	install tools/rstpep2html.py debian/tmp/usr/bin/rstpep2html
 	sed -i -e "1 s,^#!.*,#!/usr/bin/python3," \
 		debian/tmp/usr/bin/rst-buildhtml \
-		debian/tmp/usr/bin/rst2odt_prepstyles \
 		debian/tmp/usr/bin/rstpep2html
 	# Make the man pages (we want to do this *after* renaming all the
 	# tools, because their executable name goes into the --help output,
 	# and with _debian_package = "_build" set, to make sure that data paths
 	# in generated man pages are correct).
 	mkdir -p debian/tmp/man/
-	set -ex && for exe in $(filter-out rst2odt_prepstyles,$(scripts)); do \
+	set -ex && for exe in $(scripts); do \
 		export PYTHONPATH=debian/tmp/usr/lib/$(shell py3versions -d)/dist-packages; \
 		cp debian/$$exe.txt debian/tmp/man/$$exe.txt; \
 		python3 debian/tmp/usr/bin/$$exe --help > debian/tmp/man/$$exe.help.txt; \
@@ -97,8 +94,6 @@ override_dh_auto_install:
 	done
 	# Set the Debian package marker to use the runtime Debian paths
 	sed -i -e 's/^\(_debian_package\) = "build"/\1 = 1/' debian/tmp/usr/lib/python3*/dist-packages/docutils/__init__.py
-	PYTHONPATH=. LC_ALL=C.UTF-8 python3 tools/rst2man.py debian/rst2odt_prepstyles.txt \
-		debian/tmp/man/rst2odt_prepstyles.1
 	sed -i -e 's,"\(docutils/writers/\),"/usr/share/\1,g' debian/tmp/man/*
 
 override_dh_installdocs:
@@ -110,5 +105,5 @@ override_dh_installchangelogs:
 	dh_installchangelogs -XHISTORY
 
 override_dh_compress:
-	dh_compress -p docutils-doc -X.dtd -X.txt
+	dh_compress -p docutils-doc -X.dtd -X.rst
 	dh_compress --remaining-packages

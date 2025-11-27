@@ -1,8 +1,7 @@
 doc-debian-paths.diff
 testall-no-stdout-stderr-redirect.diff
 move-data-to-usr-share.diff
-no-local-roman.diff
+no-local-roman-numerals.diff
 static-help-message.diff
 source-date-epoch.diff
-fix-license-issue.diff
 verbose-tests.diff

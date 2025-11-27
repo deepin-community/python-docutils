@@ -4,8 +4,8 @@
 ======================================================================
 :Author: David Goodger
 :Contact: docutils-develop@lists.sourceforge.net
-:Revision: $Revision: 9647 $
-:Date: $Date: 2024-04-18 13:18:00 +0200 (Do, 18. Apr 2024) $
+:Revision: $Revision: 10127 $
+:Date: $Date: 2025-05-13 22:49:10 +0200 (Di, 13. Mai 2025) $
 :Copyright: This DTD has been placed in the public domain.
 :Filename: docutils.dtd
 
@@ -167,8 +167,8 @@ resolve to either an internal or external reference.
 
 <!ENTITY % additional.bibliographic.elements "">
 <!ENTITY % bibliographic.elements
-  " author | authors | organization | address | contact
-    | version | revision | status | date | copyright | field
+  " address | author | authors | contact | copyright | date | field
+    | organization | revision | status | version
     %additional.bibliographic.elements; ">
 
 <!ENTITY % additional.section.elements "">
@@ -178,25 +178,23 @@ resolve to either an internal or external reference.
 
 <!ENTITY % additional.body.elements "">
 <!ENTITY % body.elements
-  " paragraph | compound | container | literal_block | doctest_block
-    | math_block | line_block | block_quote
-    | table | figure | image | footnote | citation | rubric
-    | bullet_list | enumerated_list | definition_list | field_list
-    | option_list
-    | attention | caution | danger | error | hint | important | note
-    | tip | warning | admonition
-    | reference | target | substitution_definition | comment | pending
-    | system_message | raw
+  " admonition | attention | block_quote | bullet_list
+    | caution | citation | comment | compound | container
+    | danger | definition_list | doctest_block | enumerated_list | error
+    | field_list | figure | footnote | hint | image | important
+    | line_block | literal_block | math_block | note | option_list
+    | paragraph | pending | raw | reference | rubric
+    | substitution_definition | system_message
+    | table | target | tip | warning
     %additional.body.elements; ">
 
 <!ENTITY % additional.inline.elements "">
 <!ENTITY % inline.elements
-  " emphasis | strong | literal | math
-    | reference | footnote_reference | citation_reference
-    | substitution_reference | title_reference
-    | abbreviation | acronym | subscript | superscript
-    | inline | problematic | generated
-    | target | image | raw
+  " abbreviation | acronym | citation_reference | emphasis
+    | footnote_reference | generated | image | inline | literal
+    | math | problematic | raw | reference
+    | strong | subscript | substitution_reference | superscript
+    | target | title_reference
     %additional.inline.elements; ">
 
 
@@ -225,7 +223,11 @@ http://www.oasis-open.org/html/tm9901.htm).
     "soextblx.dtd">
 
 <!-- These parameter entities customize the table model DTD. -->
-<!ENTITY % bodyatt              " %basic.atts; ">  <!-- table elt -->
+<!-- table element TODO: use %tbl.table.att.  Keep or drop pgwide? -->
+<!ENTITY % bodyatt
+  " %basic.atts;
+    %align-h.att;
+    width     %measure;  #IMPLIED ">
 <!-- 1 colspec element is expected per table column: -->
 <!ENTITY % tbl.tgroup.mdl       "colspec+,thead?,tbody">
 <!ENTITY % tbl.tgroup.att       " %basic.atts; ">
@@ -235,14 +237,11 @@ http://www.oasis-open.org/html/tm9901.htm).
   " %basic.atts;
     stub      %yesorno; #IMPLIED ">
 <!ENTITY % tbl.row.att          " %basic.atts; ">
-<!-- ``(...)*``: nested tables are supported -->
+<!-- all body elements (including nested tables) are supported -->
 <!ENTITY % tbl.entry.mdl        " (%body.elements;)* ">
 <!ENTITY % tbl.entry.att
   " %basic.atts;
     morecols  %number;  #IMPLIED ">
-<!ATTLIST table
-    %align-h.att;
-    width     %measure;  #IMPLIED>
 
 <!--
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -356,10 +355,7 @@ http://www.oasis-open.org/html/tm9901.htm).
 <!ATTLIST section %basic.atts;>
 
 <!ELEMENT topic (title?, (%body.elements;)+)>
-<!ATTLIST topic
-    %basic.atts;
-    depth %number;  #IMPLIED
-    local %yesorno; #IMPLIED>
+<!ATTLIST topic %basic.atts;>
 
 <!ELEMENT sidebar ((title, subtitle?)?, (%body.elements; | topic)+)>
 <!ATTLIST sidebar %basic.atts;>
@@ -403,7 +399,7 @@ http://www.oasis-open.org/html/tm9901.htm).
 <!ELEMENT definition_list (definition_list_item+)>
 <!ATTLIST definition_list %basic.atts;>
 
-<!ELEMENT definition_list_item (term, classifier*, definition)>
+<!ELEMENT definition_list_item ((term, classifier*)+, definition)>
 <!ATTLIST definition_list_item %basic.atts;>
 
 <!ELEMENT term %text.model;>
@@ -556,7 +552,7 @@ that is typeset as mathematical notation (display formula).
 <!ELEMENT pending EMPTY>
 <!ATTLIST pending %basic.atts;>
 
-<!ELEMENT figure (image, ((caption, legend?) | legend)) >
+<!ELEMENT figure ((image|reference), ((caption, legend?) | legend)) >
 <!ATTLIST figure
     %basic.atts;
     %align-h.att;

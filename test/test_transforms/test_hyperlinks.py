@@ -1,6 +1,6 @@
 #! /usr/bin/env python3
 
-# $Id: test_hyperlinks.py 9425 2023-06-30 14:56:47Z milde $
+# $Id: test_hyperlinks.py 10254 2025-11-02 17:50:57Z milde $
 # Author: David Goodger <goodger@python.org>
 # Copyright: This module has been placed in the public domain.
 
@@ -27,6 +27,8 @@ from docutils.utils import new_document
 
 
 class TransformTestCase(unittest.TestCase):
+    maxDiff = None
+
     def test_transforms(self):
         parser = Parser()
         settings = get_default_settings(Parser)
@@ -319,10 +321,7 @@ __ URL
         match in this snippet.
     <system_message level="3" line="5" source="test data" type="ERROR">
         <paragraph>
-            Substitution definition contains illegal element <reference>:
-        <literal_block xml:space="preserve">
-            <reference anonymous="1" name="anonymous">
-                anonymous
+            Anonymous references are not supported in a substitution definition.
         <literal_block xml:space="preserve">
             .. |invalid| replace:: anonymous__
     <paragraph>
@@ -373,7 +372,7 @@ Another reference to the same `embedded alias`_.
         An \n\
         <reference name="embedded alias" refuri="ham.py">
             embedded alias
-        <target names="embedded\\ alias" refuri="ham.py">
+        <target ids="embedded-alias" names="embedded\\ alias" refuri="ham.py">
         .
     <paragraph>
         Another reference to the same \n\
@@ -405,11 +404,11 @@ An `embedded alias <alias_>`_ with unknown reference.
         An \n\
         <problematic ids="problematic-1" refid="system-message-2">
             `embedded alias <alias_>`_
-        <target names="embedded\\ alias" refname="alias">
+        <target ids="embedded-alias" names="embedded\\ alias" refname="alias">
          with unknown reference.
     <system_message ids="system-message-1" level="3" line="1" source="test data" type="ERROR">
         <paragraph>
-            Indirect hyperlink target "embedded alias"  refers to target "alias", which does not exist.
+            Indirect hyperlink target "embedded alias" (id="embedded-alias") refers to target "alias", which does not exist.
     <system_message backrefs="problematic-1" ids="system-message-2" level="3" line="1" source="test data" type="ERROR">
         <paragraph>
             Unknown target name: "alias".
@@ -430,13 +429,98 @@ An embedded URI with trailing underline:
         .
 """],
 ["""\
+`link <address >`_
+""",
+"""\
+<document source="test data">
+    <paragraph>
+        <problematic ids="problematic-1" refid="system-message-1">
+            `link <address >`_
+    <system_message backrefs="problematic-1" ids="system-message-1" level="3" line="1" source="test data" type="ERROR">
+        <paragraph>
+            Unknown target name: "link <address >".
+        <paragraph>
+            Did you want to embed a URI or alias?
+            Whitespace around the embedded reference is not allowed.
+"""],
+["""\
+`link < address>`_
+""",
+"""\
+<document source="test data">
+    <paragraph>
+        <problematic ids="problematic-1" refid="system-message-1">
+            `link < address>`_
+    <system_message backrefs="problematic-1" ids="system-message-1" level="3" line="1" source="test data" type="ERROR">
+        <paragraph>
+            Unknown target name: "link < address>".
+        <paragraph>
+            Did you want to embed a URI or alias?
+            Whitespace around the embedded reference is not allowed.
+"""],
+["""\
+`link <address> e`_
+""",
+"""\
+<document source="test data">
+    <paragraph>
+        <problematic ids="problematic-1" refid="system-message-1">
+            `link <address> e`_
+    <system_message backrefs="problematic-1" ids="system-message-1" level="3" line="1" source="test data" type="ERROR">
+        <paragraph>
+            Unknown target name: "link <address> e".
+        <paragraph>
+            Did you want to embed a URI or alias?
+            The embedded reference must be the last text before the end string.
+"""],
+["""\
+`link<address>`_
+""",
+"""\
+<document source="test data">
+    <paragraph>
+        <problematic ids="problematic-1" refid="system-message-1">
+            `link<address>`_
+    <system_message backrefs="problematic-1" ids="system-message-1" level="3" line="1" source="test data" type="ERROR">
+        <paragraph>
+            Unknown target name: "link<address>".
+        <paragraph>
+            Did you want to embed a URI or alias?
+            The embedded reference must be preceded by whitespace.
+"""],
+["""\
+`link <address`_
+`link address>`_
+""",
+"""\
+<document source="test data">
+    <paragraph>
+        <problematic ids="problematic-1" refid="system-message-1">
+            `link <address`_
+        \n\
+        <problematic ids="problematic-2" refid="system-message-2">
+            `link address>`_
+    <system_message backrefs="problematic-1" ids="system-message-1" level="3" line="1" source="test data" type="ERROR">
+        <paragraph>
+            Unknown target name: "link <address".
+        <paragraph>
+            Did you want to embed a URI or alias?
+            Closing bracket missing.
+    <system_message backrefs="problematic-2" ids="system-message-2" level="3" line="1" source="test data" type="ERROR">
+        <paragraph>
+            Unknown target name: "link address>".
+        <paragraph>
+            Did you want to embed a URI or alias?
+            Opening bracket missing.
+"""],
+["""\
 Hyperlinks with angle-bracketed text need escaping.
 
 See `Element \\<a>`_, `Element <b\\>`_, and `Element <c>\\ `_.
 
 .. _`Element <a>`:
 .. _`Element <b>`:
-.. _`Element <c>`: elements.txt
+.. _`Element <c>`: elements.rst
 """,
 """\
 <document source="test data">
@@ -444,18 +528,18 @@ See `Element \\<a>`_, `Element <b\\>`_, and `Element <c>\\ `_.
         Hyperlinks with angle-bracketed text need escaping.
     <paragraph>
         See \n\
-        <reference name="Element <a>" refuri="elements.txt">
+        <reference name="Element <a>" refuri="elements.rst">
             Element <a>
         , \n\
-        <reference name="Element <b>" refuri="elements.txt">
+        <reference name="Element <b>" refuri="elements.rst">
             Element <b>
         , and \n\
-        <reference name="Element <c>" refuri="elements.txt">
+        <reference name="Element <c>" refuri="elements.rst">
             Element <c>
         .
     <target refid="element-a">
     <target refid="element-b">
-    <target ids="element-c element-b element-a" names="element\\ <c> element\\ <b> element\\ <a>" refuri="elements.txt">
+    <target ids="element-c element-b element-a" names="element\\ <c> element\\ <b> element\\ <a>" refuri="elements.rst">
 """],
 ["""\
 .. _target:
@@ -762,7 +846,7 @@ Duplicate external target_'s (different URIs):
             target_
         's (different URIs):
     <target dupnames="target" ids="target" refuri="first">
-    <system_message backrefs="target-1" level="2" line="5" source="test data" type="WARNING">
+    <system_message level="2" line="5" source="test data" type="WARNING">
         <paragraph>
             Duplicate explicit target name: "target".
     <target dupnames="target" ids="target-1" refuri="second">
@@ -782,7 +866,7 @@ Duplicate external targets (different URIs) without reference:
     <paragraph>
         Duplicate external targets (different URIs) without reference:
     <target dupnames="target" ids="target" refuri="first">
-    <system_message backrefs="target-1" level="2" line="5" source="test data" type="WARNING">
+    <system_message level="2" line="5" source="test data" type="WARNING">
         <paragraph>
             Duplicate explicit target name: "target".
     <target dupnames="target" ids="target-1" refuri="second">

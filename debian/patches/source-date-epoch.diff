@@ -10,18 +10,18 @@ Forwarded: https://sourceforge.net/p/docutils/patches/132/
  2 files changed, 14 insertions(+), 7 deletions(-)
 
 diff --git a/docutils/parsers/rst/directives/misc.py b/docutils/parsers/rst/directives/misc.py
-index 2af3232..33dcaac 100644
+index 746b097..93ee467 100644
 --- a/docutils/parsers/rst/directives/misc.py
 +++ b/docutils/parsers/rst/directives/misc.py
-@@ -7,6 +7,7 @@
+@@ -8,6 +8,7 @@ from __future__ import annotations
+ 
  __docformat__ = 'reStructuredText'
  
- from pathlib import Path
 +import os
  import re
  import time
- from urllib.request import urlopen
-@@ -610,12 +611,12 @@ class Date(Directive):
+ from pathlib import Path
+@@ -658,12 +659,12 @@ class Date(Directive):
          #
          # See also the discussion about \date \time \year in TeX
          # http://tug.org/pipermail/tex-k/2016-May/002704.html
@@ -41,10 +41,10 @@ index 2af3232..33dcaac 100644
  
  
 diff --git a/docutils/transforms/universal.py b/docutils/transforms/universal.py
-index 00d57b4..41bc4cc 100644
+index b50c03d..8c8ebf6 100644
 --- a/docutils/transforms/universal.py
 +++ b/docutils/transforms/universal.py
-@@ -20,6 +20,7 @@ Transforms needed by most or all documents:
+@@ -23,6 +23,7 @@ from __future__ import annotations
  
  __docformat__ = 'reStructuredText'
  
@@ -52,7 +52,7 @@ index 00d57b4..41bc4cc 100644
  import re
  import time
  from docutils import nodes, utils
-@@ -73,7 +74,12 @@ class Decorations(Transform):
+@@ -76,7 +77,12 @@ class Decorations(Transform):
                                      refuri=source),
                      nodes.Text('.\n')])
              if settings.datestamp:

@@ -1,0 +1,53 @@
+From: Dmitry Shachnev <mitya57@debian.org>
+Date: Mon, 4 Aug 2025 23:38:10 +0300
+Subject: Use the "roman_numerals" module from python3-roman-numerals instead
+ of the local copy.
+
+Forwarded: not-needed
+---
+ docutils/parsers/rst/states.py       | 3 +--
+ docutils/writers/latex2e/__init__.py | 2 +-
+ docutils/writers/manpage.py          | 2 +-
+ 3 files changed, 3 insertions(+), 4 deletions(-)
+
+diff --git a/docutils/parsers/rst/states.py b/docutils/parsers/rst/states.py
+index cf10237..21e1b04 100644
+--- a/docutils/parsers/rst/states.py
++++ b/docutils/parsers/rst/states.py
+@@ -119,8 +119,7 @@ from docutils.parsers.rst import directives, languages, tableparser, roles
+ from docutils.utils import escape2null, column_width, strip_combining_chars
+ from docutils.utils import punctuation_chars, urischemes
+ from docutils.utils import split_escaped_whitespace
+-from docutils.utils._roman_numerals import (InvalidRomanNumeralError,
+-                                            RomanNumeral)
++from roman_numerals import InvalidRomanNumeralError, RomanNumeral
+ 
+ TYPE_CHECKING = False
+ if TYPE_CHECKING:
+diff --git a/docutils/writers/latex2e/__init__.py b/docutils/writers/latex2e/__init__.py
+index a2ac7de..3ac8589 100644
+--- a/docutils/writers/latex2e/__init__.py
++++ b/docutils/writers/latex2e/__init__.py
+@@ -23,8 +23,8 @@ from pathlib import Path
+ import docutils
+ from docutils import frontend, nodes, languages, writers, utils
+ from docutils.transforms import references, writer_aux
+-from docutils.utils._roman_numerals import RomanNumeral
+ from docutils.utils.math import pick_math_environment, unichar2tex
++from roman_numerals import RomanNumeral
+ 
+ LATEX_WRITER_DIR = Path(docutils._datadir(os.path.abspath(__file__)))
+ 
+diff --git a/docutils/writers/manpage.py b/docutils/writers/manpage.py
+index 6b84578..8722f5c 100644
+--- a/docutils/writers/manpage.py
++++ b/docutils/writers/manpage.py
+@@ -49,7 +49,7 @@ import re
+ 
+ import docutils
+ from docutils import frontend, nodes, writers, languages
+-from docutils.utils._roman_numerals import RomanNumeral
++from roman_numerals import RomanNumeral
+ 
+ FIELD_LIST_INDENT = 7
+ DEFINITION_LIST_INDENT = 7
