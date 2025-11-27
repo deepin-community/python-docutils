@@ -8,12 +8,12 @@ Forwarded: not-needed
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/test/alltests.py b/test/alltests.py
-index c4bbe72..8cf71d4 100755
+index d8f1f6c..41160f4 100755
 --- a/test/alltests.py
 +++ b/test/alltests.py
-@@ -86,7 +86,7 @@ if __name__ == '__main__':
-     print(f'Working directory: {os.getcwd()}')
-     print(f'Docutils package: {os.path.dirname(docutils.__file__)}')
+@@ -103,7 +103,7 @@ if __name__ == '__main__':
+     print(f'Working directory: {Path.cwd()}')
+     print(f'Docutils package: {Path(docutils.__file__).parent}')
      sys.stdout.flush()
 -    result = unittest.TextTestRunner(resultclass=NumbersTestResult).run(suite)
 +    result = unittest.TextTestRunner(resultclass=NumbersTestResult, verbosity=2).run(suite)

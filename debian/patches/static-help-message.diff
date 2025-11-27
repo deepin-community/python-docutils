@@ -7,68 +7,63 @@ mention build-time locale there.
 
 Bug: https://bugs.debian.org/791587
 Forwarded: no
-Last-Update: 2023-05-20
+Last-Update: 2025-09-18
 ---
- docutils/frontend.py         | 4 ++--
- test/data/help/docutils.txt  | 3 ++-
- test/data/help/rst2html.txt  | 3 ++-
- test/data/help/rst2latex.txt | 3 ++-
- 4 files changed, 8 insertions(+), 5 deletions(-)
+ docutils/frontend.py         | 2 +-
+ test/data/help/docutils.rst  | 2 +-
+ test/data/help/rst2html.rst  | 2 +-
+ test/data/help/rst2latex.rst | 2 +-
+ 4 files changed, 4 insertions(+), 4 deletions(-)
 
 diff --git a/docutils/frontend.py b/docutils/frontend.py
-index 2499c62..2e6e1a3 100644
+index d5415f4..e3f1ac1 100644
 --- a/docutils/frontend.py
 +++ b/docutils/frontend.py
-@@ -693,8 +693,8 @@ class OptionParser(optparse.OptionParser, docutils.SettingsSpec):
-           ['--output-encoding-error-handler'],
+@@ -818,7 +818,7 @@ class OptionParser(optparse.OptionParser, docutils.SettingsSpec):
+          (SUPPRESS_HELP, ['--output-encoding-error-handler'],
            {'default': 'strict', 'validator': validate_encoding_error_handler}),
-          ('Specify text encoding and optionally error handler '
--          'for error output.  Default: %s:%s.'
--          % (default_error_encoding, default_error_encoding_error_handler),
-+          'for error output.  Default text encoding: system encoding. '
-+          'Default error handler: %s.' % default_error_encoding_error_handler,
+          ('Specify text encoding and optionally the error handler'
+-          f' for error output.  Default: {default_error_encoding}.',
++          ' for error output.  Default: system encoding.',
            ['--error-encoding', '-e'],
            {'metavar': '<name[:handler]>', 'default': default_error_encoding,
             'validator': validate_encoding_and_error_handler}),
-diff --git a/test/data/help/docutils.txt b/test/data/help/docutils.txt
-index 3cf41a5..ebebe89 100644
---- a/test/data/help/docutils.txt
-+++ b/test/data/help/docutils.txt
-@@ -72,7 +72,8 @@ General Docutils Options
-                         "xmlcharrefreplace", "backslashreplace".
+diff --git a/test/data/help/docutils.rst b/test/data/help/docutils.rst
+index e0235ae..7723c80 100644
+--- a/test/data/help/docutils.rst
++++ b/test/data/help/docutils.rst
+@@ -66,7 +66,7 @@ General Docutils Options
+                         handler for output.  Default: utf-8.
  --error-encoding=<name[:handler]>, -e <name[:handler]>
-                         Specify text encoding and optionally error handler for
--                        error output.  Default: utf-8:backslashreplace.
-+                        error output.  Default text encoding: system encoding.
-+                        Default error handler: backslashreplace.
- --error-encoding-error-handler=ERROR_ENCODING_ERROR_HANDLER
-                         Specify the error handler for unencodable characters
-                         in error output.  Default: backslashreplace.
-diff --git a/test/data/help/rst2html.txt b/test/data/help/rst2html.txt
-index ea38342..5a84642 100644
---- a/test/data/help/rst2html.txt
-+++ b/test/data/help/rst2html.txt
-@@ -73,7 +73,8 @@ General Docutils Options
-                         "xmlcharrefreplace", "backslashreplace".
+                         Specify text encoding and optionally the error handler
+-                        for error output.  Default: utf-8.
++                        for error output.  Default: system encoding.
+ --language=<tag>, -l <tag>
+                         Specify the language (as BCP 47 language tag).
+                         Default: en.
+diff --git a/test/data/help/rst2html.rst b/test/data/help/rst2html.rst
+index 25b5bf5..aacbd92 100644
+--- a/test/data/help/rst2html.rst
++++ b/test/data/help/rst2html.rst
+@@ -67,7 +67,7 @@ General Docutils Options
+                         handler for output.  Default: utf-8.
  --error-encoding=<name[:handler]>, -e <name[:handler]>
-                         Specify text encoding and optionally error handler for
--                        error output.  Default: utf-8:backslashreplace.
-+                        error output.  Default text encoding: system encoding.
-+                        Default error handler: backslashreplace.
- --error-encoding-error-handler=ERROR_ENCODING_ERROR_HANDLER
-                         Specify the error handler for unencodable characters
-                         in error output.  Default: backslashreplace.
-diff --git a/test/data/help/rst2latex.txt b/test/data/help/rst2latex.txt
-index adf8551..1e2dc01 100644
---- a/test/data/help/rst2latex.txt
-+++ b/test/data/help/rst2latex.txt
-@@ -73,7 +73,8 @@ General Docutils Options
-                         "xmlcharrefreplace", "backslashreplace".
+                         Specify text encoding and optionally the error handler
+-                        for error output.  Default: utf-8.
++                        for error output.  Default: system encoding.
+ --language=<tag>, -l <tag>
+                         Specify the language (as BCP 47 language tag).
+                         Default: en.
+diff --git a/test/data/help/rst2latex.rst b/test/data/help/rst2latex.rst
+index 947ea67..c73d6c1 100644
+--- a/test/data/help/rst2latex.rst
++++ b/test/data/help/rst2latex.rst
+@@ -67,7 +67,7 @@ General Docutils Options
+                         handler for output.  Default: utf-8.
  --error-encoding=<name[:handler]>, -e <name[:handler]>
-                         Specify text encoding and optionally error handler for
--                        error output.  Default: utf-8:backslashreplace.
-+                        error output.  Default text encoding: system encoding.
-+                        Default error handler: backslashreplace.
- --error-encoding-error-handler=ERROR_ENCODING_ERROR_HANDLER
-                         Specify the error handler for unencodable characters
-                         in error output.  Default: backslashreplace.
+                         Specify text encoding and optionally the error handler
+-                        for error output.  Default: utf-8.
++                        for error output.  Default: system encoding.
+ --language=<tag>, -l <tag>
+                         Specify the language (as BCP 47 language tag).
+                         Default: en.

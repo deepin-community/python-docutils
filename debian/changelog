@@ -1,3 +1,43 @@
+python-docutils (0.22.3+dfsg-1) unstable; urgency=medium
+
+  * New upstream release.
+  * Drop fix-unknown-target.diff, included in the new release.
+  * Refresh no-local-roman-numerals.diff.
+  * Drop obsolete Breaks.
+
+ -- Dmitry Shachnev <mitya57@debian.org>  Thu, 06 Nov 2025 15:24:55 +0300
+
+python-docutils (0.22.2+dfsg-2) unstable; urgency=medium
+
+  * Replace fix-unknown-target.diff with version that was applied upstream.
+  * Drop ‘Rules-Requires-Root: no’, it became default in dpkg 1.22.13.
+  * Upload to unstable.
+
+ -- Dmitry Shachnev <mitya57@debian.org>  Sun, 12 Oct 2025 13:00:50 +0300
+
+python-docutils (0.22.2+dfsg-1) experimental; urgency=medium
+
+  * New upstream release.
+  * Refresh and rebase patches for the new release.
+  * Merge Build-Depends-Indep list into Build-Depends, to fix CI.
+  * Add a patch to fix unknown target name warning in the docs.
+
+ -- Dmitry Shachnev <mitya57@debian.org>  Sat, 27 Sep 2025 18:16:09 +0300
+
+python-docutils (0.22+dfsg-1) experimental; urgency=medium
+
+  * New upstream release.
+  * Drop fix-license-issue.diff, included in the new release.
+  * Refresh and rebase other patches.
+  * Bump required flit version to 3.11, following pyproject.toml.
+  * Replace python3-roman dependency with python3-roman-numerals.
+  * Stop installing rst2odt_prepstyles tool (replaced by a module).
+  * Update packaging for *.txt → *.rst renaming in the docs.
+  * Update debian/copyright.
+  * Bump Standards-Version to 4.7.2, no changes needed.
+
+ -- Dmitry Shachnev <mitya57@debian.org>  Sun, 17 Aug 2025 22:27:12 +0300
+
 python-docutils (0.21.2+dfsg-2) unstable; urgency=medium
 
   * Break python3-sphinx older than 7.3.0.

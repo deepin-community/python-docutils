@@ -263,7 +263,7 @@ and before TAIL-RE and DELIM-RE in VAR or DEFAULT for no match."
 SVN revision is the upstream (docutils) revision.")
 (defconst rst-svn-timestamp
   (rst-extract-version "\\$" "LastChangedDate: " ".+?+" " "
-		       "$LastChangedDate: 2022-01-20 11:11:44 +0100 (Do, 20. Jän 2022) $")
+		       "$LastChangedDate: 2022-01-20 11:11:44 +0100 (Do, 20. Jan 2022) $")
   "The SVN time stamp of this file.")
 
 ;; Maintained by the release process.

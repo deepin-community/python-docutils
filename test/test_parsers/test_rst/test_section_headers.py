@@ -1,5 +1,5 @@
 #! /usr/bin/env python3
-# $Id: test_section_headers.py 9425 2023-06-30 14:56:47Z milde $
+# $Id: test_section_headers.py 10202 2025-08-15 17:37:57Z milde $
 # Author: David Goodger <goodger@python.org>
 # Copyright: This module has been placed in the public domain.
 
@@ -22,6 +22,9 @@ from docutils.utils import new_document
 
 
 class ParserTestCase(unittest.TestCase):
+
+    maxDiff = None
+
     def test_parser(self):
         parser = Parser()
         settings = get_default_settings(Parser)
@@ -101,7 +104,7 @@ Test unexpected section titles.
     <paragraph>
         Test unexpected section titles.
     <block_quote>
-        <system_message level="4" line="4" source="test data" type="SEVERE">
+        <system_message level="3" line="4" source="test data" type="ERROR">
             <paragraph>
                 Unexpected section title.
             <literal_block xml:space="preserve">
@@ -109,12 +112,12 @@ Test unexpected section titles.
                 =====
         <paragraph>
             Paragraph.
-        <system_message level="4" line="7" source="test data" type="SEVERE">
+        <system_message level="3" line="7" source="test data" type="ERROR">
             <paragraph>
                 Unexpected section title or transition.
             <literal_block xml:space="preserve">
                 -----
-        <system_message level="4" line="9" source="test data" type="SEVERE">
+        <system_message level="3" line="9" source="test data" type="ERROR">
             <paragraph>
                 Unexpected section title.
             <literal_block xml:space="preserve">
@@ -193,7 +196,7 @@ Test overline title with inset.
 """,
 """\
 <document source="test data">
-    <system_message level="4" line="1" source="test data" type="SEVERE">
+    <system_message level="3" line="1" source="test data" type="ERROR">
         <paragraph>
             Incomplete section title.
         <literal_block xml:space="preserve">
@@ -207,7 +210,7 @@ Test overline title with inset.
 """,
 """\
 <document source="test data">
-    <system_message level="4" line="1" source="test data" type="SEVERE">
+    <system_message level="3" line="1" source="test data" type="ERROR">
         <paragraph>
             Missing matching underline for section title overline.
         <literal_block xml:space="preserve">
@@ -222,7 +225,7 @@ Test missing underline, with paragraph.
 """,
 """\
 <document source="test data">
-    <system_message level="4" line="1" source="test data" type="SEVERE">
+    <system_message level="3" line="1" source="test data" type="ERROR">
         <paragraph>
             Missing matching underline for section title overline.
         <literal_block xml:space="preserve">
@@ -262,7 +265,7 @@ Paragraph.
 """,
 """\
 <document source="test data">
-    <system_message level="4" line="1" source="test data" type="SEVERE">
+    <system_message level="3" line="1" source="test data" type="ERROR">
         <paragraph>
             Title overline & underline mismatch.
         <literal_block xml:space="preserve">
@@ -492,12 +495,14 @@ Paragraph 4.
             Title 3
         <paragraph>
             Paragraph 3.
-        <system_message level="4" line="15" source="test data" type="SEVERE">
+        <system_message level="3" line="15" source="test data" type="ERROR">
             <paragraph>
-                Title level inconsistent:
+                Inconsistent title style: skip from level 1 to 3.
             <literal_block xml:space="preserve">
                 Title 4
                 ```````
+            <paragraph>
+                Established title styles: = -
         <paragraph>
             Paragraph 4.
 """],
@@ -543,13 +548,15 @@ Paragraph 4.
             Title 3
         <paragraph>
             Paragraph 3.
-        <system_message level="4" line="19" source="test data" type="SEVERE">
+        <system_message level="3" line="19" source="test data" type="ERROR">
             <paragraph>
-                Title level inconsistent:
+                Inconsistent title style: skip from level 1 to 3.
             <literal_block xml:space="preserve">
                 ```````
                 Title 4
                 ```````
+            <paragraph>
+                Established title styles: =/= -/-
         <paragraph>
             Paragraph 4.
 """],
@@ -840,10 +847,6 @@ Paragraph
                 <paragraph>
                     Possible incomplete section title.
                     Treating the overline as ordinary text because it's so short.
-    <system_message level="1" line="7" source="test data" type="INFO">
-        <paragraph>
-            Possible incomplete section title.
-            Treating the overline as ordinary text because it's so short.
     <section dupnames="..." ids="section-3">
         <title>
             ...

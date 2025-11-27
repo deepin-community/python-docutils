@@ -12,10 +12,10 @@ Last-Update: 2011-09-18
  1 file changed, 3 deletions(-)
 
 diff --git a/test/alltests.py b/test/alltests.py
-index 9968692..c4bbe72 100755
+index 2a32f53..d8f1f6c 100755
 --- a/test/alltests.py
 +++ b/test/alltests.py
-@@ -63,9 +63,6 @@ class Tee:
+@@ -74,9 +74,6 @@ class Tee:
              self.file.flush()
  
  

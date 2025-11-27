@@ -1,8 +1,9 @@
 #!/bin/sh
 set -e -u
-cp -rL HISTORY.txt docs/ test/ "$AUTOPKGTEST_TMP"
+cp -rL HISTORY.rst docs/ test/ "$AUTOPKGTEST_TMP"
 cd "$AUTOPKGTEST_TMP/test/"
 rm test_writers/test_html4css1_misc.py
+rm test_utils/test__roman_numerals.py
 py3versions -s \
 | tr ' ' '\n' \
 | xargs -I {} env PYTHONWARNINGS=d PYTHONHASHSEED=random {} \
