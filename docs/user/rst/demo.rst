@@ -21,9 +21,9 @@
 :Contact: docutils-develop@lists.sourceforge.net
 :Authors: Me; Myself; I
 :organization: humankind
-:date: $Date: 2024-08-15 10:43:38 +0200 (Do, 15. Aug 2024) $
+:date: $Date: 2025-11-28 14:52:09 +0100 (Fr, 28. Nov 2025) $
 :status: This is a "work in progress"
-:revision: $Revision: 9906 $
+:revision: $Revision: 10266 $
 :version: 1
 :copyright: This document has been placed in the public domain. You
             may do with it as you wish. You may copy, modify,
@@ -546,7 +546,7 @@ Comments
 
 Here's one:
 
-.. Comments begin with two dots and a space. Anything may
+.. Comments begin with two dots and whitespace. Anything may
    follow, except for the syntax of footnotes, hyperlink
    targets, directives, or substitution definitions.
 

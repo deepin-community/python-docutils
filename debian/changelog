@@ -1,3 +1,9 @@
+python-docutils (0.22.4+dfsg-1) unstable; urgency=medium
+
+  * New upstream release.
+
+ -- Dmitry Shachnev <mitya57@debian.org>  Fri, 19 Dec 2025 15:02:59 +0300
+
 python-docutils (0.22.3+dfsg-1) unstable; urgency=medium
 
   * New upstream release.

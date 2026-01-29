@@ -9,8 +9,8 @@ A Guide to the `Docutils Generic` DTD
 
 :Author: David Goodger
 :Contact: docutils-develop@lists.sourceforge.net
-:Revision: $Revision: 10255 $
-:Date: $Date: 2025-11-02 18:51:07 +0100 (So, 02. Nov 2025) $
+:Revision: $Revision: 10268 $
+:Date: $Date: 2025-12-02 20:48:42 +0100 (Di, 02. Dez 2025) $
 :Copyright: This document has been placed in the public domain.
 
 .. contents:: :depth: 1
@@ -3854,8 +3854,9 @@ system.
 :Children:   one or more `body elements`_
 :Attributes: backrefs_, level_, line_, type_, and the `common attributes`_.
 
-In Docutils, the generation of system messages can be configured with the
-`"report_level"`_ setting.
+In Docutils, system messages with a level lower than the
+`"report_level"`_ setting are removed by the `universal.FilterMessages`
+transform_.
 
 Examples
 --------
@@ -4249,8 +4250,9 @@ content that is separate from the flow of the document.
 
 :Category:   `Structural Elements`_
 
-:Analogues:  <topic> is analogous to the DocBook_ <simplesect> element
-             and the HTML_ <aside> element.
+:Analogues:  <topic> is analogous to the HTML_ <aside> element.
+             The DocBook_ <simplesect> element is similar, but you cannot
+             place `body elements`_ after a <simplesect>.
 
 :Processing: A <topic> element should be set off from the rest of the
              document somehow, such as with indentation or a border.
@@ -4314,23 +4316,39 @@ The <transition> element separates body elements and sections, dividing a
 :Processing: The <transition> element is typically rendered as vertical
              whitespace (more than that separating paragraphs), with or
              without a horizontal line or row of asterisks.  In novels,
-             transitions are often represented as a row of three
-             well-spaced asterisks with vertical space above and below.
-:Parents:    `\<document>`_, `\<section>`_
+             transitions are often represented as a row of three well-spaced
+             asterisks or a vignette with vertical space above and below.
+:Parents:    `\<document>`_, `\<section>`_ (cf. `%structure.model`_)
 :Children:   none (empty)
 :Attributes: only the `common attributes`_
-:Parameter Entities: `%structure.model`_ directly includes <transition>.
+:Parameter Entities: The `%structure.model`_ directly includes <transition>.
 
-A transition may not begin or end a section [#]_ or document, nor may two
-transitions be immediately adjacent.
+The document model sets additional restrictions
+on the placement of <transitions>: [#extra-rule]_
+
+* A transition may not be immediately adjacent to another transition,
+  i.e., <transition> elements must be separated by other elements.
+
+* A transition may not start the text of a document or section, i.e., a
+  <transition> is invalid as first child or preceded by only `\<title>`_,
+  `\<subtitle>`_, or invisible elements [#invisible-or-moving]_.
+
+* A transition may not occur at the end of a document or section. [#]_
+  In other words, a <transition> is invalid as last child element
+  or followed by only invisible elements [#invisible-or-moving]_.
 
 See also `Doctree Representation of Transitions`__ in
 `A Record of reStructuredText Syntax Alternatives`__.
 
-.. [#] In reStructuredText markup, a transition may appear to fall at
-   the end of a section immediately before another section.
-   A transform_ recognizes this case and moves the transition so it
-   separates the sections.
+.. [#invisible-or-moving] The elements `\<meta>`_, `\<pending>`_,
+  `\<substitution_definition>`_, and `\<target>`_ are not visible
+  in the output document. The `\<decoration>`_ element contains
+  `\<header>`_ and `\<footer>`_ which move to the respective places.
+
+.. [#] In reStructuredText markup, a transition may appear to fall
+   at the end of a section immediately before another section.
+   The `misc.Transitions` transform_ recognizes this case and
+   moves the transition so it separates the sections.
 
 __ ../dev/rst/alternatives.html#doctree-representation-of-transitions
 __ ../dev/rst/alternatives.html
@@ -5608,25 +5626,15 @@ The actual entity definition is more complex,
      ( (`%section.elements`_;),
        (transition?, (`%section.elements`_;) )* )? )
 
-to impose the following restrictions:
-
-* A `\<transition>`_ may not be the first element (i.e. it may
-  not occur at the beginning of a document or directly after
-  a title, subtitle, meta or decoration element).
-
-* Transitions must be separated by other elements (body elements,
-  sections, etc.).  In other words, a transition may not be
-  immediately adjacent to another transition.
-
-An additional restriction cannot be easily expressed in the
-language of DTDs: [#]_
-
-* A transition may not occur at the end of a document or section.
+because there are additional restrictions on `\<transition>`_\ s.
+[#extra-rule]_
 
 The ``%structure.model`` parameter entity is directly employed in the
 content models of the `\<document>`_ and `\<section>`_ elements.
 
-.. [#] Docutils enforces it in the `misc.Transitions` transform_.
+.. [#extra-rule] The restrictions cannot be fully expressed in the
+   language of DTDs without making the definition overly complicated.
+   Docutils checks them in the `misc.Transitions` transform_.
 
 
 ``%tbl.entry.mdl``
@@ -5794,7 +5802,7 @@ _`Reference names`
   .. _namespace:
 
   Almost all elements in a document share a common *namespace*
-  for reference names, comparison ignores case.
+  for reference names and match them ignoring case.
   Only `\<substitution_definition>`_ and `\<substitution_reference>`_
   elements use a distinct namespace with `case-sensitive but forgiving`_
   matching of reference names.
