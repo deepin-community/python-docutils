@@ -6,12 +6,42 @@
 
 :Author: David Goodger; open to all Docutils developers
 :Contact: docutils-develop@lists.sourceforge.net
-:Date: $Date: 2025-11-06 03:17:08 +0100 (Do, 06. Nov 2025) $
-:Revision: $Revision: 10258 $
+:Date: $Date: 2025-12-18 19:44:54 +0100 (Do, 18. Dez 2025) $
+:Revision: $Revision: 10275 $
 :Web site: https://docutils.sourceforge.io/
 :Copyright: This document has been placed in the public domain.
 
 .. contents::
+
+
+Release 0.22.4 (2025-12-18)
+===========================
+
+* docutils/io.py
+
+  - Ensure `FileInput.read()` returns a `str` (decode if `source.read`
+    returns `bytes`. Fixes bug #514.
+
+* docutils/parsers/rst/directives/body.py,
+  docutils/parsers/rst/directives/parts.py
+
+  - Test a "whitelist" of categories before the "blacklist" to allow
+    auxiliary elements belonging to several categories (e.g. `nodes.Root`
+    and `nodes.BodyElements`) as parents of topics or sidebars.
+
+* docutils/writers/html/*
+
+  - New value "auto" for `initial_header_level`_ configuration setting.
+    Produces a HTML document with valid "outline" for documents
+    with document title as well as documents without document title.
+
+* docutils/writers/html5_polyglot/responsive.css
+
+  - Increase indentation of enumerated lists to fit 2-digit numerals
+    and of bullet lists to keep them looking similar.
+  - Use "top" instead of "baseline" for the vertical alignment in table
+    rows. ("Baseline" fails if one cell contains certain body elements,
+    e.g. a figure or a table with caption.)
 
 
 Release 0.22.3 (2025-11-06)

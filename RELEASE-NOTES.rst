@@ -6,8 +6,8 @@
 
 :Contact: grubert@users.sourceforge.net
 :Maintainer: docutils-develop@lists.sourceforge.net
-:Date: $Date: 2025-11-06 03:17:08 +0100 (Do, 06. Nov 2025) $
-:Revision: $Revision: 10258 $
+:Date: $Date: 2025-12-18 19:44:54 +0100 (Do, 18. Dez 2025) $
+:Revision: $Revision: 10275 $
 :Web site: https://docutils.sourceforge.io/
 :Copyright: This document has been placed in the public domain.
 
@@ -56,9 +56,6 @@ Document Tree / Docutils DTD
 * The <footnote> element's first child (<label>) will become mandatory
   in Docutils 1.0.
 
-* The "rst" parser will warn if a `"figure"`_ directive is missing both
-  caption and legend in Docutils 1.0.
-
 * Inline `\<target>`_ elements and <target> elements with content will be
   deprecated in Docutils 1.0 and invalid in Docutils 2.0.
   The "rst" parser will use <inline> elements for inline targets
@@ -73,6 +70,33 @@ Document Tree / Docutils DTD
 * The `\<doctest_block>`_ element will be deprecated in Docutils 1.0.
   The rST parser will handle a `doctest block`_ similar to a "code" directive
   with language "pycon" (Python console) and generate a <literal_block>.
+
+* The `Transitions` transform will ignore <pending>,
+  <substitution_definition>, and <target> elements when warning about
+  transitions at the start or end of the document or a section.
+
+* In case of name conflicts, an explicit target will not only override
+  the "name" attribute of an implicit target but also its name-based "id".
+  Use case: "sane" anchors for links from an external source to a fragment
+  of the document.  Cf. https://github.com/sphinx-doc/sphinx/issues/1961
+
+Parsers
+-------
+
+* The "rst" parser will warn, if a directive that does not take arguments
+  has content above and below directive options in Docutils 0.23.
+
+* The highlight language of a custom role based on "code" will default to
+  the role's name in Docutils 0.23.
+
+* Problems with the "include" directive will be reported as ERROR instead
+  of SEVERE in Docutils 0.23.
+
+* The options :start-after: and :end-before: of the "include" directive
+  will support empty values (standing for an empty line) in Docutils 0.23.
+
+* The "rst" parser will warn if a `"figure"`_ directive is missing both
+  caption and legend in Docutils 1.0.
 
 Writers
 -------
@@ -93,13 +117,27 @@ Writers
 
 * "html5" writer:
 
+  - If a section title has several IDs, use the last one (from the first
+    `explicit target`__) as self-link_ in Docutils 0.23.
+
+    __ docs/ref/rst/restructuredtext.html#explicit-hyperlink-targets
+
+  - The default of the self-link_ configuration setting will change to
+    "True" in Docutils 1.0.
+
+  - Prefer explicit reference names as base for an HTML element's ID
+    in Docutils 1.0. No change for internal cross-references.
+    Cf. `Sphinx issue #1961`__
+
+    __ https://github.com/sphinx-doc/sphinx/issues/1961
+
   - Move attribution behind the blockquote to comply with the
     `"HTML living standard"`__ [#]_ and adapt CSS stylesheets
     in Docutils 1.0.
 
     __ https://html.spec.whatwg.org/#the-blockquote-element
 
-  - Change the default value of the initial_header_level_ setting to None
+  - Change the default value of the initial_header_level_ setting to "auto"
     (<h2> if there is a document title, else <h1>) in Docutils 1.0.
 
   - Remove option ``--embed-images`` (obsoleted by "image_loading_")
@@ -107,8 +145,9 @@ Writers
 
 * "latex2e" writer:
 
-  - Only write ``\label`` commands for IDs that are referenced in the
-    current document in Docutils 0.23.
+  - Only write ``\label`` commands for explicit IDs and IDs that are
+    referenced in the current document (i.e. not for un-referenced
+    section titles) in Docutils 0.23.
 
   - Change default of use_latex_citations_ setting to True
     in Docutils 1.0.
@@ -116,13 +155,13 @@ Writers
   - Change default of legacy_column_widths_ setting to False
     in Docutils 1.0.
 
-  - Remove ``use_verbatim_when_possible`` setting
-    (use literal_block_env_: verbatim) in Docutils 2.0.
-
   - The `default length unit`__ will change from "bp" (DTP point)
     to "px" (pixel unit) in Docutils 1.0.
 
     __ docs/user/latex.html#length-units
+
+  - Remove ``use_verbatim_when_possible`` setting
+    (use literal_block_env_: verbatim) in Docutils 2.0.
 
 * "manpage" writer:
 
@@ -230,12 +269,6 @@ Removals
 Misc
 ----
 
-* Prefer explicit reference names as base for an HTML element's ID
-  in Docutils 1.0. No change for internal cross-references.
-  Cf. `Sphinx issue #1961`__
-
-  __ https://github.com/sphinx-doc/sphinx/issues/1961
-
 * Revise the `String I/O`__ interface used by the `publish_string()`
   and `publish_from_doctree()` publisher convenience functions.
   (In Python 3, name and behaviour no longer match.)
@@ -261,6 +294,20 @@ Misc
    contains a patch to implement this behaviour since May 2023.
 
    __ https://packages.debian.org/source/trixie/python-docutils
+
+
+Release 0.22.4 (2025-12-18)
+===========================
+
+reStructuredText Specification:
+  - Clarify indentation rules: minimal indentation is *one* space.
+  - Clarify comment syntax: Comments begin with two dots and *whitespace*.
+
+HTML writers:
+  - New value "auto" for the initial_header_level_ setting.
+  - Bugfixes in the provisional style-sheet "responsive.css".
+
+See HISTORY_ for details.
 
 
 Release 0.22.3 (2025-11-06)
@@ -1554,6 +1601,7 @@ Release 0.3.5 (2004-07-29)
 .. _output_path: docs/user/config.html#output-path
 .. _reference_label: docs/user/config.html#reference-label
 .. _root_prefix: docs/user/config.html#root-prefix
+.. _self-link: docs/user/config.html#section-self-link
 .. _SmartQuotes: docs/user/config.html#smart-quotes
 .. _sources: docs/user/config.html#sources
 .. _use_latex_citations: docs/user/config.html#use-latex-citations

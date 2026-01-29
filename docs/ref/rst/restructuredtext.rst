@@ -6,8 +6,8 @@
 
 :Author: David Goodger
 :Contact: docutils-develop@lists.sourceforge.net
-:Revision: $Revision: 10253 $
-:Date: $Date: 2025-10-06 14:29:47 +0200 (Mo, 06. Okt 2025) $
+:Revision: $Revision: 10273 $
+:Date: $Date: 2025-12-16 18:39:48 +0100 (Di, 16. Dez 2025) $
 :Copyright: This document has been placed in the public domain.
 
 .. Note::
@@ -88,7 +88,7 @@ Here are examples of `body elements`_:
 
          1. This is an enumerated list.
 
-         2. Enumerators may be arabic numbers, letters, or roman
+         2. Enumerators may be arabic numerals, letters, or roman
             numerals.
 
   3. `Definition lists`_::
@@ -179,7 +179,10 @@ Here are examples of `body elements`_:
   - Footnotes_::
 
         .. [1] A footnote contains body elements, consistently
-           indented by at least 3 spaces.
+         indented by at least 1 space.
+
+            The least indented line sets the reference
+            indentation, so this is a nested block quote.
 
   - Citations_::
 
@@ -204,7 +207,7 @@ Here are examples of `body elements`_:
 
   - Comments_::
 
-        .. Comments begin with two dots and a space.  Anything may
+        .. Comments begin with two dots and whitespace.  Anything may
            follow, except for the syntax of footnotes/citations,
            hyperlink targets, directives, or substitution definitions.
 
@@ -249,7 +252,19 @@ line of a document is treated as if it is followed by a blank line.
 Indentation
 -----------
 
-Indentation is used to indicate -- and is only significant in
+When a paragraph or other construct consists of more than one line of
+text, the lines must be left-aligned::
+
+    This is a paragraph.  The lines of
+    this paragraph are aligned at the left.
+
+        This paragraph has problems.  The
+    lines are not left-aligned.  In addition
+      to potential misinterpretation, warning
+        and/or error messages will be generated
+      by the parser.
+
+*Indentation* is used to indicate -- and is only significant in
 indicating -- block quotes, definitions (in `definition lists`_),
 and local nested content:
 
@@ -272,8 +287,11 @@ consistent.  For example, indentation is the sole markup indicator for
 
         Paragraph 2 of the first-level block quote.
 
-Multiple levels of indentation within a block quote will result in
-more complex structures::
+.. _reference indentation:
+
+Multiple levels of indentation within a block will result in more
+complex structures.  The least indented line of a block sets the
+*reference indentation*::
 
     This is a top-level paragraph.
 
@@ -285,21 +303,14 @@ more complex structures::
 
             This paragraph belongs to a second-level block quote.
 
-        This paragraph belongs to a first-level block quote.  The
-        second-level block quote above is inside this first-level
-        block quote.
+        This paragraph belongs to a first-level block quote.
+        The second-level block quote above is inside this
+        first-level block quote.
 
-When a paragraph or other construct consists of more than one line of
-text, the lines must be left-aligned::
+    Every block has its own reference indentation::
 
-    This is a paragraph.  The lines of
-    this paragraph are aligned at the left.
-
-        This paragraph has problems.  The
-    lines are not left-aligned.  In addition
-      to potential misinterpretation, warning
-        and/or error messages will be generated
-      by the parser.
+            This paragraph belongs to a first-level block quote
+            because there is no less indented line in the block.
 
 Several constructs begin with a marker, and the body of the construct
 must be indented relative to the marker.  For constructs using simple
@@ -320,18 +331,32 @@ line of text. For example::
      this paragraph does not belong to the list
      item (it's a block quote following the list).
 
+The first line of text may start below the marker::
+
+    1.
+     This is the first line of an enumeration
+     item's paragraph.
+
+      This indented paragraph is interpreted
+      as a block quote.
+
+     This paragraph still belongs to the list
+     item
+
+    This paragraph ends the list.
+
 The body of `explicit markup blocks`_, `field lists`_, and `option
 lists`_ ends above the first line with the same or less indentation
 than the marker.  For example, field lists may have very long markers
 (containing the field names)::
 
-    :Hello: This field has a short field name, so aligning the field
-            body with the first line is feasible.
-
-    :Number-of-African-swallows-required-to-carry-a-coconut: It would
-        be very difficult to align the field body with the left edge
-        of the first line.  It may even be preferable not to begin the
-        body on the same line as the marker.
+    :Hello: This field has a short field name, so aligning
+            the field body with the first line is feasible.
+    :Long field name: It would be inconvenient to align the
+        field body with the left edge of the first line.
+    :Number of African swallows required to carry a coconut:
+        Sometimes, it is preferable to begin the body
+        on the next line.
 
 
 .. _escape:
@@ -359,7 +384,7 @@ A backslash (``\``) escapes the following character.
   itself. (A literal backslash can be specified by two backslashes in a
   row -- the first backslash escapes the second. [#caveat]_)
 
-* Escaped whitespace characters are removed from the output document
+* _`Escaped whitespace` characters are removed from the output document
   together with the escaping backslash. This allows for `character-level
   inline markup`_.
 
@@ -743,7 +768,7 @@ Enumerated Lists
 Enumerated lists (a.k.a. "ordered" lists) are similar to bullet lists,
 but use enumerators instead of bullets.  An enumerator consists of an
 enumeration sequence member and formatting, followed by whitespace.
-The following enumeration sequences are recognized:
+The following *enumeration sequences* are recognized:
 
 - arabic numerals: 1, 2, 3, ... (no upper limit).
 - uppercase alphabet characters: A, B, C, ..., Z.
@@ -753,10 +778,10 @@ The following enumeration sequences are recognized:
 
 In addition, the auto-enumerator, ``#``, may be used to automatically
 enumerate a list.  Auto-enumerated lists may begin with explicit
-enumeration, which sets the sequence.  Fully auto-enumerated lists use
-arabic numerals and begin with 1.
+enumeration, which sets the sequence and start value.
+Fully auto-enumerated lists use arabic numerals and begin with 1.
 
-The following formatting types are recognized:
+The following *formatting types* are recognized:
 
 - suffixed with a period: ``1.``, ``A.``, ``a.``, ``I.``, ``i.``.
 - surrounded by parentheses: ``(1)``, ``(A)``, ``(a)``, ``(I)``, ``(i)``.
@@ -1377,7 +1402,7 @@ markup) continues within the block quote::
 
         -- Sherlock Holmes
 
-A block quote may end with an attribution: a text block beginning with
+A block quote may end with an _`attribution`: a paragraph beginning with
 ``--``, ``---``, or a true em-dash, flush left within the block quote.  If
 the attribution consists of multiple lines, the left edges of the
 second and subsequent lines must align.
@@ -2299,8 +2324,13 @@ Syntax diagram::
 
 The following *inline-compatible directives* are implemented in Docutils:
 
+:`"date"`_: inserts the current local date.
+
 :`"image"`_: can be used for block-level images as well as in a
              substitution definition for `inline images`_.
+
+:`"raw"`_: can be used in block-level context as well as in a
+           substitution definition.
 
 :`"replace"`_: allows simple macro substitution.
   It also provides a workaround__ for the still missing support of
@@ -2309,8 +2339,6 @@ The following *inline-compatible directives* are implemented in Docutils:
   __ directives.html#hyperlink-workaround
 
 :`"unicode"`_: converts Unicode character codes to characters.
-
-:`"date"`_: inserts the current local date.
 
 Applications may find other use cases for the substitution mechanism.
 The following are ideas that have not been implemented in Docutils.
@@ -2976,7 +3004,8 @@ For example::
     Please RTFM [1]_. [#]_
 
     .. [1] Read The Fine Manual
-    .. [#] See "footnotes_" for the format of the *footnote label*.
+    .. [#] Life is too short for man pages,
+       and occasionally much too short without them.
 
 `Inline markup recognition rules`_ may require whitespace in front of the
 footnote reference. To remove the whitespace from the output, use an

@@ -6,8 +6,8 @@
 
 :Author: David Goodger
 :Contact: docutils-develop@lists.sourceforge.net
-:Revision: $Revision: 10196 $
-:Date: $Date: 2025-08-07 08:35:37 +0200 (Do, 07. Aug 2025) $
+:Revision: $Revision: 10270 $
+:Date: $Date: 2025-12-03 12:38:54 +0100 (Mi, 03. Dez 2025) $
 :Copyright: This document has been placed in the public domain.
 
 .. sidebar:: Docutils Security for Web Applications
@@ -1195,13 +1195,23 @@ if the parser supports this option. [#override]_
 
 initial_header_level
 ~~~~~~~~~~~~~~~~~~~~
-The initial level for section header elements.  This does not affect the
-document title & subtitle; see doctitle_xform_.
+The level of the first *section* heading element
+(the `document title`_ always uses <h1>).
+Supported values:
+
+:1, ..., 6: <h1>, ..., <h6>,
+:auto: <h2> if there is a `document title`_, else <h1>. [#auto-header-level]_
+
+See also `doctitle_xform`_.
 
 :Default: writer dependent
           (see `[html4css1 writer]`_, `[html5 writer]`_, `[pep_html writer]`_).
 :Option:  ``--initial-header-level``.
 
+.. [#auto-header-level] Ensures the HTML document has a valid outline__
+   in documents with/without a document title.
+   New in Docutils 0.22.3.
+__ https://html.spec.whatwg.org/multipage/sections.html#outline
 
 math_output
 ~~~~~~~~~~~
@@ -1489,13 +1499,7 @@ Writer Specific Defaults
   "minimal.css, plain.css".
 :`xml_declaration <xml_declaration [html writers]_>`__:  False.
 
-.. [#] Documents without (visible) document title may have <h2> as highest
-   heading level, which is not recommended but valid (cf. "`Headings and
-   outlines`__" in the HTML Standard). The default will change to None
-   (<h2> if there is a document title, else <h1>) in Docutils 1.0.
-
-__ https://html.spec.whatwg.org/multipage/sections.html
-   #headings-and-outlines-2
+.. [#] The default will change to "auto" in Docutils 1.0.
 
 image_loading
 """""""""""""
@@ -1521,8 +1525,8 @@ New in Docutils 0.18.
 
 section_self_link
 """""""""""""""""
-Append an empty anchor element with a ``href`` to the section to
-section headings. See ``responsive.css`` for an example how this can be
+Extend section headings with an empty <a> element with a ``href`` to
+the section.  See ``responsive.css`` for an example how this can be
 styled to show a symbol allowing users to copy the section's URL.
 
 :Default: False.

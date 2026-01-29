@@ -4,8 +4,8 @@
 
 :Author: David Goodger
 :Contact: docutils-develop@lists.sourceforge.net
-:Date: $Date: 2025-04-22 16:04:43 +0200 (Di, 22. Apr 2025) $
-:Revision: $Revision: 10101 $
+:Date: $Date: 2025-12-14 14:20:59 +0100 (So, 14. Dez 2025) $
+:Revision: $Revision: 10272 $
 :Copyright: This document has been placed in the public domain.
 
 The latest working documents may be accessed individually below, or
@@ -126,7 +126,7 @@ they're mature and used by end-users and client-developers, they have
 become reference material.  Successful specs evolve into refs.
 
 Docutils-general:
-  * `The Docutils Document Tree <ref/doctree.html>`__ (incomplete)
+  * `The Docutils Document Tree <ref/doctree.html>`__
   * `Docutils Generic DTD <ref/docutils.dtd>`__
   * `OASIS XML Exchange Table Model Declaration Module
     <ref/soextblx.dtd>`__ (CALS tables DTD module)
